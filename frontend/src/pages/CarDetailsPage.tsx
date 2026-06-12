@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile, useSelectCarDetails } from '@/hooks/useProfile';
+import { useProfile, useSelectCarDetails, useRequestFinancing } from '@/hooks/useProfile';
 import { motion } from 'framer-motion';
 import { carsData, Car } from '@/data/cars';
 import { formatUGX } from '@/lib/format';
@@ -19,6 +19,7 @@ const CarDetailsPage = () => {
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const selectCar = useSelectCarDetails();
+  const requestFinancing = useRequestFinancing();
   
   const [car, setCar] = useState<Car | null>(null);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -70,9 +71,7 @@ const CarDetailsPage = () => {
 
   const installment = monthlyInstallment / divisor;
   const insurance = car.estimatedCosts.insurance / divisor;
-  const fuel = car.estimatedCosts.fuel / divisor;
-  const maintenance = car.estimatedCosts.maintenance / divisor;
-  const totalCost = installment + insurance + fuel + maintenance;
+  const totalCost = installment + insurance;
 
   return (
     <>
@@ -195,15 +194,43 @@ const CarDetailsPage = () => {
                   {profile?.selected_car_id === car.id ? 'View in My Vehicle Dashboard' : 'Select & Add to My Vehicle'}
                 </button>
               )}
-              <button 
-                onClick={() => {
-                  selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
-                  navigate('/my-vehicle');
-                }}
-                className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
-              >
-                Go to My Vehicle
-              </button>
+              {isEligible ? (
+                <button 
+                  disabled={requestFinancing.isPending}
+                  onClick={async () => {
+                    try {
+                      const res = await requestFinancing.mutateAsync({
+                        carId: car.id,
+                        carName: car.name,
+                        carPrice: car.priceUgx,
+                        requestedAmount: financedAmount
+                      });
+                      if (res.status === 'APPROVED') {
+                         toast.success('Purchase successful! Financing approved.');
+                      } else {
+                         toast.success('Purchase initiated! Application under review.');
+                      }
+                      // Navigate to dashboard or logbook
+                      navigate('/logbook');
+                    } catch (err: any) {
+                      toast.error('Failed to process purchase: ' + err.message);
+                    }
+                  }}
+                  className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 disabled:opacity-50`}
+                >
+                  {requestFinancing.isPending ? 'Processing Purchase...' : 'Complete Purchase (Finance 70%)'}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => {
+                    selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
+                    navigate('/my-vehicle');
+                  }}
+                  className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
+                >
+                  Go to My Vehicle
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -302,9 +329,7 @@ const CarDetailsPage = () => {
               ].map(plan => {
                 const pLoan = Math.round(monthlyInstallment / plan.divisor);
                 const pIns = Math.round(car.estimatedCosts.insurance / plan.divisor);
-                const pFuel = Math.round(car.estimatedCosts.fuel / plan.divisor);
-                const pMaint = Math.round(car.estimatedCosts.maintenance / plan.divisor);
-                const pTotal = pLoan + pIns + pFuel + pMaint;
+                const pTotal = pLoan + pIns;
                 const isSelected = paymentFreq === plan.id;
 
                 return (
@@ -327,8 +352,6 @@ const CarDetailsPage = () => {
                     <div className="grid grid-cols-2 gap-y-2 text-xs font-medium text-slate-500 pl-8">
                       <div className="flex justify-between pr-4"><span>Loan:</span> <span className="text-slate-700">{formatUGX(pLoan)}</span></div>
                       <div className="flex justify-between"><span>Insurance:</span> <span className="text-slate-700">{formatUGX(pIns)}</span></div>
-                      <div className="flex justify-between pr-4"><span>Fuel:</span> <span className="text-slate-700">{formatUGX(pFuel)}</span></div>
-                      <div className="flex justify-between"><span>Maint:</span> <span className="text-slate-700">{formatUGX(pMaint)}</span></div>
                     </div>
                   </div>
                 );
