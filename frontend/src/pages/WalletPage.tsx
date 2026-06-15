@@ -45,6 +45,7 @@ const WalletPage = () => {
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [withdrawReason, setWithdrawReason] = useState('personal');
 
   // Live Data State
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -255,8 +256,7 @@ const WalletPage = () => {
               </button>
               <button 
                 onClick={() => { setAmount(''); setShowWithdraw(true); }} 
-                disabled={profile.savings_locked || availableBalance <= 0}
-                className="bg-white/10 text-white border border-white/20 hover:bg-white/20 font-bold px-6 py-4 rounded-2xl transition-all shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-auto justify-center"
+                className="bg-white/10 text-white border border-white/20 hover:bg-white/20 font-bold px-6 py-4 rounded-2xl transition-all shadow-xl flex items-center gap-2 flex-1 md:flex-auto justify-center"
               >
                 <MinusCircle size={20} /> Withdraw
               </button>
@@ -534,6 +534,17 @@ const WalletPage = () => {
                     <input type="number" placeholder="Enter amount" value={amount}
                       onChange={e => setAmount(e.target.value)}
                       className="w-full h-16 pl-14 pr-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-xl font-black placeholder:text-slate-300 placeholder:text-lg placeholder:font-bold outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Reason for Withdrawal</label>
+                    <select value={withdrawReason} onChange={e => setWithdrawReason(e.target.value)}
+                      className="w-full h-14 px-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition appearance-none">
+                      <option value="personal">Personal Use</option>
+                      <option value="emergency">Emergency Funds</option>
+                      <option value="car_maintenance">Car Maintenance</option>
+                      <option value="other">Other / Miscellaneous</option>
+                    </select>
                   </div>
                   
                   <button onClick={handleWithdraw} disabled={!amount || parseInt(amount) > availableBalance}
