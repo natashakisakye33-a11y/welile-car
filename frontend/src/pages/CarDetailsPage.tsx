@@ -27,6 +27,7 @@ const CarDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [paymentFreq, setPaymentFreq] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [showInspectionForm, setShowInspectionForm] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     const foundCar = carsData.find(c => c.id === id);
@@ -179,58 +180,12 @@ const CarDetailsPage = () => {
             </div>
 
             <div className="mt-6 space-y-3">
-              {!isEligible && (
-                <button 
-                  onClick={() => {
-                    selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
-                    navigate('/my-vehicle');
-                  }} 
-                  className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 ${
-                    profile?.selected_car_id === car.id 
-                      ? 'bg-secondary text-primary border-2 border-primary' 
-                      : 'bg-primary hover:bg-[#3f2bc2] text-white'
-                  }`}
-                >
-                  {profile?.selected_car_id === car.id ? 'View in My Vehicle Dashboard' : 'Select & Add to My Vehicle'}
-                </button>
-              )}
-              {isEligible ? (
-                <button 
-                  disabled={requestFinancing.isPending}
-                  onClick={async () => {
-                    try {
-                      const res = await requestFinancing.mutateAsync({
-                        carId: car.id,
-                        carName: car.name,
-                        carPrice: car.priceUgx,
-                        requestedAmount: financedAmount
-                      });
-                      if (res.status === 'APPROVED') {
-                         toast.success('Purchase successful! Financing approved.');
-                      } else {
-                         toast.success('Purchase initiated! Application under review.');
-                      }
-                      // Navigate to dashboard or logbook
-                      navigate('/logbook');
-                    } catch (err: any) {
-                      toast.error('Failed to process purchase: ' + err.message);
-                    }
-                  }}
-                  className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 disabled:opacity-50`}
-                >
-                  {requestFinancing.isPending ? 'Processing Purchase...' : 'Complete Purchase (Finance 70%)'}
-                </button>
-              ) : (
-                <button 
-                  onClick={() => {
-                    selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
-                    navigate('/my-vehicle');
-                  }}
-                  className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
-                >
-                  Go to My Vehicle
-                </button>
-              )}
+              <button 
+                onClick={() => setShowPaymentModal(true)}
+                className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
+              >
+                Purchase Vehicle
+              </button>
             </div>
           </div>
         </div>
@@ -443,6 +398,46 @@ const CarDetailsPage = () => {
           >
             Confirm Appointment
           </button>
+        </motion.div>
+      </div>
+    )}
+
+    {showPaymentModal && (
+      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowPaymentModal(false)}>
+        <motion.div 
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="font-bold text-xl text-slate-900">Select Payment Method</h3>
+              <p className="text-sm text-slate-500">How would you like to pay?</p>
+            </div>
+            <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Welile Wallet</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Mobile Money</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Bank Card</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Bank Transfer</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+          </div>
         </motion.div>
       </div>
     )}
