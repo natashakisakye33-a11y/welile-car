@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile, useSelectCarDetails } from '@/hooks/useProfile';
+import { useProfile, useSelectCarDetails, useRequestFinancing } from '@/hooks/useProfile';
 import { motion } from 'framer-motion';
 import { carsData, Car } from '@/data/cars';
 import { formatUGX } from '@/lib/format';
@@ -19,6 +19,7 @@ const CarDetailsPage = () => {
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const selectCar = useSelectCarDetails();
+  const requestFinancing = useRequestFinancing();
   
   const [car, setCar] = useState<Car | null>(null);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -26,6 +27,7 @@ const CarDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [paymentFreq, setPaymentFreq] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [showInspectionForm, setShowInspectionForm] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     const foundCar = carsData.find(c => c.id === id);
@@ -70,9 +72,7 @@ const CarDetailsPage = () => {
 
   const installment = monthlyInstallment / divisor;
   const insurance = car.estimatedCosts.insurance / divisor;
-  const fuel = car.estimatedCosts.fuel / divisor;
-  const maintenance = car.estimatedCosts.maintenance / divisor;
-  const totalCost = installment + insurance + fuel + maintenance;
+  const totalCost = installment + insurance;
 
   return (
     <>
@@ -180,29 +180,11 @@ const CarDetailsPage = () => {
             </div>
 
             <div className="mt-6 space-y-3">
-              {!isEligible && (
-                <button 
-                  onClick={() => {
-                    selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
-                    navigate('/my-vehicle');
-                  }} 
-                  className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 ${
-                    profile?.selected_car_id === car.id 
-                      ? 'bg-secondary text-primary border-2 border-primary' 
-                      : 'bg-primary hover:bg-[#3f2bc2] text-white'
-                  }`}
-                >
-                  {profile?.selected_car_id === car.id ? 'View in My Vehicle Dashboard' : 'Select & Add to My Vehicle'}
-                </button>
-              )}
               <button 
-                onClick={() => {
-                  selectCar.mutate({ carId: car.id, condition: 'used', price: car.priceUgx });
-                  navigate('/my-vehicle');
-                }}
+                onClick={() => setShowPaymentModal(true)}
                 className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
               >
-                Go to My Vehicle
+                Purchase Vehicle
               </button>
             </div>
           </div>
@@ -302,9 +284,7 @@ const CarDetailsPage = () => {
               ].map(plan => {
                 const pLoan = Math.round(monthlyInstallment / plan.divisor);
                 const pIns = Math.round(car.estimatedCosts.insurance / plan.divisor);
-                const pFuel = Math.round(car.estimatedCosts.fuel / plan.divisor);
-                const pMaint = Math.round(car.estimatedCosts.maintenance / plan.divisor);
-                const pTotal = pLoan + pIns + pFuel + pMaint;
+                const pTotal = pLoan + pIns;
                 const isSelected = paymentFreq === plan.id;
 
                 return (
@@ -327,8 +307,6 @@ const CarDetailsPage = () => {
                     <div className="grid grid-cols-2 gap-y-2 text-xs font-medium text-slate-500 pl-8">
                       <div className="flex justify-between pr-4"><span>Loan:</span> <span className="text-slate-700">{formatUGX(pLoan)}</span></div>
                       <div className="flex justify-between"><span>Insurance:</span> <span className="text-slate-700">{formatUGX(pIns)}</span></div>
-                      <div className="flex justify-between pr-4"><span>Fuel:</span> <span className="text-slate-700">{formatUGX(pFuel)}</span></div>
-                      <div className="flex justify-between"><span>Maint:</span> <span className="text-slate-700">{formatUGX(pMaint)}</span></div>
                     </div>
                   </div>
                 );
@@ -420,6 +398,46 @@ const CarDetailsPage = () => {
           >
             Confirm Appointment
           </button>
+        </motion.div>
+      </div>
+    )}
+
+    {showPaymentModal && (
+      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowPaymentModal(false)}>
+        <motion.div 
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="font-bold text-xl text-slate-900">Select Payment Method</h3>
+              <p className="text-sm text-slate-500">How would you like to pay?</p>
+            </div>
+            <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Welile Wallet</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Mobile Money</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Bank Card</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+            <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+              <span className="font-bold text-slate-700">Bank Transfer</span>
+              <ChevronRight size={18} className="text-slate-400" />
+            </button>
+          </div>
         </motion.div>
       </div>
     )}
