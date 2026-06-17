@@ -36,18 +36,20 @@ const deposit = async (req, res) => {
       }
     });
 
-    // MOCK: Auto-trigger the webhook after 3 seconds to simulate a successful mobile money flow
-    setTimeout(async () => {
-      try {
-        await fetch(`http://localhost:${process.env.PORT || 5000}/api/transactions/webhook/payment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reference, status: 'SUCCESS' })
-        });
-      } catch (err) {
-        console.error('Mock Webhook failed:', err.message);
-      }
-    }, 3000);
+    // MOCK: Auto-trigger the webhook after 3 seconds to simulate a successful mobile money flow in development ONLY
+    if (process.env.NODE_ENV !== 'production') {
+      setTimeout(async () => {
+        try {
+          await fetch(`http://localhost:${process.env.PORT || 3000}/api/transactions/webhook/payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference, status: 'SUCCESS' })
+          });
+        } catch (err) {
+          console.error('Mock Webhook failed:', err.message);
+        }
+      }, 3000);
+    }
 
     res.json({
       message: 'Deposit initiated. Please check your phone for the mobile money prompt.',
