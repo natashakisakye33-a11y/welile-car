@@ -14,33 +14,29 @@ model User {
   passwordHash     String
   name             String
   phone            String               @unique
-  role             String @default("CUSTOMER")
-  status           String @default("PENDING_KYC")
-  
-  // KYC Fields
+  role             String               @default("CUSTOMER")
+  status           String               @default("PENDING_KYC")
   nationalId       String?              @unique
   selfieUrl        String?
   address          String?
   employmentStatus String?
-  kycStatus        String @default("PENDING")
-  
+  kycStatus        String               @default("PENDING")
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-  
-  savingsAccount   SavingsAccount?
-  financings       FinancingAgreement[]
   auditLogs        AuditLog[]           @relation("UserLogs")
+  financings       FinancingAgreement[]
   loanApplications LoanApplication[]
+  savingsAccount   SavingsAccount?
 }
 
 model AuditLog {
   id        Int      @id @default(autoincrement())
   userId    Int?
-  user      User?    @relation("UserLogs", fields: [userId], references: [id])
   action    String
   details   String?
   ipAddress String?
   createdAt DateTime @default(now())
+  user      User?    @relation("UserLogs", fields: [userId], references: [id])
 }
 
 model Vehicle {
@@ -49,102 +45,75 @@ model Vehicle {
   model            String
   year             Int
   price            Float
-  status           String @default("AVAILABLE")
-  dealerId         Int? // Can link to a Dealer user role in the future
+  status           String               @default("AVAILABLE")
+  dealerId         Int?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-
   financings       FinancingAgreement[]
   loanApplications LoanApplication[]
 }
 
 model SavingsAccount {
-  id                        Int                  @id @default(autoincrement())
-  userId                    Int                  @unique
-  user                      User                 @relation(fields: [userId], references: [id])
-  balance                   Float @default(0)
-  targetAmount              Float
-  interestEarned            Float @default(0)
-  status                    String @default("ACTIVE")
-  createdAt                 DateTime             @default(now())
-  updatedAt                 DateTime             @updatedAt
-
-  transactions              SavingsTransaction[]
+  id             Int                  @id @default(autoincrement())
+  userId         Int                  @unique
+  balance        Float                @default(0)
+  targetAmount   Float
+  interestEarned Float                @default(0)
+  status         String               @default("ACTIVE")
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  user           User                 @relation(fields: [userId], references: [id])
+  transactions   SavingsTransaction[]
 }
 
 model SavingsTransaction {
-  id           Int               @id @default(autoincrement())
-  accountId    Int
-  account      SavingsAccount    @relation(fields: [accountId], references: [id])
-  amount       Float
-  type         String
-  status       String @default("COMPLETED")
-  reference    String?           @unique
-  date         DateTime          @default(now())
+  id        Int            @id @default(autoincrement())
+  accountId Int
+  amount    Float
+  type      String
+  status    String         @default("COMPLETED")
+  reference String?        @unique
+  date      DateTime       @default(now())
+  account   SavingsAccount @relation(fields: [accountId], references: [id])
 }
 
 model LoanApplication {
-  id              Int                 @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   userId          Int
-  user            User                @relation(fields: [userId], references: [id])
   vehicleId       Int
-  vehicle         Vehicle             @relation(fields: [vehicleId], references: [id])
   requestedAmount Float
-  status          String @default("PENDING")
-  riskScore       Int?                // 0 - 100
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  status          String   @default("PENDING")
+  riskScore       Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
 }
 
 model FinancingAgreement {
-  id                   Int               @id @default(autoincrement())
-  customerId           Int
-  user                 User              @relation(fields: [customerId], references: [id])
-  vehicleId            Int
-  vehicle              Vehicle           @relation(fields: [vehicleId], references: [id])
-  principalAmount      Float
-  monthlyInstallment   Float
-  interestRate         Float
-  startDate            DateTime          @default(now())
-  endDate              DateTime
-  status               String @default("ACTIVE")
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-
-  repayments           Repayment[]
+  id                 Int         @id @default(autoincrement())
+  customerId         Int
+  vehicleId          Int
+  principalAmount    Float
+  monthlyInstallment Float
+  interestRate       Float
+  startDate          DateTime    @default(now())
+  endDate            DateTime
+  status             String      @default("ACTIVE")
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  vehicle            Vehicle     @relation(fields: [vehicleId], references: [id])
+  user               User        @relation(fields: [customerId], references: [id])
+  repayments         Repayment[]
 }
 
 model Repayment {
-  id              Int                 @id @default(autoincrement())
-  agreementId     Int
-  agreement       FinancingAgreement  @relation(fields: [agreementId], references: [id])
-  amount          Float
-  status          String @default("PENDING")
-  dueDate         DateTime
-  paidDate        DateTime?
-  createdAt       DateTime            @default(now())
+  id          Int                @id @default(autoincrement())
+  agreementId Int
+  amount      Float
+  status      String             @default("PENDING")
+  dueDate     DateTime
+  paidDate    DateTime?
+  createdAt   DateTime           @default(now())
+  agreement   FinancingAgreement @relation(fields: [agreementId], references: [id])
 }
-
-// ENUMS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

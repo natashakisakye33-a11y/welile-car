@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedNumber from '@/components/AnimatedNumber';
 import BottomNav from '@/components/BottomNav';
 import { formatUGX, formatDate } from '@/lib/format';
-import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 
@@ -228,38 +228,63 @@ const WalletPage = () => {
           </div>
         </div>
 
-        {/* Hero Wallet Card */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="print:hidden relative bg-[#4C158D] text-white rounded-[2rem] p-8 shadow-2xl shadow-[#4C158D]/30 overflow-hidden">
+        {/* Hero Wallet Card Redesigned */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="print:hidden relative bg-[#4C158D] text-white rounded-[3rem] p-8 min-h-[440px] flex flex-col items-center justify-between shadow-2xl shadow-[#4C158D]/30 overflow-hidden">
+          {/* Background decorations */}
           <div className="absolute top-[-50%] right-[-20%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[60px] pointer-events-none"></div>
           <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[50px] pointer-events-none"></div>
           
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <p className="text-white/70 font-bold uppercase tracking-wider text-xs mb-2 flex items-center gap-2">
-                <Wallet size={16} /> Total Balance
-              </p>
-              <AnimatedNumber value={availableBalance} className="text-5xl md:text-6xl font-black drop-shadow-lg" />
-              {profile.savings_locked && (
-                <p className="text-xs bg-white/20 text-white inline-flex items-center gap-1 font-bold px-3 py-1 rounded-full mt-4 backdrop-blur-sm">
-                  <ShieldCheck size={14} /> Savings locked for car financing
-                </p>
-              )}
-            </div>
+          {/* Top section */}
+          <div className="relative z-10 flex flex-col items-center w-full mt-4">
+            <button className="text-white/70 hover:text-white font-medium flex items-center gap-1 mb-6 transition-colors">
+              Wallet 1 <ChevronDown size={16} />
+            </button>
             
-            <div className="flex gap-3 w-full md:w-auto">
+            <AnimatedNumber value={availableBalance} className="text-5xl md:text-6xl font-black drop-shadow-lg text-center tracking-tight" />
+            
+            <p className="text-sm text-white/60 mt-3 font-medium flex items-center gap-2">
+              {profile.savings_locked ? (
+                <><ShieldCheck size={14} /> Savings Locked</>
+              ) : (
+                <>{formatUGX(dashboardData.savings.interestEarned)} Earned <TrendingUp size={14} /></>
+              )}
+            </p>
+          </div>
+          
+          {/* Bottom actions */}
+          <div className="relative z-10 flex flex-col items-center w-full mt-10 space-y-8">
+            <div className="flex items-center justify-center gap-3 w-full max-w-sm">
+              {/* Deposit Button */}
               <button 
                 onClick={() => { setAmount(''); setShowDeposit(true); }} 
                 disabled={profile.savings_locked}
-                className="bg-white text-[#4C158D] hover:bg-slate-100 font-bold px-6 py-4 rounded-2xl transition-all shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed flex-1 md:flex-auto justify-center"
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
               >
-                <PlusCircle size={20} /> Deposit
+                <ArrowDownLeft size={16} /> <span className="text-sm">Deposit</span>
               </button>
+              
+              {/* Center Plus Button */}
+              <button 
+                onClick={() => { setAmount(''); setShowDeposit(true); }} 
+                disabled={profile.savings_locked}
+                className="w-[60px] h-[60px] bg-white/5 border border-white/10 hover:bg-white/10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-50 backdrop-blur-md text-white"
+              >
+                <Plus size={24} />
+              </button>
+              
+              {/* Withdraw Button */}
               <button 
                 onClick={() => { setAmount(''); setShowWithdraw(true); }} 
-                className="bg-white/10 text-white border border-white/20 hover:bg-white/20 font-bold px-6 py-4 rounded-2xl transition-all shadow-xl flex items-center gap-2 flex-1 md:flex-auto justify-center"
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
               >
-                <MinusCircle size={20} /> Withdraw
+                <ArrowUpRight size={16} /> <span className="text-sm">Withdraw</span>
               </button>
+            </div>
+            
+            {/* Status indicator */}
+            <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full backdrop-blur-md flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+              <span className="text-xs font-medium text-white/70 tracking-wide">Synchronized</span>
             </div>
           </div>
         </motion.div>
