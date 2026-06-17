@@ -4,10 +4,14 @@ const prisma = new PrismaClient();
 const deposit = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { amount, method } = req.body;
+    const { amount, method, transactionId, transactionTime, transactionDate } = req.body;
 
     if (!amount || amount < 1000) {
       return res.status(400).json({ error: 'Minimum deposit is 1000 UGX' });
+    }
+    
+    if (!transactionId || !transactionTime || !transactionDate) {
+      return res.status(400).json({ error: 'Missing required manual deposit details' });
     }
 
     // Get or create savings account
@@ -32,27 +36,16 @@ const deposit = async (req, res) => {
         amount: amount,
         type: 'DEPOSIT',
         status: 'PENDING',
-        reference: reference
+        reference: reference,
+        provider: method,
+        providerRef: transactionId,
+        providerTime: transactionTime,
+        providerDate: transactionDate
       }
     });
 
-    // MOCK: Auto-trigger the webhook after 3 seconds to simulate a successful mobile money flow in development ONLY
-    if (process.env.NODE_ENV !== 'production') {
-      setTimeout(async () => {
-        try {
-          await fetch(`http://localhost:${process.env.PORT || 3000}/api/transactions/webhook/payment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference, status: 'SUCCESS' })
-          });
-        } catch (err) {
-          console.error('Mock Webhook failed:', err.message);
-        }
-      }, 3000);
-    }
-
     res.json({
-      message: 'Deposit initiated. Please check your phone for the mobile money prompt.',
+      message: 'Deposit request submitted successfully. It is pending verification by the Finance Department.',
       reference: reference,
       status: 'PENDING',
       balance: savings.balance
@@ -201,8 +194,79 @@ const payFromWallet = async (req, res) => {
   }
 };
 
+const withdraw = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { amount, method, withdrawalPhone, withdrawalName, withdrawalBank, withdrawalAccount } = req.body;
+
+    if (!amount || amount < 1000) {
+      return res.status(400).json({ error: 'Minimum withdrawal is 1000 UGX' });
+    }
+
+    if (method === 'mtn' || method === 'airtel') {
+      if (!withdrawalPhone || !withdrawalName) {
+        return res.status(400).json({ error: 'Missing Mobile Money details' });
+      }
+    } else if (method === 'bank') {
+      if (!withdrawalName || !withdrawalBank || !withdrawalAccount) {
+        return res.status(400).json({ error: 'Missing Bank Transfer details' });
+      }
+    } else {
+      return res.status(400).json({ error: 'Invalid withdrawal method' });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const savings = await tx.savingsAccount.findUnique({
+        where: { userId }
+      });
+
+      if (!savings || savings.balance < amount) {
+        throw new Error('Insufficient wallet balance');
+      }
+
+      // Hold funds by decrementing
+      const updatedSavings = await tx.savingsAccount.update({
+        where: { id: savings.id },
+        data: { balance: { decrement: amount } }
+      });
+
+      const reference = `WD-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      const transaction = await tx.savingsTransaction.create({
+        data: {
+          accountId: savings.id,
+          amount: amount,
+          type: 'WITHDRAWAL',
+          status: 'PENDING',
+          reference: reference,
+          provider: method,
+          withdrawalPhone,
+          withdrawalName,
+          withdrawalBank,
+          withdrawalAccount
+        }
+      });
+
+      return { updatedSavings, transaction };
+    });
+
+    res.json({
+      message: 'Withdrawal request submitted successfully. It is pending verification by the Finance Department.',
+      transaction: result.transaction,
+      balance: result.updatedSavings.balance
+    });
+  } catch (error) {
+    console.error('Withdraw Error:', error.message);
+    if (error.message === 'Insufficient wallet balance') {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Server error processing withdrawal' });
+  }
+};
+
 module.exports = {
   deposit,
+  withdraw,
   getHistory,
   paymentWebhook,
   payFromWallet

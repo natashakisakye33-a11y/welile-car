@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
 import { carsData, Car } from '@/data/cars';
-import { useProfile, useTransactions, useDeposit } from '@/hooks/useProfile';
+import { useProfile, useTransactions, useDeposit, useWithdraw } from '@/hooks/useProfile';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedNumber from '@/components/AnimatedNumber';
 import BottomNav from '@/components/BottomNav';
@@ -15,6 +15,12 @@ import { toast } from 'sonner';
 const paymentMethods = [
   { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: '📱' },
   { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: '📱' },
+];
+
+const withdrawalMethods = [
+  { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: '📱' },
+  { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: '📱' },
+  { id: 'bank', name: 'Bank Transfer', color: '#4C158D', icon: '🏦' },
 ];
 
 const quickAmounts = [50000, 100000, 200000, 500000];
@@ -39,6 +45,9 @@ const WalletPage = () => {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('mtn');
+  const [transactionId, setTransactionId] = useState('');
+  const [transactionTime, setTransactionTime] = useState('');
+  const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0]);
   
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositSuccess, setDepositSuccess] = useState(false);
@@ -46,6 +55,12 @@ const WalletPage = () => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
   const [withdrawReason, setWithdrawReason] = useState('personal');
+
+  const withdraw = useWithdraw();
+  const [withdrawalPhone, setWithdrawalPhone] = useState('');
+  const [withdrawalName, setWithdrawalName] = useState('');
+  const [withdrawalBank, setWithdrawalBank] = useState('');
+  const [withdrawalAccount, setWithdrawalAccount] = useState('');
 
   // Live Data State
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -122,30 +137,26 @@ const WalletPage = () => {
   const handleDeposit = async () => {
     const val = parseInt(amount);
     if (!val || val < 1000) return;
+    if (!transactionId || !transactionTime || !transactionDate) {
+      toast.error("Missing Details", { description: "Please provide the transaction ID, time, and date." });
+      return;
+    }
     
     setIsDepositing(true);
     try {
-      await deposit.mutateAsync({ amount: val, method });
+      await deposit.mutateAsync({ amount: val, method, transactionId, transactionTime, transactionDate });
       
-      // Wait for the mock webhook on the backend to finish
-      setTimeout(async () => {
-        const res = await fetch(`${API_URL}/dashboard/summary`, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        });
-        if (res.ok) {
-          setDashboardData(await res.json());
-        }
-        
-        setIsDepositing(false);
-        setDepositSuccess(true);
-        toast.success("Deposit Successful", { description: `${formatUGX(val)} has been added to your wallet.` });
-        
-        setTimeout(() => {
-          setDepositSuccess(false);
-          setAmount('');
-          setShowDeposit(false);
-        }, 2000);
-      }, 3500);
+      setIsDepositing(false);
+      setDepositSuccess(true);
+      toast.success("Deposit Submitted", { description: `Your deposit of ${formatUGX(val)} is pending verification.` });
+      
+      setTimeout(() => {
+        setDepositSuccess(false);
+        setAmount('');
+        setTransactionId('');
+        setTransactionTime('');
+        setShowDeposit(false);
+      }, 3000);
     } catch (e) {
       console.error(e);
       setIsDepositing(false);
@@ -155,7 +166,10 @@ const WalletPage = () => {
 
   const handleWithdraw = async () => {
     const val = parseInt(amount);
-    if (!val || val < 1000) return;
+    if (!val || val < 1000) {
+      toast.error("Invalid Amount", { description: "Minimum withdrawal is 1000 UGX." });
+      return;
+    }
     if (val > availableBalance) {
       toast.error("Insufficient Funds", { description: "You cannot withdraw more than your available balance." });
       return;
@@ -163,31 +177,28 @@ const WalletPage = () => {
     
     setIsWithdrawing(true);
     try {
-      // Mock withdrawal process
+      await withdraw.mutateAsync({
+        amount: val,
+        method,
+        withdrawalPhone,
+        withdrawalName,
+        withdrawalBank,
+        withdrawalAccount
+      });
+      
+      setIsWithdrawing(false);
+      setWithdrawSuccess(true);
+      toast.success("Withdrawal Requested", { description: "Your request is pending verification by the Finance Department." });
+      
       setTimeout(() => {
-        // Optimistically update local dashboard data for the mock
-        setDashboardData((prev: any) => ({
-          ...prev,
-          savings: {
-            ...prev.savings,
-            totalSaved: prev.savings.totalSaved - val
-          }
-        }));
-        
-        setIsWithdrawing(false);
-        setWithdrawSuccess(true);
-        toast.success("Withdrawal Successful", { description: `${formatUGX(val)} has been sent to your mobile money account.` });
-        
-        setTimeout(() => {
-          setWithdrawSuccess(false);
-          setAmount('');
-          setShowWithdraw(false);
-        }, 2000);
-      }, 3500);
-    } catch (e) {
+        setWithdrawSuccess(false);
+        setAmount('');
+        setShowWithdraw(false);
+      }, 2500);
+    } catch (e: any) {
       console.error(e);
       setIsWithdrawing(false);
-      toast.error("Withdrawal Failed", { description: "An error occurred during the transaction." });
+      toast.error("Withdrawal Failed", { description: e.message || "An error occurred." });
     }
   };
 
@@ -430,16 +441,16 @@ const WalletPage = () => {
                     <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-3xl">📱</span>
                   </div>
-                  <h3 className="text-xl font-extrabold mb-2 text-slate-900">Awaiting Approval</h3>
-                  <p className="text-slate-500 font-medium px-4">Please check your phone and enter your PIN to approve the deposit of <span className="font-bold text-slate-900">{formatUGX(parseInt(amount) || 0)}</span>.</p>
+                  <h3 className="text-xl font-extrabold mb-2 text-slate-900">Submitting Deposit</h3>
+                  <p className="text-slate-500 font-medium px-4">Sending your deposit details to the Finance Department for verification...</p>
                 </div>
               ) : depositSuccess ? (
                 <div className="py-12 flex flex-col items-center text-center">
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
                     <Check size={40} strokeWidth={3} />
                   </motion.div>
-                  <h3 className="text-2xl font-extrabold mb-2 text-slate-900">Deposit Successful!</h3>
-                  <p className="text-slate-500 font-medium">Your wallet balance has been updated securely.</p>
+                  <h3 className="text-2xl font-extrabold mb-2 text-slate-900">Deposit Submitted!</h3>
+                  <p className="text-slate-500 font-medium">Your deposit is now pending verification by the Finance Department.</p>
                 </div>
               ) : (
                 <>
@@ -485,9 +496,32 @@ const WalletPage = () => {
                     ))}
                   </div>
                   
-                  <button onClick={handleDeposit} disabled={!amount}
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Transaction ID (TID)</label>
+                      <input type="text" placeholder="e.g., 2038472948" value={transactionId}
+                        onChange={e => setTransactionId(e.target.value)}
+                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Time</label>
+                        <input type="time" value={transactionTime}
+                          onChange={e => setTransactionTime(e.target.value)}
+                          className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Date</label>
+                        <input type="date" value={transactionDate}
+                          onChange={e => setTransactionDate(e.target.value)}
+                          className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button onClick={handleDeposit} disabled={!amount || !transactionId || !transactionTime || !transactionDate}
                     className="w-full h-14 bg-primary text-white font-bold rounded-2xl disabled:opacity-50 disabled:bg-slate-300 shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all text-lg">
-                    Confirm Deposit
+                    Submit for Verification
                   </button>
                 </>
               )}
@@ -529,13 +563,13 @@ const WalletPage = () => {
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
                     <Check size={40} strokeWidth={3} />
                   </motion.div>
-                  <h3 className="text-2xl font-extrabold mb-2 text-slate-900">Withdrawal Sent!</h3>
-                  <p className="text-slate-500 font-medium">The funds have been dispatched to your mobile money account.</p>
+                  <h3 className="text-2xl font-extrabold mb-2 text-slate-900">Withdrawal Requested!</h3>
+                  <p className="text-slate-500 font-medium">Your request has been forwarded to the Finance Department for verification.</p>
                 </div>
               ) : (
                 <>
                   <div className="space-y-3 mb-6">
-                    {paymentMethods.map(pm => (
+                    {withdrawalMethods.map(pm => (
                       <button 
                         key={pm.id} 
                         onClick={() => setMethod(pm.id)}
@@ -548,6 +582,55 @@ const WalletPage = () => {
                         {method === pm.id && <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>}
                       </button>
                     ))}
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 space-y-4">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Destination Details</h4>
+                    
+                    {(method === 'mtn' || method === 'airtel') && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Registered Phone Number</label>
+                          <input type="tel" value={withdrawalPhone}
+                            onChange={e => setWithdrawalPhone(e.target.value)}
+                            placeholder="e.g. +256 700 000000"
+                            className="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Full Name (as registered)</label>
+                          <input type="text" value={withdrawalName}
+                            onChange={e => setWithdrawalName(e.target.value)}
+                            placeholder="e.g. John Doe"
+                            className="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                        </div>
+                      </>
+                    )}
+
+                    {method === 'bank' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Bank Name</label>
+                          <input type="text" value={withdrawalBank}
+                            onChange={e => setWithdrawalBank(e.target.value)}
+                            placeholder="e.g. Centenary Bank"
+                            className="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Account Holder Name</label>
+                          <input type="text" value={withdrawalName}
+                            onChange={e => setWithdrawalName(e.target.value)}
+                            placeholder="e.g. John Doe"
+                            className="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Account Number</label>
+                          <input type="text" value={withdrawalAccount}
+                            onChange={e => setWithdrawalAccount(e.target.value)}
+                            placeholder="e.g. 1234567890"
+                            className="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   <div className="flex justify-between text-sm font-bold text-slate-500 mb-2 px-1">
@@ -572,8 +655,9 @@ const WalletPage = () => {
                     </select>
                   </div>
                   
-                  <button onClick={handleWithdraw} disabled={!amount || parseInt(amount) > availableBalance}
-                    className="w-full h-14 bg-rose-500 text-white font-bold rounded-2xl disabled:opacity-50 disabled:bg-slate-300 shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all text-lg">
+                  <button onClick={handleWithdraw} disabled={withdraw.isPending || !amount || parseInt(amount) > availableBalance}
+                    className="w-full h-14 bg-rose-500 text-white font-bold rounded-2xl disabled:opacity-50 disabled:bg-slate-300 shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all text-lg flex items-center justify-center gap-2">
+                    {withdraw.isPending && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                     Confirm Withdrawal
                   </button>
                 </>

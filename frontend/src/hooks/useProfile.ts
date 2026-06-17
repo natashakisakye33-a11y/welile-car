@@ -232,7 +232,7 @@ export function useDeposit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ amount, method }: { amount: number; method: string }) => {
+    mutationFn: async ({ amount, method, transactionId, transactionTime, transactionDate }: { amount: number; method: string; transactionId: string; transactionTime: string; transactionDate: string }) => {
       if (!user || !token) throw new Error('Not authenticated');
 
       const res = await fetch(`${API_URL}/transactions/deposit`, {
@@ -241,11 +241,42 @@ export function useDeposit() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ amount, method })
+        body: JSON.stringify({ amount, method, transactionId, transactionTime, transactionDate })
       });
 
       if (!res.ok) {
         throw new Error('Failed to deposit');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
+    },
+  });
+}
+
+export function useWithdraw() {
+  const { user, session } = useAuth();
+  const token = session?.access_token;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ amount, method, withdrawalPhone, withdrawalName, withdrawalBank, withdrawalAccount }: { amount: number; method: string; withdrawalPhone?: string; withdrawalName?: string; withdrawalBank?: string; withdrawalAccount?: string }) => {
+      if (!user || !token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/transactions/withdraw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount, method, withdrawalPhone, withdrawalName, withdrawalBank, withdrawalAccount })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to withdraw');
       }
     },
     onSuccess: () => {

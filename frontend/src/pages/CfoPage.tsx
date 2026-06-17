@@ -4,6 +4,12 @@ import {
   useAllProfiles,
   useCfoRequests,
   useResolveCfoRequest,
+  usePendingDeposits,
+  useApproveDeposit,
+  useRejectDeposit,
+  usePendingWithdrawals,
+  useApproveWithdrawal,
+  useRejectWithdrawal,
   type AdminProfile,
   type CfoRequest,
 } from '@/hooks/useAdmin';
@@ -40,6 +46,14 @@ const CfoPage = () => {
   const { data: users = [], isLoading: usersLoading } = useAllProfiles();
   const { data: requests = [], isLoading: requestsLoading } = useCfoRequests();
   const resolveRequest = useResolveCfoRequest();
+  
+  const { data: pendingDeposits = [], isLoading: depositsLoading } = usePendingDeposits();
+  const approveDeposit = useApproveDeposit();
+  const rejectDeposit = useRejectDeposit();
+
+  const { data: pendingWithdrawals = [], isLoading: withdrawalsLoading } = usePendingWithdrawals();
+  const approveWithdrawal = useApproveWithdrawal();
+  const rejectWithdrawal = useRejectWithdrawal();
 
   // Filters & Search
   const [paymentSearch, setPaymentSearch] = useState('');
@@ -78,6 +92,34 @@ const CfoPage = () => {
       toast.success(`Request ${status === 'approved' ? 'approved' : 'rejected'} successfully.`);
     } catch (err: any) {
       toast.error(err.message || "Failed to resolve request");
+    }
+  };
+
+  const handleDepositAction = async (id: number, action: 'approve' | 'reject') => {
+    try {
+      if (action === 'approve') {
+        await approveDeposit.mutateAsync(id);
+        toast.success('Deposit approved securely.');
+      } else {
+        await rejectDeposit.mutateAsync(id);
+        toast.success('Deposit rejected.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || `Failed to ${action} deposit`);
+    }
+  };
+
+  const handleWithdrawalAction = async (id: number, action: 'approve' | 'reject') => {
+    try {
+      if (action === 'approve') {
+        await approveWithdrawal.mutateAsync(id);
+        toast.success('Withdrawal approved securely.');
+      } else {
+        await rejectWithdrawal.mutateAsync(id);
+        toast.success('Withdrawal rejected. Funds refunded to user.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || `Failed to ${action} withdrawal`);
     }
   };
 
@@ -828,6 +870,177 @@ const CfoPage = () => {
                   )}
                 </div>
 
+              </div>
+
+              {/* Deposit Verification Queue */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-md p-6 space-y-6 mt-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                      <ShieldCheck size={20} className="text-indigo-500" />
+                      Deposit Verification Queue
+                    </h3>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">Manual user deposits pending CFO approval</p>
+                  </div>
+                  <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold">
+                    {pendingDeposits.length} Pending
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {depositsLoading ? (
+                    <div className="text-center py-8">
+                      <div className="w-8 h-8 border-4 border-slate-200 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+                    </div>
+                  ) : pendingDeposits.length === 0 ? (
+                    <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                      <ShieldCheck size={32} className="text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm font-bold text-slate-500">No pending deposits</p>
+                    </div>
+                  ) : (
+                    pendingDeposits.map((dep: any) => (
+                      <div key={dep.id} className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-extrabold text-slate-800 text-sm">{dep.account?.user?.name || 'Unknown User'}</h4>
+                            <p className="text-xs text-slate-500 font-semibold">{dep.account?.user?.phone || 'N/A'}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-black text-slate-800 text-base">{formatUGX(dep.amount)}</span>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">{dep.provider || 'N/A'}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-slate-400 font-semibold block">Transaction ID</span>
+                            <span className="font-bold text-slate-700">{dep.providerRef || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-semibold block">Date & Time</span>
+                            <span className="font-bold text-slate-700">{dep.providerDate} {dep.providerTime}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            onClick={() => handleDepositAction(dep.id, 'approve')}
+                            disabled={approveDeposit.isPending || rejectDeposit.isPending}
+                            className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                          >
+                            <CheckCircle size={14} />
+                            <span>Verify & Approve</span>
+                          </button>
+                          <button
+                            onClick={() => handleDepositAction(dep.id, 'reject')}
+                            disabled={approveDeposit.isPending || rejectDeposit.isPending}
+                            className="h-9 px-4 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                          >
+                            <XCircle size={14} />
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Withdrawal Verification Queue */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-md p-6 space-y-6 mt-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                      <LogOut size={20} className="text-rose-500" />
+                      Withdrawal Requests Queue
+                    </h3>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">User withdrawal requests pending CFO approval</p>
+                  </div>
+                  <div className="bg-rose-50 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold">
+                    {pendingWithdrawals.length} Pending
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {withdrawalsLoading ? (
+                    <div className="text-center py-8">
+                      <div className="w-8 h-8 border-4 border-slate-200 border-t-rose-500 rounded-full animate-spin mx-auto"></div>
+                    </div>
+                  ) : pendingWithdrawals.length === 0 ? (
+                    <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                      <ShieldCheck size={32} className="text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm font-bold text-slate-500">No pending withdrawals</p>
+                    </div>
+                  ) : (
+                    pendingWithdrawals.map((dep: any) => (
+                      <div key={dep.id} className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-extrabold text-slate-800 text-sm">{dep.account?.user?.name || 'Unknown User'}</h4>
+                            <p className="text-xs text-slate-500 font-semibold">{dep.account?.user?.phone || 'N/A'}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-black text-rose-600 text-base">-{formatUGX(dep.amount)}</span>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">{dep.provider || 'N/A'}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-2">
+                          {dep.provider === 'bank' ? (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Bank</span>
+                                <span className="font-bold text-slate-700">{dep.withdrawalBank || 'N/A'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Account Name</span>
+                                <span className="font-bold text-slate-700">{dep.withdrawalName || 'N/A'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Account No.</span>
+                                <span className="font-bold text-slate-700">{dep.withdrawalAccount || 'N/A'}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Mobile Money</span>
+                                <span className="font-bold text-slate-700 uppercase">{dep.provider || 'N/A'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Registered Name</span>
+                                <span className="font-bold text-slate-700">{dep.withdrawalName || 'N/A'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400 font-semibold">Phone</span>
+                                <span className="font-bold text-slate-700">{dep.withdrawalPhone || 'N/A'}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            onClick={() => handleWithdrawalAction(dep.id, 'approve')}
+                            disabled={approveWithdrawal.isPending || rejectWithdrawal.isPending}
+                            className="flex-1 h-9 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                          >
+                            <CheckCircle size={14} />
+                            <span>Approve & Release Funds</span>
+                          </button>
+                          <button
+                            onClick={() => handleWithdrawalAction(dep.id, 'reject')}
+                            disabled={approveWithdrawal.isPending || rejectWithdrawal.isPending}
+                            className="h-9 px-4 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                          >
+                            <XCircle size={14} />
+                            <span>Reject & Refund</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 

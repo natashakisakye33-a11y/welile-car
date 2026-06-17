@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import type { Profile } from './useProfile';
+import { API_URL } from '@/config';
 
 export type AdminProfile = Profile;
 export type AdminTransaction = any;
@@ -362,6 +363,120 @@ export function useResolveCfoRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cfo-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
+    }
+  });
+}
+
+export function usePendingDeposits() {
+  const { isCfo, isAdmin, session } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin-pending-deposits'],
+    queryFn: async () => {
+      if (!session?.access_token) return [];
+      const res = await fetch(`${API_URL}/admin/deposits/pending`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch pending deposits');
+      const data = await res.json();
+      return data.deposits;
+    },
+    enabled: !!session?.access_token && (isCfo || isAdmin),
+    refetchInterval: 5000,
+  });
+}
+
+export function useApproveDeposit() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${API_URL}/admin/deposits/${id}/approve`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to approve deposit');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-deposits'] });
+    }
+  });
+}
+
+export function useRejectDeposit() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${API_URL}/admin/deposits/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to reject deposit');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-deposits'] });
+    }
+  });
+}
+
+export function usePendingWithdrawals() {
+  const { isCfo, isAdmin, session } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin-pending-withdrawals'],
+    queryFn: async () => {
+      if (!session?.access_token) return [];
+      const res = await fetch(`${API_URL}/admin/withdrawals/pending`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch pending withdrawals');
+      const data = await res.json();
+      return data.withdrawals;
+    },
+    enabled: !!session?.access_token && (isCfo || isAdmin),
+    refetchInterval: 5000,
+  });
+}
+
+export function useApproveWithdrawal() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to approve withdrawal');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-withdrawals'] });
+    }
+  });
+}
+
+export function useRejectWithdrawal() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to reject withdrawal');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-withdrawals'] });
     }
   });
 }
