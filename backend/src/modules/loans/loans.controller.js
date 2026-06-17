@@ -4,11 +4,13 @@ const { calculateRiskScore } = require('../../shared/utils/risk.util');
 const prisma = new PrismaClient();
 
 const VEHICLE_CATALOG = {
-  'vitz': { name: 'Toyota Vitz', price: 25000000 },
-  'premio': { name: 'Toyota Premio', price: 35000000 },
-  'wish': { name: 'Toyota Wish', price: 30000000 },
-  'passo': { name: 'Toyota Passo', price: 20000000 },
-  'harrier': { name: 'Toyota Harrier', price: 65000000 }
+  'vitz': { name: 'Toyota Vitz', price: 18000000 },
+  'premio': { name: 'Toyota Premio', price: 28000000 },
+  'wish': { name: 'Toyota Wish', price: 25000000 },
+  'harrier': { name: 'Toyota Harrier', price: 85000000 },
+  'noah': { name: 'Toyota Noah', price: 35000000 },
+  'passo': { name: 'Toyota Passo', price: 16500000 },
+  'jeep_wrangler_black': { name: 'Jeep Wrangler', price: 150000000 }
 };
 
 const applyForLoan = async (req, res) => {

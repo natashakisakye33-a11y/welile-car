@@ -22,6 +22,7 @@ import noahInteriorImg from '@/assets/noah_interior_1781172684000.png';
 import passoRearImg from '@/assets/passo_rear_1781172702484.png';
 import passoSideImg from '@/assets/passo_side_1781172713577.png';
 import passoInteriorImg from '@/assets/passo_interior_1781172725525.png';
+import jeepImg from '@/assets/black_jeep.png';
 
 export interface Car {
   id: string;
@@ -241,5 +242,32 @@ export const carsData: Car[] = [
     estimatedCosts: { insurance: 110000, fuel: 180000, maintenance: 75000 },
     features: ['Air Conditioning', 'Power Steering', 'ABS Brakes'],
     verification: { date: '10 Apr 2026', inspector: 'Peter M.', status: 'Verified & Approved' }
+  },
+  {
+    id: 'jeep_wrangler_black',
+    name: 'Jeep Wrangler',
+    make: 'Jeep',
+    model: 'Wrangler',
+    year: 2021,
+    type: 'SUV',
+    tagline: 'Off-Road Capability',
+    priceUgx: 150000000,
+    priceStr: '150M UGX',
+    oldPriceRange: '130M - 150M UGX',
+    oldMin: 130000000,
+    oldMax: 150000000,
+    newPriceRange: '180M - 200M UGX',
+    newMin: 180000000,
+    newMax: 200000000,
+    image: jeepImg,
+    gallery: [jeepImg],
+    specs: { year: 2021, engine: '2.0L Turbo', fuel: 'Petrol', transmission: 'Automatic', mileage: '20,000 km', seats: 5, color: 'Black', drivetrain: '4WD' },
+    category: 'SUV',
+    rating: 4.9,
+    condition: { verified: true, inspected: true, serviceRecords: true, accidentHistory: 'None', ownershipHistory: '1 Previous Owner' },
+    dealer: { name: 'Premium Drives', rating: 5.0, location: 'Kololo', phone: '+256 701 555555' },
+    estimatedCosts: { insurance: 450000, fuel: 550000, maintenance: 300000 },
+    features: ['4x4 Off-Road', 'Removable Roof', 'Leather Seats', 'Apple CarPlay', 'Reverse Camera'],
+    verification: { date: '10 Jun 2026', inspector: 'James L.', status: 'Verified & Approved' }
   }
 ];

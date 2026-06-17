@@ -17,12 +17,23 @@ const AuthPage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [residence, setResidence] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+
+  const handle2FASubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (twoFactorCode !== '123456') {
+      setError('Invalid code. Please try 123456.');
+      return;
+    }
+    navigate('/vehicles');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
-    if (!email || !password) {
+    if (!phone || !password) {
       setError('Please fill in all required fields');
       return;
     }
@@ -30,17 +41,22 @@ const AuthPage: React.FC = () => {
     try {
       let result;
       if (isLogin) {
-        result = await signIn(email, password);
+        result = await signIn(phone, password);
       } else {
-        if (!name || !phone) {
-          setError('Please provide your name and phone number');
+        if (!name) {
+          setError('Please provide your name');
           return;
         }
-        result = await signUp(email, password, name, phone, residence);
+        result = await signUp(phone, password, name, email, residence);
       }
       
       if (result.error) {
         setError(result.error);
+        return;
+      }
+      
+      if (isLogin && localStorage.getItem('2fa_enabled') === 'true') {
+        setShow2FA(true);
         return;
       }
       
@@ -68,16 +84,9 @@ const AuthPage: React.FC = () => {
             <a href="#" className="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md">Sell</a>
             <a href="#" className="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md">Finance</a>
             <a href="#" className="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md">Support</a>
-            <button className="bg-primary-container text-white px-6 py-2 rounded-full font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-sm font-label-md">
-              Dealer Portal
-            </button>
           </nav>
           
-          <div className="flex items-center gap-4 md:hidden">
-            <button className="p-2 text-on-surface hover:bg-surface-container rounded-full transition-colors active:scale-95">
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-          </div>
+          {/* Removed mobile menu */}
         </div>
       </header>
 
@@ -154,13 +163,55 @@ const AuthPage: React.FC = () => {
               {/* Header */}
               <div className="mb-8">
                 <h1 className="font-headline-lg-mobile md:font-headline-lg text-[28px] text-primary mb-2">
-                  {isLogin ? 'Welcome Back' : 'Create an account'}
+                  {show2FA ? 'Two-Factor Authentication' : (isLogin ? 'Welcome Back' : 'Create an account')}
                 </h1>
                 <p className="text-on-surface-variant font-body-md">
-                  {isLogin ? 'Securely access your personalized automotive portal.' : 'Start your journey to car ownership today.'}
+                  {show2FA ? 'Enter the 6-digit code sent to your phone.' : (isLogin ? 'Securely access your personalized automotive portal.' : 'Start your journey to car ownership today.')}
                 </p>
               </div>
 
+            {show2FA ? (
+              <form onSubmit={handle2FASubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="relative border-b-2 border-outline-variant focus-within:border-primary transition-all group">
+                  <div className="flex items-center gap-3 py-2">
+                    <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">pin</span>
+                    <input 
+                      className="w-full bg-transparent border-none focus:ring-0 p-0 text-on-surface placeholder:text-outline-variant font-body-md outline-none tracking-[0.5em] font-mono text-xl" 
+                      placeholder="------" 
+                      type="text"
+                      maxLength={6}
+                      value={twoFactorCode}
+                      onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-on-surface-variant text-center">Hint: For testing, use code <strong className="text-primary">123456</strong></p>
+
+                {(error) && (
+                  <p className="text-error text-sm font-bold text-center bg-error-container/50 p-2 rounded-md">
+                    {error}
+                  </p>
+                )}
+
+                <button 
+                  className="w-full bg-primary-container text-white py-4 rounded-xl font-bold text-body-lg shadow-lg hover:shadow-primary-container/20 hover:scale-[1.02] active:scale-[0.98] transition-all mt-4" 
+                  type="submit"
+                >
+                  Verify & Sign In
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShow2FA(false);
+                    setError(null);
+                  }}
+                  className="w-full text-primary font-bold text-label-md py-2 mt-2 hover:bg-surface-container rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
               <form onSubmit={handleSubmit} className="space-y-6 transition-all duration-300">
                 {!isLogin && (
                   <>
@@ -179,19 +230,6 @@ const AuthPage: React.FC = () => {
 
                     <div className="relative border-b-2 border-outline-variant focus-within:border-primary transition-all group">
                       <div className="flex items-center gap-3 py-2">
-                        <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">call</span>
-                        <input 
-                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-on-surface placeholder:text-outline-variant font-body-md outline-none" 
-                          placeholder="Phone Number" 
-                          type="tel"
-                          value={phone}
-                          onChange={e => setPhone(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="relative border-b-2 border-outline-variant focus-within:border-primary transition-all group">
-                      <div className="flex items-center gap-3 py-2">
                         <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">location_on</span>
                         <input 
                           className="w-full bg-transparent border-none focus:ring-0 p-0 text-on-surface placeholder:text-outline-variant font-body-md outline-none" 
@@ -202,18 +240,31 @@ const AuthPage: React.FC = () => {
                         />
                       </div>
                     </div>
+
+                    <div className="relative border-b-2 border-outline-variant focus-within:border-primary transition-all group">
+                      <div className="flex items-center gap-3 py-2">
+                        <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">mail</span>
+                        <input 
+                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-on-surface placeholder:text-outline-variant font-body-md outline-none" 
+                          placeholder="Email Address (Optional)" 
+                          type="email"
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </>
                 )}
 
                 <div className="relative border-b-2 border-outline-variant focus-within:border-primary transition-all group">
                   <div className="flex items-center gap-3 py-2">
-                    <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">mail</span>
+                    <span className="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">call</span>
                     <input 
                       className="w-full bg-transparent border-none focus:ring-0 p-0 text-on-surface placeholder:text-outline-variant font-body-md outline-none" 
-                      placeholder="Email Address" 
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
+                      placeholder="Phone Number" 
+                      type="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
                     />
                   </div>
                 </div>
@@ -259,6 +310,7 @@ const AuthPage: React.FC = () => {
                   {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
                 </button>
               </form>
+            )}
             </div>
 
             {/* Social Login Section */}

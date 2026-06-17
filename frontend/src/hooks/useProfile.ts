@@ -354,7 +354,8 @@ export function useApplyGrowth() {
 }
 
 export function useRequestFinancing() {
-  const { user, token } = useAuth();
+  const { user, session } = useAuth();
+  const token = session?.access_token;
   const queryClient = useQueryClient();
 
   return useMutation({

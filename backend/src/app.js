@@ -10,6 +10,9 @@ const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const transactionsRoutes = require('./modules/transactions/transactions.routes');
 const loansRoutes = require('./modules/loans/loans.routes');
 const repaymentsRoutes = require('./modules/repayments/repayments.routes');
+const vehiclesRoutes = require('./modules/vehicles/vehicles.routes');
+const savingsRoutes = require('./modules/savings/savings.routes');
+const adminRoutes = require('./modules/admin/admin.routes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -36,23 +39,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionsRoutes);
 app.use('/api/loans', loansRoutes);
 app.use('/api/repayments', repaymentsRoutes);
-
-app.post('/api/savings/calculate', (req, res) => {
-  const { targetAmount, monthlyContribution } = req.body;
-  if (!targetAmount || !monthlyContribution) {
-    return res.status(400).json({ error: 'Missing targetAmount or monthlyContribution' });
-  }
-  
-  const months = Math.ceil(targetAmount / monthlyContribution);
-  const totalInterest = (targetAmount * 0.05).toFixed(0);
-  
-  res.json({
-    targetAmount,
-    monthlyContribution,
-    estimatedMonths: months,
-    estimatedInterest: parseInt(totalInterest)
-  });
-});
+app.use('/api/vehicles', vehiclesRoutes);
+app.use('/api/savings', savingsRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(port, '0.0.0.0', () => {
   const { networkInterfaces } = require('os');

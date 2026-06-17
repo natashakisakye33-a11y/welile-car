@@ -1,9 +1,29 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LifeBuoy, PhoneCall, Mail, MessageCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { LifeBuoy, PhoneCall, Mail, MessageCircle, ChevronDown, ChevronUp, ExternalLink, Send, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const SupportPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [ticketSubject, setTicketSubject] = useState('');
+  const [ticketMessage, setTicketMessage] = useState('');
+
+  const handleTicketSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ticketSubject || !ticketMessage) return;
+    
+    setIsSubmittingTicket(true);
+    // Simulate network request
+    setTimeout(() => {
+      setIsSubmittingTicket(false);
+      setIsTicketDialogOpen(false);
+      setTicketSubject('');
+      setTicketMessage('');
+      alert('Support Ticket successfully submitted! Our team will get back to you shortly.');
+    }, 1500);
+  };
 
   const faqs = [
     {
@@ -124,10 +144,61 @@ const SupportPage = () => {
           <h2 className="text-xl font-bold text-white mb-2">Can't find what you're looking for?</h2>
           <p className="text-slate-400 text-sm max-w-md">Our technical team is ready to resolve any bugs, app issues, or complex disputes immediately.</p>
         </div>
-        <button className="px-8 py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors shrink-0 shadow-lg shadow-black/20 whitespace-nowrap">
+        <button 
+          onClick={() => setIsTicketDialogOpen(true)}
+          className="px-8 py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors shrink-0 shadow-lg shadow-black/20 whitespace-nowrap"
+        >
           Open a Support Ticket
         </button>
       </div>
+
+      <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
+        <DialogContent className="sm:max-w-md p-6 rounded-3xl border-0 shadow-2xl">
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">Submit a Ticket</h2>
+              <p className="text-slate-500 text-sm">Please describe your issue in detail and our technical team will assist you.</p>
+            </div>
+            
+            <form onSubmit={handleTicketSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Subject</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="E.g. App is crashing on login"
+                  className="w-full h-12 bg-slate-50 rounded-xl px-4 border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  value={ticketSubject}
+                  onChange={(e) => setTicketSubject(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
+                <textarea 
+                  required
+                  placeholder="Please provide as much detail as possible..."
+                  className="w-full h-32 bg-slate-50 rounded-xl p-4 border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors resize-none"
+                  value={ticketMessage}
+                  onChange={(e) => setTicketMessage(e.target.value)}
+                ></textarea>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmittingTicket || !ticketSubject || !ticketMessage}
+                className="w-full h-14 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20 disabled:opacity-50"
+              >
+                {isSubmittingTicket ? (
+                  <><Loader2 className="animate-spin" size={20} /> Submitting...</>
+                ) : (
+                  <><Send size={20} /> Submit Ticket</>
+                )}
+              </button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

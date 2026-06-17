@@ -14,8 +14,8 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isCfo: boolean;
-  signUp: (email: string, password: string, name: string, phone: string, residence: string) => Promise<{ error: string | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (phone: string, password: string, name: string, email: string, residence: string) => Promise<{ error: string | null }>;
+  signIn: (phone: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -58,12 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const signUp = async (email: string, password: string, name: string, phone: string, residence: string) => {
+  const signUp = async (phone: string, password: string, name: string, email: string, residence: string) => {
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, phone, residence })
+        body: JSON.stringify({ phone, password, name, email, residence })
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Signup failed' };
@@ -79,12 +79,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (phone: string, password: string) => {
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ phone, password })
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Login failed' };

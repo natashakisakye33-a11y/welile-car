@@ -53,7 +53,34 @@ const getMyProfile = async (req, res) => {
   }
 };
 
+const approveKyc = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { status } = req.body; // e.g., 'APPROVED', 'REJECTED'
+
+    if (!['APPROVED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ error: 'Status must be APPROVED or REJECTED' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: {
+        kycStatus: status,
+        status: status === 'APPROVED' ? 'ACTIVE' : 'PENDING_KYC'
+      }
+    });
+
+    await logAction(req.user.id, 'KYC_REVIEWED', `Admin reviewed KYC for user ${userId}. Result: ${status}`, req.ip);
+
+    res.json({ message: 'KYC status updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('KYC Approval Error:', error);
+    res.status(500).json({ error: 'Server error updating KYC status' });
+  }
+};
+
 module.exports = {
   submitKyc,
-  getMyProfile
+  getMyProfile,
+  approveKyc
 };

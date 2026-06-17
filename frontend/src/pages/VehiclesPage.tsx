@@ -133,7 +133,7 @@ export default function VehiclesPage() {
                     <span className="text-slate-800 font-bold">{car.newPriceRange}</span>
                   </div>
                   <p className="text-[9px] text-amber-600 font-extrabold italic mt-1 leading-none">
-                    Depending on condition
+                    Depending on the Condition
                   </p>
                 </div>
 

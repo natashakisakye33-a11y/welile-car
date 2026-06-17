@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 
 const register = async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
+    const { phone, password, name, email, residence } = req.body;
     
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    // Check if user exists by phone
+    const existingUser = await prisma.user.findUnique({ where: { phone } });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already in use' });
+      return res.status(400).json({ error: 'Phone number already in use' });
     }
 
     // Hash password
@@ -21,10 +21,11 @@ const register = async (req, res) => {
     // Create user and a linked SavingsAccount
     const user = await prisma.user.create({
       data: {
-        email,
+        phone,
         passwordHash,
         name,
-        phone,
+        email: email || null,
+        address: residence || null,
         status: 'PENDING_KYC',
         kycStatus: 'PENDING',
         savingsAccount: {
@@ -46,8 +47,8 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const { phone, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { phone } });
     
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });

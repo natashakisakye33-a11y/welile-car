@@ -10,10 +10,10 @@ datasource db {
 
 model User {
   id               Int                  @id @default(autoincrement())
-  email            String               @unique
+  email            String?              @unique
   passwordHash     String
   name             String
-  phone            String?
+  phone            String               @unique
   role             String @default("CUSTOMER")
   status           String @default("PENDING_KYC")
   

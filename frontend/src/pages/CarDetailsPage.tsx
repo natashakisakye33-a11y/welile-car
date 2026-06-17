@@ -318,9 +318,8 @@ const CarDetailsPage = () => {
 
           <div className="space-y-6">
             {/* Verification Section */}
-            <button 
-              onClick={() => navigate('/wallet')}
-              className="w-full text-left bg-slate-900 rounded-3xl p-6 text-white shadow-sm flex items-center gap-4 hover:bg-slate-800 transition-colors cursor-pointer hover:shadow-lg"
+            <div 
+              className="w-full text-left bg-slate-900 rounded-3xl p-6 text-white shadow-sm flex items-center gap-4"
             >
               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center shrink-0">
                 <ShieldCheck size={24} className="text-emerald-400" />
@@ -329,7 +328,7 @@ const CarDetailsPage = () => {
                 <h4 className="font-bold mb-1">{car.verification.status}</h4>
                 <p className="text-sm text-slate-400 font-medium">Inspected by {car.verification.inspector} on {car.verification.date}</p>
               </div>
-            </button>
+            </div>
           </div>
         </div>
 

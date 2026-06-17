@@ -24,7 +24,7 @@ export default function SettingsPage() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => localStorage.getItem('2fa_enabled') === 'true');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   const [isSaving, setIsSaving] = useState(false);
@@ -251,6 +251,7 @@ export default function SettingsPage() {
           onClick={() => {
             const newState = !twoFactorEnabled;
             setTwoFactorEnabled(newState);
+            localStorage.setItem('2fa_enabled', newState ? 'true' : 'false');
             if (newState) {
               toast.success("Two-Factor Auth Enabled", { description: "Verification codes will now be sent to your phone." });
             } else {
@@ -307,11 +308,7 @@ export default function SettingsPage() {
   const renderLanguage = () => {
     const languages = [
       'English (US)',
-      'Luganda',
       'Swahili',
-      'Runyankore',
-      'Lusoga',
-      'Kinyarwanda',
       'French'
     ];
 

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, CheckCircle2, Sparkles, Upload } from 'lucide-react';
 import { carsData, Car } from '@/data/cars';
 import { formatUGX } from '@/lib/format';
-import { useDeposit, usePayFromWallet } from '@/hooks/useProfile';
+import { useDeposit, usePayFromWallet, useProfile } from '@/hooks/useProfile';
 
 const PaymentDetailsPage = () => {
   const location = useLocation();
@@ -21,9 +21,11 @@ const PaymentDetailsPage = () => {
   const [ussdMessage, setUssdMessage] = useState('');
   const { mutateAsync: makeDeposit } = useDeposit();
   const { mutateAsync: payFromWallet } = usePayFromWallet();
+  const { data: profile } = useProfile();
 
   // Form states
   const [amountToPay, setAmountToPay] = useState('');
+  const [buyerName, setBuyerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -40,7 +42,7 @@ const PaymentDetailsPage = () => {
     }
   }, [carId]);
 
-  const walletBalance = car ? car.priceUgx - deficit : 0;
+  const walletBalance = profile?.wallet_balance || 0;
   const parsedAmount = parseInt(amountToPay || '0', 10);
   const currentDeficit = method === 'wallet' ? Math.max(0, parsedAmount - walletBalance) : 0;
 
@@ -50,17 +52,22 @@ const PaymentDetailsPage = () => {
     setIsProcessing(true);
     
     try {
-      if (method === 'mtn' || method === 'airtel') {
+      if (method === 'mtn' || method === 'airtel' || method === 'mobile_money') {
+        if (!phoneNumber || !buyerName) {
+          alert('Please enter both the Buyer Name and Mobile Number');
+          setIsProcessing(false);
+          return;
+        }
         setUssdMessage('Connecting to USSD... Please check your phone to enter your Mobile Money PIN.');
-        // Call the real backend API
-        await makeDeposit({ amount: parsedAmount, method: method });
+        // Call the real backend API (mocked in useDeposit)
+        await makeDeposit({ amount: parsedAmount, method: method === 'mobile_money' ? 'mtn' : method });
         
         setUssdMessage('Processing transaction...');
         setTimeout(() => {
           setIsProcessing(false);
           setUssdMessage('');
           setSuccess(true);
-          setTimeout(() => navigate('/wallet'), 3000);
+          setTimeout(() => navigate('/dashboard'), 3000);
         }, 3000);
       } else if (method === 'wallet') {
         setUssdMessage('Processing payment securely from your wallet...');
@@ -69,7 +76,7 @@ const PaymentDetailsPage = () => {
         setIsProcessing(false);
         setUssdMessage('');
         setSuccess(true);
-        setTimeout(() => navigate('/logbook'), 3000);
+        setTimeout(() => navigate('/dashboard'), 3000);
       } else {
         // Fallback for mock flows (bank, etc)
         setTimeout(() => {
@@ -78,7 +85,7 @@ const PaymentDetailsPage = () => {
           const currentTotal = Number(localStorage.getItem('mockTotalPaid') || 0);
           localStorage.setItem('mockTotalPaid', (currentTotal + parsedAmount).toString());
           if (car) localStorage.setItem('mockPurchasedCarId', car.id);
-          setTimeout(() => navigate('/logbook'), 3000);
+          setTimeout(() => navigate('/dashboard'), 3000);
         }, 2000);
       }
     } catch (err: any) {
@@ -88,7 +95,33 @@ const PaymentDetailsPage = () => {
     }
   };
 
-  if (!car) return null;
+  if (!car) {
+    return (
+      <div className="min-h-screen bg-background pb-20 flex flex-col">
+        <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-border/40 p-4 flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 flex items-center justify-center rounded-full bg-secondary/50 text-foreground">
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-bold font-heading">Payment Details</h1>
+        </header>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center mt-20">
+          <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-6">
+            <span className="material-symbols-outlined text-5xl">directions_car</span>
+          </div>
+          <h2 className="text-2xl font-bold font-heading mb-2">No Vehicle Selected</h2>
+          <p className="text-muted-foreground mb-8 max-w-sm">
+            It looks like you haven't selected a vehicle. Please go back and select a vehicle to proceed with your payment.
+          </p>
+          <button 
+            onClick={() => navigate('/vehicles')} 
+            className="w-full max-w-xs h-14 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-hover transition-colors"
+          >
+            Browse Vehicles
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -127,7 +160,7 @@ const PaymentDetailsPage = () => {
               </div>
               <h2 className="text-3xl font-bold font-heading">Payment Successful!</h2>
               <p className="text-muted-foreground text-lg">Your payment of <strong>{formatUGX(parsedAmount)}</strong> has been processed successfully.</p>
-              <p className="text-sm mt-4 text-primary font-medium animate-pulse">Redirecting to Logbook...</p>
+              <p className="text-sm mt-4 text-primary font-medium animate-pulse">Redirecting to Dashboard...</p>
             </motion.div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -161,27 +194,41 @@ const PaymentDetailsPage = () => {
                 </div>
                 
                 {/* Mobile Money Form */}
-                {(method === 'mtn' || method === 'airtel') && (
+                {(method === 'mtn' || method === 'airtel' || method === 'mobile_money') && (
                   <div className="bg-white p-5 rounded-2xl shadow-sm border border-border/50 space-y-4">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined">phone_iphone</span>
                       </div>
                       <h3 className="font-bold font-heading text-lg">
-                        {method === 'mtn' ? 'MTN MoMo' : 'Airtel Money'} Details
+                        {method === 'airtel' ? 'Airtel Money' : method === 'mtn' ? 'MTN MoMo' : 'Mobile Money'} Details
                       </h3>
                     </div>
+                    
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">Buyer's Name</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="e.g. John Doe"
+                        className="w-full h-14 bg-surface rounded-xl px-4 border-2 border-border focus:border-primary focus:ring-0 outline-none transition-colors"
+                        value={buyerName}
+                        onChange={(e) => setBuyerName(e.target.value)}
+                      />
+                    </div>
+
                     <div>
                       <label className="block text-sm font-semibold mb-2">Mobile Number</label>
                       <input 
                         type="tel" 
                         required
-                        placeholder={method === 'mtn' ? '077/078...' : '070/075...'}
+                        placeholder={method === 'airtel' ? '070/075...' : '077/078/070/075...'}
                         className="w-full h-14 bg-surface rounded-xl px-4 border-2 border-border focus:border-primary focus:ring-0 outline-none transition-colors"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                       />
                     </div>
+                    
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       Please ensure your mobile money account has sufficient funds. You will receive a prompt on your phone to enter your PIN to confirm the payment.
                     </p>
@@ -307,13 +354,24 @@ const PaymentDetailsPage = () => {
                   </div>
                 )}
 
-                <button 
-                  type="submit"
-                  disabled={isProcessing || (method === 'bank' && !receiptUploaded)}
-                  className="w-full h-14 gradient-primary text-primary-foreground font-bold rounded-2xl disabled:opacity-50 text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 mt-8"
-                >
-                  {isProcessing ? 'Processing Payment...' : 'Confirm Payment'}
-                </button>
+                {method === 'wallet' && currentDeficit > 0 ? (
+                  <div className="w-full p-4 bg-red-50 text-red-600 font-bold rounded-2xl text-center border border-red-200 mt-8">
+                    Insufficient Funds - Deposit Required
+                  </div>
+                ) : (
+                  <button 
+                    type="submit"
+                    disabled={
+                      isProcessing || 
+                      parsedAmount <= 0 ||
+                      ((method === 'mtn' || method === 'airtel' || method === 'mobile_money') && (!phoneNumber || !buyerName)) ||
+                      (method === 'bank' && !receiptUploaded)
+                    }
+                    className="w-full h-14 gradient-primary text-primary-foreground font-bold rounded-2xl disabled:opacity-50 text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 mt-8"
+                  >
+                    {isProcessing ? 'Processing Payment...' : 'Confirm Payment'}
+                  </button>
+                )}
 
               </form>
             </motion.div>
