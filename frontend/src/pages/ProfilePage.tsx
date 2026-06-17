@@ -37,7 +37,7 @@ import {
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin, isCfo } = useAuth();
   const { data: profile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
   const navigate = useNavigate();
@@ -355,13 +355,25 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <button 
-              onClick={handleLogout}
-              className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
-            >
-              <LogOut size={18} />
-              Log Out Securely
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {(isAdmin || isCfo) && (
+                <button 
+                  onClick={() => navigate('/cfo')}
+                  className="w-full sm:w-auto bg-[#4C158D]/10 hover:bg-[#4C158D]/20 text-[#4C158D] font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
+                >
+                  <ShieldCheck size={18} />
+                  Admin Dashboard
+                </button>
+              )}
+
+              <button 
+                onClick={handleLogout}
+                className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
+              >
+                <LogOut size={18} />
+                Log Out Securely
+              </button>
+            </div>
 
           </div>
         </div>
