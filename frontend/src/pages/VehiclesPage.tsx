@@ -107,8 +107,13 @@ export default function VehiclesPage() {
                 onClick={() => navigate('/vehicles/' + car.id)}
                 className="bg-white rounded-[28px] border p-4 pb-5 flex flex-col justify-between cursor-pointer transition-all duration-300 relative border-slate-100 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 group"
               >
+                {/* Catchy Hook Badge */}
+                <div className="bg-gradient-to-r from-[#4C158D] to-purple-600 text-white rounded-xl px-2 py-1.5 mb-2 flex items-center justify-center shadow-sm shadow-[#4C158D]/20 w-full">
+                  <span className="text-[10px] font-black uppercase tracking-wider">Own from just UGX 5,000</span>
+                </div>
+
                 {/* Car Image centered, slightly floating */}
-                <div className="relative w-full h-32 sm:h-40 flex items-center justify-center mb-3">
+                <div className="relative w-full h-24 sm:h-32 flex items-center justify-center mb-3">
                   <img 
                     src={car.image} 
                     alt={car.name} 
