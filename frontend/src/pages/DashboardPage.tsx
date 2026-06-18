@@ -148,7 +148,7 @@ const DashboardPage = () => {
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <span className="block text-xs font-bold text-slate-500 mb-1">Est. Monthly (36m)</span>
                       <span className="block text-lg font-black text-slate-900">
-                        {formatUGX((targetCar.priceUgx * 0.7 * 1.3) / 36)}
+                        {formatUGX((targetCar.priceUgx * 0.7 * 1.28) / 36)}
                       </span>
                     </div>
                   </div>
@@ -176,7 +176,7 @@ const DashboardPage = () => {
                     </div>
                     <div className="flex justify-between text-[11px] font-bold">
                       <span className="text-slate-500">Est. Monthly (36m)</span>
-                      <span className="text-slate-900">{formatUGX((car.priceUgx * 0.7 * 1.3) / 36)}</span>
+                      <span className="text-slate-900">{formatUGX((car.priceUgx * 0.7 * 1.28) / 36)}</span>
                     </div>
                   </div>
 

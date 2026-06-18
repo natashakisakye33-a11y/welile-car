@@ -130,7 +130,7 @@ const FinancingPage = () => {
   // Dynamic financing math
   const actualDeposit = Math.max(customDeposit, minDepositTarget);
   const remaining = car.priceUgx - actualDeposit;
-  const monthlyInstallment = (remaining * 1.3) / 36;
+  const monthlyInstallment = (remaining * 1.28) / 36;
   
   const plans = [
     { id: 'daily', label: 'Daily Payment', divisor: 30, period: '36 months' },

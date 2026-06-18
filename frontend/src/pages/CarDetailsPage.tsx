@@ -65,8 +65,8 @@ const CarDetailsPage = () => {
   const remainingNeeded = Math.max(0, requiredDeposit - userSavings);
   const isEligible = remainingNeeded === 0;
   
-  // Mock monthly installment (Financed amount + 30% interest spread over 36 months)
-  const monthlyInstallment = (financedAmount * 1.3) / 36;
+  // Mock monthly installment (Financed amount + 28% interest spread over 36 months)
+  const monthlyInstallment = (financedAmount * 1.28) / 36;
   const divisor = paymentFreq === 'daily' ? 30 : paymentFreq === 'weekly' ? 4 : 1;
   const periodLabel = paymentFreq === 'daily' ? 'Daily' : paymentFreq === 'weekly' ? 'Weekly' : 'Monthly';
 

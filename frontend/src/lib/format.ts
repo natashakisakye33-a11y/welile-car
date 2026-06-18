@@ -1,6 +1,6 @@
 export const formatUGX = (amount: number | string): string => {
   const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return `UGX ${numericAmount.toLocaleString('en-UG')}`;
+  return `UGX ${Math.round(numericAmount).toLocaleString('en-UG')}`;
 };
 
 export const formatDate = (dateStr: string): string => {
