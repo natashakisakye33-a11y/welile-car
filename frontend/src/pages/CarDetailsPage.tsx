@@ -28,6 +28,7 @@ const CarDetailsPage = () => {
   const [paymentFreq, setPaymentFreq] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [showInspectionForm, setShowInspectionForm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'plan' | 'method'>('plan');
 
   useEffect(() => {
     const foundCar = carsData.find(c => c.id === id);
@@ -64,14 +65,24 @@ const CarDetailsPage = () => {
   const financedAmount = car.priceUgx * 0.7;
   const remainingNeeded = Math.max(0, requiredDeposit - userSavings);
   const isEligible = remainingNeeded === 0;
-  
-  // Mock monthly installment (Financed amount + 28% interest spread over 36 months)
-  const monthlyInstallment = (financedAmount * 1.28) / 36;
+
+  const monthlyLoan = (financedAmount * 1.28) / 36;
+  const monthlyInsurance = car.estimatedCosts.insurance || (car.priceUgx * 0.08 / 12);
+  const totalMonthly = monthlyLoan + monthlyInsurance;
+
+  const weeklyLoan = monthlyLoan / 4;
+  const weeklyInsurance = monthlyInsurance / 4;
+  const totalWeekly = weeklyLoan + weeklyInsurance;
+
+  const dailyLoan = monthlyLoan / 30;
+  const dailyInsurance = monthlyInsurance / 30;
+  const totalDaily = dailyLoan + dailyInsurance;
+
   const divisor = paymentFreq === 'daily' ? 30 : paymentFreq === 'weekly' ? 4 : 1;
   const periodLabel = paymentFreq === 'daily' ? 'Daily' : paymentFreq === 'weekly' ? 'Weekly' : 'Monthly';
 
-  const installment = monthlyInstallment / divisor;
-  const insurance = car.estimatedCosts.insurance / divisor;
+  const installment = monthlyLoan / divisor;
+  const insurance = monthlyInsurance / divisor;
   const totalCost = installment + insurance;
 
   return (
@@ -118,86 +129,39 @@ const CarDetailsPage = () => {
                 </div>
               </div>
               <div className="mt-6 mb-8">
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Vehicle Price</p>
-                <p className="text-4xl font-black text-primary">{formatUGX(car.priceUgx)}</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-slate-50 rounded-2xl p-4 flex justify-between items-center">
-                <span className="text-sm font-medium text-slate-500">Required Deposit (30%)</span>
-                <span className="font-bold text-slate-900">{formatUGX(requiredDeposit)}</span>
-              </div>
-              <div className="bg-slate-50 rounded-2xl p-4 flex justify-between items-center">
-                <span className="text-sm font-medium text-slate-500">Welile Financing (70%)</span>
-                <span className="font-bold text-slate-900">{formatUGX(financedAmount)}</span>
-              </div>
-              <div className="bg-primary/5 rounded-2xl p-4 flex justify-between items-center border border-primary/10">
-                <span className="text-sm font-bold text-primary">Est. Monthly Payment (36m)</span>
-                <span className="font-black text-primary">{formatUGX(monthlyInstallment)}</span>
+                <div className="bg-gradient-to-br from-primary to-purple-900 rounded-2xl p-5 text-white relative overflow-hidden shadow-lg shadow-primary/20 border border-white/10">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+                  <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500 opacity-20 rounded-full blur-2xl"></div>
+                  <h4 className="font-extrabold text-lg mb-1 flex items-center gap-2 relative z-10">
+                    <Star className="text-yellow-400 fill-yellow-400" size={18} /> Dream Big, Start Small
+                  </h4>
+                  <p className="text-white text-xl font-black leading-relaxed relative z-10">
+                    Use <span className="text-yellow-400">UGX 5,000</span> to own this car!
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Financing Eligibility Widget */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><ShieldCheck className="text-primary" /> Financing Eligibility</h3>
-            
-            <div className="space-y-6 flex-1">
-              {!isEligible && (
-                <div className="bg-gradient-to-br from-primary to-purple-900 rounded-2xl p-5 text-white relative overflow-hidden shadow-lg shadow-primary/20 border border-white/10">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-                  <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500 opacity-20 rounded-full blur-2xl"></div>
-                  <h4 className="font-extrabold text-lg mb-2 flex items-center gap-2 relative z-10">
-                    <Star className="text-yellow-400 fill-yellow-400" size={18} /> Dream Big, Start Small
-                  </h4>
-                  <p className="text-purple-100 text-sm font-medium leading-relaxed relative z-10">
-                    Yes, owning this {car.name} is entirely possible starting with just <span className="font-bold text-white bg-white/20 px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">UGX 5,000</span>. Save consistently, earn <span className="font-black text-yellow-400">5% compound interest</span>, and drive it home sooner than you think!
-                  </p>
-                </div>
-              )}
-
-              <div className="flex justify-between items-end border-b border-slate-100 pb-4">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Required Deposit</p>
-                  <p className="text-xl font-bold text-slate-900">{formatUGX(requiredDeposit)}</p>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-end border-b border-slate-100 pb-4">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Your Current Savings</p>
-                  <p className="text-xl font-bold text-slate-900">{formatUGX(userSavings)}</p>
-                </div>
-              </div>
-
-              {!isEligible ? (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Still Needed</p>
-                  <p className="text-2xl font-black text-amber-600 mb-2">{formatUGX(remainingNeeded)}</p>
-                  <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
-                    <AlertCircle size={16} /> Save {formatUGX(remainingNeeded)} more to qualify.
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-emerald-700">Eligible for Financing</p>
-                    <p className="text-sm text-emerald-600 font-medium">You have met the deposit requirement!</p>
-                  </div>
-                </div>
-              )}
+          {/* Start Saving Widget */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center h-full">
+            <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Star className="text-primary fill-primary" size={40} />
             </div>
-
-            <div className="mt-6 space-y-3">
+            <h3 className="text-2xl font-black text-slate-900 mb-3">Your Journey Starts Here</h3>
+            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+              Don't let big price tags hold you back. Start saving towards your {car.name} today and watch your money grow!
+            </p>
+            
+            <div className="mt-auto">
               <button 
-                onClick={() => setShowPaymentModal(true)}
-                className={`w-full font-bold py-4 rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20`}
+                onClick={() => {
+                  setPaymentStep('plan');
+                  setShowPaymentModal(true);
+                }}
+                className="w-full font-bold py-4 rounded-xl transition-all bg-primary hover:bg-purple-800 text-white shadow-lg shadow-primary/30 text-lg"
               >
-                Purchase Vehicle
+                Start  with UGX 5,000
               </button>
             </div>
           </div>
@@ -422,34 +386,107 @@ const CarDetailsPage = () => {
           className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl"
           onClick={e => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-bold text-xl text-slate-900">Select Payment Method</h3>
-              <p className="text-sm text-slate-500">How would you like to pay?</p>
-            </div>
-            <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
-              <X size={20} />
-            </button>
-          </div>
+          {paymentStep === 'plan' ? (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-2xl text-slate-900">Select Payment Plan</h3>
+                <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
 
-          <div className="space-y-3 mb-6">
-            <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-              <span className="font-bold text-slate-700">Welile Wallet</span>
-              <ChevronRight size={18} className="text-slate-400" />
-            </button>
-            <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-              <span className="font-bold text-slate-700">Mobile Money</span>
-              <ChevronRight size={18} className="text-slate-400" />
-            </button>
-            <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-              <span className="font-bold text-slate-700">Bank Card</span>
-              <ChevronRight size={18} className="text-slate-400" />
-            </button>
-            <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-              <span className="font-bold text-slate-700">Bank Transfer</span>
-              <ChevronRight size={18} className="text-slate-400" />
-            </button>
-          </div>
+              <div className="space-y-4 mb-6">
+                {/* Daily */}
+                <div onClick={() => setPaymentFreq('daily')} className={`border rounded-2xl p-4 cursor-pointer transition-all ${paymentFreq === 'daily' ? 'border-primary ring-1 ring-primary bg-purple-50/50' : 'border-slate-200 hover:border-slate-300'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentFreq === 'daily' ? 'border-primary' : 'border-slate-300'}`}>
+                        {paymentFreq === 'daily' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <span className="font-bold text-slate-800 text-lg">Daily Payment</span>
+                    </div>
+                    <span className="font-bold text-primary text-xl">UGX {formatUGX(totalDaily)}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm pl-8">
+                    <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(dailyLoan)}</span></span>
+                    <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(dailyInsurance)}</span></span>
+                  </div>
+                </div>
+
+                {/* Weekly */}
+                <div onClick={() => setPaymentFreq('weekly')} className={`border rounded-2xl p-4 cursor-pointer transition-all ${paymentFreq === 'weekly' ? 'border-primary ring-1 ring-primary bg-purple-50/50' : 'border-slate-200 hover:border-slate-300'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentFreq === 'weekly' ? 'border-primary' : 'border-slate-300'}`}>
+                        {paymentFreq === 'weekly' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <span className="font-bold text-slate-800 text-lg">Weekly Payment</span>
+                    </div>
+                    <span className="font-bold text-primary text-xl">UGX {formatUGX(totalWeekly)}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm pl-8">
+                    <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyLoan)}</span></span>
+                    <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyInsurance)}</span></span>
+                  </div>
+                </div>
+
+                {/* Monthly */}
+                <div onClick={() => setPaymentFreq('monthly')} className={`border rounded-2xl p-4 cursor-pointer transition-all ${paymentFreq === 'monthly' ? 'border-primary ring-1 ring-primary bg-purple-50/50' : 'border-slate-200 hover:border-slate-300'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentFreq === 'monthly' ? 'border-primary' : 'border-slate-300'}`}>
+                        {paymentFreq === 'monthly' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <span className="font-bold text-slate-800 text-lg">Monthly Payment</span>
+                    </div>
+                    <span className="font-bold text-primary text-xl">UGX {formatUGX(totalMonthly)}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm pl-8">
+                    <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyLoan)}</span></span>
+                    <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyInsurance)}</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setPaymentStep('method')}
+                className="w-full font-bold py-4 rounded-xl transition-all bg-primary hover:bg-purple-800 text-white shadow-lg shadow-primary/30 text-lg"
+              >
+                Continue
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="font-bold text-xl text-slate-900">Select Payment Method</h3>
+                  <p className="text-sm text-slate-500">How would you like to pay?</p>
+                </div>
+                <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <span className="font-bold text-slate-700">Welile Wallet</span>
+                  <ChevronRight size={18} className="text-slate-400" />
+                </button>
+                <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <span className="font-bold text-slate-700">Mobile Money</span>
+                  <ChevronRight size={18} className="text-slate-400" />
+                </button>
+                <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <span className="font-bold text-slate-700">Bank Card</span>
+                  <ChevronRight size={18} className="text-slate-400" />
+                </button>
+                <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <span className="font-bold text-slate-700">Bank Transfer</span>
+                  <ChevronRight size={18} className="text-slate-400" />
+                </button>
+              </div>
+            </>
+          )}
         </motion.div>
       </div>
     )}
