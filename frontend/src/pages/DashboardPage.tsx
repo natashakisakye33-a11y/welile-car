@@ -153,9 +153,7 @@ const DashboardPage = () => {
                     </div>
                   </div>
 
-                  <button onClick={() => navigate('/vehicles/' + targetCar.id)} className="w-full sm:w-auto px-8 py-4 border-2 border-primary bg-primary text-white hover:bg-white hover:text-primary font-bold rounded-2xl text-sm transition-all shadow-lg shadow-primary/20 hover:shadow-primary/10">
-                    View Vehicle Details
-                  </button>
+
                 </div>
               </div>
             );
