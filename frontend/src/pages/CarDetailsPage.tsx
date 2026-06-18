@@ -159,12 +159,25 @@ const CarDetailsPage = () => {
               </div>
 
               {!isEligible ? (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Still Needed</p>
-                  <p className="text-2xl font-black text-amber-600 mb-2">{formatUGX(remainingNeeded)}</p>
-                  <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
-                    <AlertCircle size={16} /> Save {formatUGX(remainingNeeded)} more to qualify.
-                  </p>
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Still Needed</p>
+                    <p className="text-2xl font-black text-amber-600 mb-2">{formatUGX(remainingNeeded)}</p>
+                    <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                      <AlertCircle size={16} /> Save {formatUGX(remainingNeeded)} more to qualify.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-primary to-purple-900 rounded-2xl p-5 text-white relative overflow-hidden shadow-lg shadow-primary/20 border border-white/10">
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500 opacity-20 rounded-full blur-2xl"></div>
+                    <h4 className="font-extrabold text-lg mb-2 flex items-center gap-2 relative z-10">
+                      <Star className="text-yellow-400 fill-yellow-400" size={18} /> Dream Big, Start Small
+                    </h4>
+                    <p className="text-purple-100 text-sm font-medium leading-relaxed relative z-10">
+                      Yes, owning this {car.name} is entirely possible starting with just <span className="font-bold text-white bg-white/20 px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">UGX 5,000</span>. Save consistently, earn <span className="font-black text-yellow-400">5% compound interest</span>, and drive it home sooner than you think!
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
