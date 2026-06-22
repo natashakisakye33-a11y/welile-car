@@ -95,42 +95,6 @@ const SupportPage = () => {
         </a>
       </div>
 
-      {/* Location Map */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm mb-12">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <MapPin size={24} className="text-primary" /> Company Headquarters
-            </h2>
-            <p className="text-slate-500 text-sm mt-1">Visit our main office for formal inquiries, document drops, or a cup of coffee.</p>
-          </div>
-          <a href="https://maps.google.com/?q=Kampala+Uganda" target="_blank" rel="noreferrer" className="bg-primary/10 text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shrink-0">
-            Open in Maps <ExternalLink size={16} />
-          </a>
-        </div>
-        
-        <div className="w-full h-80 bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-200">
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127641.52733973305!2d32.48270570417937!3d0.3135898031269399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177dfb5ea5f8b11d%3A0x908c7c25a7a72d4c!2sKampala%2C%20Uganda!5e0!3m2!1sen!2sus!4v1714571694931!5m2!1sen!2sus" 
-            width="100%" 
-            height="100%" 
-            style={{ border: 0 }} 
-            allowFullScreen 
-            loading="lazy" 
-            referrerPolicy="no-referrer-when-downgrade"
-            className="absolute inset-0"
-          ></iframe>
-        </div>
-        <div className="mt-6 flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
-          <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center shrink-0 text-primary">
-            <MapPin size={20} />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900">Welile Car HQ</h4>
-            <p className="text-slate-600 text-sm">Plot 123, Kampala Road, Kampala, Uganda</p>
-            <p className="text-slate-400 text-xs mt-1">Open Mon-Fri: 8AM - 6PM, Sat: 9AM - 2PM</p>
-          </div>
-        </div>
       </div>
 
       {/* FAQs */}

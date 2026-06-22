@@ -5,7 +5,7 @@ import { fetchWithTimeout } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { formatUGX } from '@/lib/format';
-import { PlusCircle, Wallet, FileText, Car, CarFront, LifeBuoy, CheckCircle2, Circle, TrendingUp, Target, Clock, ArrowRight } from 'lucide-react';
+import { PlusCircle, Wallet, FileText, Car, CarFront, LifeBuoy, CheckCircle2, Circle, TrendingUp, Target, Clock, ArrowRight, MapPin, ExternalLink } from 'lucide-react';
 import { carsData } from '@/data/cars';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -125,6 +125,44 @@ const DashboardPage = () => {
                 +{formatUGX(data.savings.interestEarned)} Earned
               </span>
             </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Location Map */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-100 shadow-sm">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+              <MapPin size={24} className="text-primary" /> Company Headquarters
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">Visit our main office for formal inquiries, document drops, or a cup of coffee.</p>
+          </div>
+          <a href="https://maps.google.com/?q=Palm+Lane+Kabaale+Entebbe" target="_blank" rel="noreferrer" className="bg-primary/10 text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shrink-0">
+            Open in Maps <ExternalLink size={16} />
+          </a>
+        </div>
+        
+        <div className="w-full h-80 bg-slate-100 rounded-[2rem] overflow-hidden relative border border-slate-200">
+          <iframe 
+            src="https://maps.google.com/maps?q=Palm+Lane+Kabaale,+Entebbe&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            allowFullScreen 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+            className="absolute inset-0"
+          ></iframe>
+        </div>
+        <div className="mt-6 flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
+          <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center shrink-0 text-primary">
+            <MapPin size={20} />
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-900">Welile Technologies Headquaters</h4>
+            <p className="text-slate-600 text-sm">Palm Lane Kabaale, Entebbe</p>
+            <p className="text-slate-400 text-xs mt-1">Open Mon-Fri: 9:00AM - 5:00PM</p>
           </div>
         </div>
       </motion.div>
@@ -319,6 +357,7 @@ const DashboardPage = () => {
           </button>
         </div>
       </motion.div>
+
 
     </div>
   );
