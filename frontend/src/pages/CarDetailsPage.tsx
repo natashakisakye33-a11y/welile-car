@@ -67,7 +67,7 @@ const CarDetailsPage = () => {
   const isEligible = remainingNeeded === 0;
 
   const monthlyLoan = (financedAmount * 1.28) / 36;
-  const monthlyInsurance = car.estimatedCosts.insurance || (car.priceUgx * 0.08 / 12);
+  const monthlyInsurance = car.estimatedCosts?.insurance || (car.priceUgx * 0.08 / 12);
   const totalMonthly = monthlyLoan + monthlyInsurance;
 
   const weeklyLoan = monthlyLoan / 4;
@@ -259,8 +259,8 @@ const CarDetailsPage = () => {
                 { id: 'weekly', label: 'Weekly Payment', divisor: 4 },
                 { id: 'monthly', label: 'Monthly Payment', divisor: 1 },
               ].map(plan => {
-                const pLoan = Math.round(monthlyInstallment / plan.divisor);
-                const pIns = Math.round(car.estimatedCosts.insurance / plan.divisor);
+                const pLoan = Math.round(monthlyLoan / plan.divisor);
+                const pIns = Math.round(monthlyInsurance / plan.divisor);
                 const pTotal = pLoan + pIns;
                 const isSelected = paymentFreq === plan.id;
 
