@@ -275,48 +275,7 @@ const CarDetailsPage = () => {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Estimated Costs / Payment Plans */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Select Payment Plan</h3>
-              <div className="space-y-4">
-                {[
-                  { id: 'daily', label: 'Daily Payment', divisor: 30 },
-                  { id: 'weekly', label: 'Weekly Payment', divisor: 4 },
-                  { id: 'monthly', label: 'Monthly Payment', divisor: 1 },
-                ].map(plan => {
-                  const pLoan = Math.round(monthlyLoan / plan.divisor);
-                  const pIns = Math.round(monthlyInsurance / plan.divisor);
-                  const pTotal = pLoan + pIns;
-                  const isSelected = paymentFreq === plan.id;
-
-                  return (
-                    <div
-                      key={plan.id}
-                      onClick={() => setPaymentFreq(plan.id as any)}
-                      className={`border-2 rounded-2xl p-4 cursor-pointer transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-inner' : 'border-slate-100 hover:border-slate-200'
-                        }`}
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary' : 'border-slate-300'}`}>
-                            {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                          </div>
-                          <h4 className="font-bold text-slate-900">{plan.label}</h4>
-                        </div>
-                        <span className="font-black text-primary text-lg">{formatUGX(pTotal)}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-y-2 text-xs font-medium text-slate-500 pl-8">
-                        <div className="flex justify-between pr-4"><span>Loan:</span> <span className="text-slate-700">{formatUGX(pLoan)}</span></div>
-                        <div className="flex justify-between"><span>Insurance:</span> <span className="text-slate-700">{formatUGX(pIns)}</span></div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-
-            </div>
+          <div className="grid grid-cols-1 gap-6">
 
             <div className="space-y-6">
               {/* Verification Section */}
