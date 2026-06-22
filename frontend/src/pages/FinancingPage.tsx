@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatUGX } from '@/lib/format';
 import BottomNav from '@/components/BottomNav';
 import { useState, useEffect, useRef } from 'react';
+import { fetchWithTimeout } from '@/lib/api';
 import { API_URL } from '@/config';
 import { 
   CheckCircle2, 
@@ -68,9 +69,7 @@ const FinancingPage = () => {
     if (!user) return;
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_URL}/dashboard/summary`, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        });
+        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           setDashboardData(await res.json());
         }

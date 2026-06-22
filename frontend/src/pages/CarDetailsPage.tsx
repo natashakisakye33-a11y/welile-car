@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
+import { fetchWithTimeout } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useSelectCarDetails, useRequestFinancing } from '@/hooks/useProfile';
 import { motion } from 'framer-motion';
@@ -41,9 +42,7 @@ const CarDetailsPage = () => {
 
   useEffect(() => {
     if (session?.access_token) {
-      fetch(`${API_URL}/dashboard/summary`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      })
+      fetchWithTimeout(`${API_URL}/dashboard/summary`)
       .then(res => res.json())
       .then(data => {
         if (data.savings) {
@@ -120,36 +119,38 @@ const CarDetailsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Basic Info & Pricing */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-between hover:card-shadow transition-all">
             <div>
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h2 className="text-3xl font-black text-slate-900 leading-tight">{car.name}</h2>
-                  <p className="text-slate-500 font-medium">{car.specs.year} Model • {car.type} • {car.specs.transmission}</p>
+                  <h2 className="text-4xl font-black text-slate-900 leading-tight tracking-tight">{car.name}</h2>
+                  <p className="text-slate-500 font-bold uppercase tracking-wider text-sm mt-1">{car.specs.year} Model • {car.type} • {car.specs.transmission}</p>
                 </div>
               </div>
-              <div className="mt-6 mb-8">
-                <div className="bg-gradient-to-br from-primary to-purple-900 rounded-2xl p-5 text-white relative overflow-hidden shadow-lg shadow-primary/20 border border-white/10">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-                  <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500 opacity-20 rounded-full blur-2xl"></div>
-                  <h4 className="font-extrabold text-lg mb-1 flex items-center gap-2 relative z-10">
-                    <Star className="text-yellow-400 fill-yellow-400" size={18} /> Dream Big, Start Small
+              <div className="mt-8 mb-4">
+                <div className="bg-gradient-to-br from-primary to-fuchsia-600 rounded-[1.5rem] p-6 text-white relative overflow-hidden shadow-xl shadow-primary/20 border border-white/10 group cursor-default">
+                  <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] bg-white/20 rounded-full blur-[40px] pointer-events-none group-hover:scale-150 transition-transform duration-700"></div>
+                  <div className="absolute bottom-[-20%] left-[-10%] w-[150px] h-[150px] bg-fuchsia-400/30 rounded-full blur-[40px] pointer-events-none"></div>
+                  <h4 className="font-black text-lg mb-2 flex items-center gap-2 relative z-10 tracking-tight">
+                    <Star className="text-yellow-400 fill-yellow-400" size={20} /> Dream Big, Start Small
                   </h4>
-                  <p className="text-white text-xl font-black leading-relaxed relative z-10">
-                    Use <span className="text-yellow-400">UGX 5,000</span> to own this car!
+                  <p className="text-white/90 text-lg font-medium leading-relaxed relative z-10">
+                    Use <span className="text-yellow-400 font-black text-2xl ml-1">UGX 5,000</span> to own this car!
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Start Saving Widget */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center h-full">
-            <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Star className="text-primary fill-primary" size={40} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center h-full hover:card-shadow transition-all relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/5 rounded-full blur-[40px] pointer-events-none -z-10"></div>
+            <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+              <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping opacity-20"></div>
+              <Star className="text-primary fill-primary" size={48} />
             </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-3">Your Journey Starts Here</h3>
-            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Your Journey Starts Here</h3>
+            <p className="text-slate-500 font-medium mb-8 leading-relaxed px-4">
               Don't let big price tags hold you back. Start saving towards your {car.name} today and watch your money grow!
             </p>
             
@@ -159,12 +160,12 @@ const CarDetailsPage = () => {
                   setPaymentStep('plan');
                   setShowPaymentModal(true);
                 }}
-                className="w-full font-bold py-4 rounded-xl transition-all bg-primary hover:bg-purple-800 text-white shadow-lg shadow-primary/30 text-lg"
+                className="w-full shimmer-btn font-black py-4 rounded-2xl transition-all bg-primary hover:bg-fuchsia-700 text-white shadow-xl shadow-primary/30 text-lg hover:-translate-y-1"
               >
-                Start  with UGX 5,000
+                Start with UGX 5,000
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Condition & Verification */}
@@ -188,65 +189,77 @@ const CarDetailsPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Specifications */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-6">Vehicle Specifications</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex gap-3">
-                <Settings className="text-slate-400 shrink-0" size={20} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
+            <h3 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Vehicle Specifications</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <Settings className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Engine</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.engine}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Engine</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.engine}</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Fuel className="text-slate-400 shrink-0" size={20} />
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <Fuel className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Fuel</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.fuel}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Fuel</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.fuel}</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Gauge className="text-slate-400 shrink-0" size={20} />
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <Gauge className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Transmission</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.transmission}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Transmission</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.transmission}</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <CarIcon className="text-slate-400 shrink-0" size={20} />
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <CarIcon className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Mileage</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.mileage}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Mileage</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.mileage}</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Users className="text-slate-400 shrink-0" size={20} />
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <Users className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Seats</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.seats}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Seats</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.seats}</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Droplet className="text-slate-400 shrink-0" size={20} />
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                  <Droplet className="text-slate-500" size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium">Color</p>
-                  <p className="font-bold text-slate-900 text-sm">{car.specs.color}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Color</p>
+                  <p className="font-black text-slate-900 text-sm mt-0.5">{car.specs.color}</p>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Features */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-6">Key Features</h3>
-            <div className="flex flex-wrap gap-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
+            <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Key Features</h3>
+            <div className="flex flex-wrap gap-2.5">
               {car.features.map((feature, idx) => (
-                <div key={idx} className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                <div key={idx} className="bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-primary/5 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-colors">
                   {feature}
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,7 +272,7 @@ const CarDetailsPage = () => {
                 { id: 'weekly', label: 'Weekly Payment', divisor: 4 },
                 { id: 'monthly', label: 'Monthly Payment', divisor: 1 },
               ].map(plan => {
-                const pLoan = Math.round(monthlyInstallment / plan.divisor);
+                const pLoan = Math.round(monthlyLoan / plan.divisor);
                 const pIns = Math.round(car.estimatedCosts.insurance / plan.divisor);
                 const pTotal = pLoan + pIns;
                 const isSelected = paymentFreq === plan.id;

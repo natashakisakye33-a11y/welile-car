@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { API_URL } from '@/config';
+import { fetchWithTimeout } from '@/lib/api';
 
 // Mock Profile type
 export interface Profile {
@@ -115,8 +116,8 @@ export function useProfile() {
       
       try {
         const [meRes, summaryRes] = await Promise.all([
-          fetch(`${API_URL}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`${API_URL}/dashboard/summary`, { headers: { 'Authorization': `Bearer ${token}` } })
+          fetchWithTimeout(`${API_URL}/users/me`),
+          fetchWithTimeout(`${API_URL}/dashboard/summary`)
         ]);
         
         if (!meRes.ok || !summaryRes.ok) throw new Error('Failed to fetch profile data');
@@ -204,11 +205,7 @@ export function useTransactions() {
     queryKey: ['transactions', user?.id],
     queryFn: async () => {
       if (!user || !token) return [];
-      const res = await fetch(`${API_URL}/transactions/history`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await fetchWithTimeout(`${API_URL}/transactions/history`);
       if (!res.ok) throw new Error('Failed to fetch transactions');
       const data = await res.json();
       
@@ -235,11 +232,10 @@ export function useDeposit() {
     mutationFn: async ({ amount, method, transactionId, transactionTime, transactionDate }: { amount: number; method: string; transactionId: string; transactionTime: string; transactionDate: string }) => {
       if (!user || !token) throw new Error('Not authenticated');
 
-      const res = await fetch(`${API_URL}/transactions/deposit`, {
+      const res = await fetchWithTimeout(`${API_URL}/transactions/deposit`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ amount, method, transactionId, transactionTime, transactionDate })
       });
@@ -265,11 +261,10 @@ export function useWithdraw() {
     mutationFn: async ({ amount, method, withdrawalPhone, withdrawalName, withdrawalBank, withdrawalAccount }: { amount: number; method: string; withdrawalPhone?: string; withdrawalName?: string; withdrawalBank?: string; withdrawalAccount?: string }) => {
       if (!user || !token) throw new Error('Not authenticated');
 
-      const res = await fetch(`${API_URL}/transactions/withdraw`, {
+      const res = await fetchWithTimeout(`${API_URL}/transactions/withdraw`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ amount, method, withdrawalPhone, withdrawalName, withdrawalBank, withdrawalAccount })
       });
@@ -296,11 +291,10 @@ export function usePayFromWallet() {
     mutationFn: async ({ amount, reason }: { amount: number; reason?: string }) => {
       if (!user || !token) throw new Error('Not authenticated');
 
-      const res = await fetch(`${API_URL}/transactions/pay-from-wallet`, {
+      const res = await fetchWithTimeout(`${API_URL}/transactions/pay-from-wallet`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ amount, reason })
       });
@@ -393,11 +387,10 @@ export function useRequestFinancing() {
     mutationFn: async ({ carId, carName, carPrice, requestedAmount }: { carId: string, carName: string, carPrice: number, requestedAmount: number }) => {
       if (!user || !token) throw new Error('Not authenticated');
       
-      const res = await fetch(`${API_URL}/loans/apply`, {
+      const res = await fetchWithTimeout(`${API_URL}/loans/apply`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ carId, carName, carPrice, requestedAmount })
       });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
+import { fetchWithTimeout } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { carsData, Car } from '@/data/cars';
 import { useProfile, useTransactions, useDeposit, useWithdraw } from '@/hooks/useProfile';
@@ -89,9 +90,7 @@ const WalletPage = () => {
     if (!user) return;
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_URL}/dashboard/summary`, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        });
+        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           const json = await res.json();
           setDashboardData(json);
