@@ -130,7 +130,7 @@ const DashboardPage = () => {
       </motion.div>
 
       {/* Target/Featured Vehicle */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} >
         <div className="flex justify-between items-end mb-4">
           <h3 className="text-lg font-bold text-slate-900">{profile?.selected_car_id ? "Your Target Vehicle" : "Featured Vehicles"}</h3>
           <button onClick={() => navigate('/vehicles')} className="text-primary text-xs font-bold flex items-center gap-1 hover:underline">{profile?.selected_car_id ? "Change Vehicle" : "View All"} <ArrowRight size={12} /></button>
@@ -216,7 +216,7 @@ const DashboardPage = () => {
       </motion.div>
 
       {/* Section 2: Ownership Journey Tracker */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm overflow-hidden relative">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm overflow-hidden relative">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] pointer-events-none -z-10"></div>
         <h3 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Ownership Journey</h3>
         <div className="flex justify-between items-start min-w-[600px] relative mt-4">
@@ -245,7 +245,7 @@ const DashboardPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Section 3: Qualification Status */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow">
           <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight"><Target size={24} className="text-primary" /> Qualification Status</h3>
           <div className="flex gap-6 items-center mb-8">
             <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
@@ -272,7 +272,7 @@ const DashboardPage = () => {
         </motion.div>
 
         {/* Section 4: Savings Goals */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow flex flex-col justify-between">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow flex flex-col justify-between">
           <div>
             <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight"><TrendingUp size={24} className="text-primary" /> Savings Goals</h3>
             <div className="space-y-5">
@@ -294,7 +294,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Section 6: Quick Actions */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} >
         <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <button onClick={() => navigate('/wallet')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">

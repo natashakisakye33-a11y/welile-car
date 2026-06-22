@@ -301,14 +301,14 @@ const WalletPage = () => {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 gap-4 md:gap-6 print:hidden">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4">
               <ArrowDownLeft size={24} />
             </div>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total Deposits</p>
             <p className="text-2xl font-black text-slate-900">{formatUGX(availableBalance)}</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="w-12 h-12 bg-fuchsia-50 text-fuchsia-600 rounded-full flex items-center justify-center mb-4">
               <TrendingUp size={24} />
             </div>
@@ -318,7 +318,7 @@ const WalletPage = () => {
         </div>
 
         {/* Enhanced Interactive Savings Calculator */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="print:hidden bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="print:hidden bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2 space-y-6">
             <h2 className="font-extrabold text-xl text-slate-900 flex items-center gap-2">
               <Calculator size={24} className="text-primary" /> Savings Estimator
@@ -380,7 +380,7 @@ const WalletPage = () => {
         </motion.div>
 
         {/* Savings Timeline / History */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm print:shadow-none print:border-none print:p-0">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm print:shadow-none print:border-none print:p-0">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-extrabold text-xl text-slate-900">Savings History</h2>
             <button onClick={() => window.print()} className="print:hidden text-sm flex items-center gap-2 text-primary font-bold bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition">

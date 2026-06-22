@@ -132,7 +132,7 @@ const CarDetailsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Basic Info & Pricing */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-between hover:card-shadow transition-all">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-between hover:card-shadow transition-all">
               <div>
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -156,7 +156,7 @@ const CarDetailsPage = () => {
             </motion.div>
 
             {/* Start Saving Widget */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center h-full hover:card-shadow transition-all relative overflow-hidden">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center h-full hover:card-shadow transition-all relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/5 rounded-full blur-[40px] pointer-events-none -z-10"></div>
               <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 relative">
                 <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping opacity-20"></div>
@@ -202,7 +202,7 @@ const CarDetailsPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Specifications */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
               <h3 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Vehicle Specifications</h3>
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex gap-4">
@@ -263,7 +263,7 @@ const CarDetailsPage = () => {
             </motion.div>
 
             {/* Features */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 hover:card-shadow transition-all">
               <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Key Features</h3>
               <div className="flex flex-wrap gap-2.5">
                 {car.features.map((feature, idx) => (

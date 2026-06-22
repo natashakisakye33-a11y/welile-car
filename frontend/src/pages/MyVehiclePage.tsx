@@ -98,7 +98,7 @@ const MyVehiclePage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Ownership & Financing Tracker */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-primary text-white rounded-3xl p-6 shadow-xl relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-primary text-white rounded-3xl p-6 shadow-xl relative overflow-hidden">
           <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-[40px] pointer-events-none"></div>
           <h3 className="text-lg font-bold mb-6 relative z-10">Ownership Progress</h3>
           
@@ -132,7 +132,7 @@ const MyVehiclePage = () => {
         </motion.div>
 
         {/* Digital Glovebox */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
             <FileText size={20} className="text-primary" /> Digital Glovebox
           </h3>
@@ -217,7 +217,7 @@ const MyVehiclePage = () => {
       </div>
 
       {/* Maintenance & Health */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
           <Wrench size={20} className="text-primary" /> Maintenance & Services
         </h3>

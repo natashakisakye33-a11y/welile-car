@@ -27,7 +27,7 @@ export default function AboutPage() {
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              
               className="text-lg md:text-xl text-white/80 max-w-xl font-medium leading-relaxed"
             >
               Our vehicle financing solutions are fresh and simple and will benefit your journey greatly. Learn more about our work!
@@ -36,7 +36,7 @@ export default function AboutPage() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              
               className="flex flex-col sm:flex-row items-center gap-6 pt-4"
             >
               <div className="relative w-full sm:w-auto flex-1 max-w-md">

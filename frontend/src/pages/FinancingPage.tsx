@@ -222,7 +222,7 @@ const FinancingPage = () => {
 
             {/* Application Locked State */}
             {!isUnlocked && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-amber-50 border-2 border-amber-200 rounded-[24px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg shadow-amber-500/5">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-amber-50 border-2 border-amber-200 rounded-[24px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg shadow-amber-500/5">
                 <div className="flex items-start gap-5">
                   <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
                     <AlertCircle size={28} />
@@ -243,7 +243,7 @@ const FinancingPage = () => {
               {/* Left Column: Financing Breakdown & Slider */}
               <div className="lg:col-span-7 space-y-8">
                 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-primary text-white rounded-[32px] p-8 shadow-2xl relative overflow-hidden">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-primary text-white rounded-[32px] p-8 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-white/5 rounded-full blur-[60px] pointer-events-none"></div>
                   <h3 className="text-xl font-black mb-8 relative z-10 tracking-tight flex items-center gap-2">
                     <Settings size={22} className="text-primary-fixed-dim" /> Configure Financing
@@ -292,7 +292,7 @@ const FinancingPage = () => {
                 </motion.div>
 
                 {/* Commitments */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
                   <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
                     <ShieldCheck size={22} className="text-primary" /> Your Commitments
                   </h3>
@@ -325,7 +325,7 @@ const FinancingPage = () => {
               <div className="lg:col-span-5 space-y-8">
                 
                 {/* Requirements Checklist */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm flex flex-col">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm flex flex-col">
                   <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight flex items-center justify-between">
                     Requirements
                     <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{isUnlocked ? '4/4 Met' : '1/4 Met'}</span>
@@ -463,7 +463,7 @@ const FinancingPage = () => {
 
                 {/* Payment Plan Selection */}
                 {isUnlocked && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
                     <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Payment Frequency</h3>
                     
                     <div className="space-y-3">
