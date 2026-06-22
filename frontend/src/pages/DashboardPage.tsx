@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
+import { fetchWithTimeout } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { formatUGX } from '@/lib/format';
@@ -56,9 +57,7 @@ const DashboardPage = () => {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_URL}/dashboard/summary`, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        });
+        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           const json = await res.json();
           // Map backend data to our new layout structure if necessary, or just use as is
@@ -103,11 +102,32 @@ const DashboardPage = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto pb-24">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</h1>
-        <p className="text-slate-500 font-medium">Here is your vehicle ownership progress.</p>
-      </div>
+      {/* Header / Hero */}
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative bg-primary text-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-primary/30 overflow-hidden flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="absolute top-[-50%] right-[-10%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+        
+        <div className="relative z-10 w-full md:w-1/2">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 mb-6">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+            <span className="text-xs font-bold uppercase tracking-wider text-white/90">Active Account</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</h1>
+          <p className="text-white/70 font-medium text-lg">Your vehicle ownership journey is looking great.</p>
+        </div>
+
+        <div className="relative z-10 w-full md:w-1/2 flex justify-end">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl w-full max-w-sm text-center transform hover:scale-105 transition-transform duration-500">
+            <p className="text-sm font-bold text-white/70 uppercase tracking-widest mb-1">Total Savings Balance</p>
+            <p className="text-4xl font-black tracking-tight">{formatUGX(availableBalance)}</p>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <span className="text-xs bg-emerald-500/20 text-emerald-300 font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+                +{formatUGX(data.savings.interestEarned)} Earned
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Target/Featured Vehicle */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -120,40 +140,45 @@ const DashboardPage = () => {
             const targetCar = carsData.find(c => c.id === profile.selected_car_id);
             if (!targetCar) return null;
             return (
-              <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row items-center gap-8">
-                <div className="w-full md:w-1/2 h-64 md:h-80 flex items-center justify-center bg-gradient-to-b from-slate-50 to-white rounded-3xl p-6 overflow-hidden">
+              <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm hover:card-shadow-lg transition-all duration-500 group flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none -z-10 group-hover:bg-primary/10 transition-colors duration-700"></div>
+                <div className="w-full md:w-1/2 h-64 md:h-80 flex items-center justify-center bg-gradient-to-br from-slate-50 to-white rounded-[2rem] p-6 overflow-hidden border border-slate-50">
                   <img 
                     src={targetCar.image} 
                     alt={targetCar.name} 
-                    className="w-full h-full object-contain mix-blend-multiply drop-shadow-2xl group-hover:scale-110 transition-transform duration-700" 
+                    className="w-full h-full object-contain mix-blend-multiply drop-shadow-2xl group-hover:scale-105 transition-transform duration-700 ease-out" 
                   />
                 </div>
                 
                 <div className="w-full md:w-1/2 flex flex-col justify-center">
-                  <div className="inline-block bg-primary/10 text-primary font-bold px-3 py-1 rounded-full text-xs mb-4 w-fit">Target Goal</div>
-                  <h4 className="font-extrabold text-slate-900 text-3xl md:text-4xl leading-tight mb-2">
+                  <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary font-black uppercase tracking-widest px-3 py-1 rounded-full text-[10px] mb-4 w-fit">
+                    <Target size={12} /> Target Goal
+                  </div>
+                  <h4 className="font-black text-slate-900 text-3xl md:text-5xl tracking-tight mb-2">
                     {targetCar.name}
                   </h4>
-                  <p className="text-primary font-black text-xl md:text-2xl mb-6">
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-fuchsia-500 font-black text-2xl md:text-3xl mb-8">
                     {formatUGX(targetCar.priceUgx)}
                   </p>
                   
                   <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <span className="block text-xs font-bold text-slate-500 mb-1">Required Deposit (30%)</span>
-                      <span className="block text-lg font-black text-slate-900">
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 group-hover:border-primary/20 transition-colors">
+                      <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Deposit (30%)</span>
+                      <span className="block text-xl font-black text-slate-900">
                         {formatUGX(targetCar.priceUgx * 0.3)}
                       </span>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <span className="block text-xs font-bold text-slate-500 mb-1">Est. Monthly (36m)</span>
-                      <span className="block text-lg font-black text-slate-900">
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 group-hover:border-primary/20 transition-colors">
+                      <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Est. Monthly (36m)</span>
+                      <span className="block text-xl font-black text-slate-900">
                         {formatUGX((targetCar.priceUgx * 0.7 * 1.28) / 36)}
                       </span>
                     </div>
                   </div>
-
-
+                  
+                  <button onClick={() => navigate('/financing')} className="w-full shimmer-btn bg-primary text-white font-black py-4 rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                    Manage Financing <ArrowRight size={18} />
+                  </button>
                 </div>
               </div>
             );
@@ -191,23 +216,25 @@ const DashboardPage = () => {
       </motion.div>
 
       {/* Section 2: Ownership Journey Tracker */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm overflow-x-auto">
-        <h3 className="text-lg font-bold text-slate-900 mb-6">Ownership Journey</h3>
-        <div className="flex justify-between items-start min-w-[600px] relative">
-          <div className="absolute top-4 left-6 right-6 h-1 bg-slate-100 rounded-full z-0"></div>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] pointer-events-none -z-10"></div>
+        <h3 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Ownership Journey</h3>
+        <div className="flex justify-between items-start min-w-[600px] relative mt-4">
+          <div className="absolute top-4 left-6 right-6 h-1.5 bg-slate-100 rounded-full z-0 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-primary to-fuchsia-500 transition-all duration-1000" style={{ width: `${(data.journey.completedSteps.length / (JOURNEY_STEPS.length - 1)) * 100}%` }}></div>
+          </div>
           {JOURNEY_STEPS.map((step, idx) => {
-            // Mock logic for step progression
             const isCompleted = idx < 2 || (idx === 2 && isQualified);
             const isCurrent = (idx === 1 && !isQualified) || (idx === 2 && isQualified) || (idx === 3 && data.journey.currentStep === 'Financing Approved');
             
             return (
-              <div key={step} className="relative z-10 flex flex-col items-center w-24 text-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 border-4 bg-white ${
-                  isCompleted ? 'border-emerald-500 text-emerald-500' : isCurrent ? 'border-primary text-primary shadow-[0_0_0_4px_rgba(52,0,105,0.1)]' : 'border-slate-200 text-slate-300'
+              <div key={step} className="relative z-10 flex flex-col items-center w-24 text-center group cursor-default">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 border-4 bg-white transition-all duration-300 ${
+                  isCompleted ? 'border-primary text-primary shadow-[0_0_15px_rgba(78,21,142,0.3)] scale-110' : isCurrent ? 'border-fuchsia-500 text-fuchsia-500 shadow-[0_0_0_4px_rgba(217,70,239,0.2)]' : 'border-slate-100 text-slate-300'
                 }`}>
-                  {isCompleted ? <CheckCircle2 size={16} /> : <Circle size={10} className={isCurrent ? 'fill-primary' : 'fill-slate-200'} />}
+                  {isCompleted ? <CheckCircle2 size={18} strokeWidth={3} /> : <Circle size={12} className={isCurrent ? 'fill-fuchsia-500' : 'fill-slate-200'} />}
                 </div>
-                <span className={`text-[11px] font-bold ${isCurrent ? 'text-primary' : isCompleted ? 'text-slate-700' : 'text-slate-400'}`}>
+                <span className={`text-[10px] uppercase tracking-widest font-bold transition-colors ${isCurrent ? 'text-fuchsia-600' : isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
                   {step}
                 </span>
               </div>
@@ -218,48 +245,48 @@ const DashboardPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Section 3: Qualification Status */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><Target size={20} className="text-primary" /> Qualification Status</h3>
-          <div className="flex gap-4 items-center mb-6">
-            <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow">
+          <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight"><Target size={24} className="text-primary" /> Qualification Status</h3>
+          <div className="flex gap-6 items-center mb-8">
+            <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
+              <svg className="w-full h-full -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
                 <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path className={`${isQualified ? 'text-emerald-500' : 'text-amber-500'}`} strokeWidth="3" strokeDasharray={`${data.health.creditScore}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className={`${isQualified ? 'text-primary' : 'text-fuchsia-500'} transition-all duration-1000 ease-out`} strokeWidth="3" strokeDasharray={`${data.health.creditScore}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold text-slate-500 leading-none">Score</span>
-                <span className="text-base font-black text-slate-900 leading-none mt-1">{data.health.creditScore}/100</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Score</span>
+                <span className="text-2xl font-black text-slate-900 leading-none mt-1">{data.health.creditScore}</span>
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Risk Level: <span className={`font-bold ${data.health.riskLevel === 'Low' ? 'text-emerald-600' : 'text-amber-600'}`}>{data.health.riskLevel}</span></p>
-              <p className="text-sm font-medium text-slate-500">Status: <span className={`font-bold ${isQualified ? 'text-emerald-600' : 'text-slate-900'}`}>{isQualified ? 'Eligible for Financing' : 'Building Deposit'}</span></p>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Risk Level: <span className={`font-black ml-1 ${data.health.riskLevel === 'Low' ? 'text-emerald-500' : 'text-amber-500'}`}>{data.health.riskLevel}</span></p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Status: <span className={`font-black ml-1 ${isQualified ? 'text-primary' : 'text-fuchsia-500'}`}>{isQualified ? 'Eligible for Financing' : 'Building Deposit'}</span></p>
             </div>
           </div>
           
           {!isQualified && (
-            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm font-medium text-amber-800">
-              You need <span className="font-bold">{formatUGX(data.savings.nextMilestone.amountNeeded)}</span> more savings to qualify.
+            <div className="bg-gradient-to-r from-fuchsia-50 to-fuchsia-100/50 border border-fuchsia-100 rounded-2xl p-5 text-sm font-medium text-fuchsia-900 shadow-sm">
+              Keep pushing! You need <span className="font-black text-fuchsia-600">{formatUGX(data.savings.nextMilestone.amountNeeded)}</span> more savings to qualify.
             </div>
           )}
         </motion.div>
 
         {/* Section 4: Savings Goals */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:card-shadow transition-shadow flex flex-col justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><TrendingUp size={20} className="text-primary" /> Savings Goals</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                <span className="text-sm text-slate-500 font-medium">Deposit Target</span>
-                <span className="font-bold text-slate-900">{formatUGX(data.savings.targetAmount)}</span>
+            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight"><TrendingUp size={24} className="text-primary" /> Savings Goals</h3>
+            <div className="space-y-5">
+              <div className="flex justify-between items-center border-b border-slate-50 pb-4">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Deposit Target</span>
+                <span className="font-black text-slate-900 text-lg">{formatUGX(data.savings.targetAmount)}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                <span className="text-sm text-slate-500 font-medium">Remaining Amount</span>
-                <span className="font-bold text-slate-900">{formatUGX(data.savings.targetAmount - availableBalance)}</span>
+              <div className="flex justify-between items-center border-b border-slate-50 pb-4">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Remaining Amount</span>
+                <span className="font-black text-slate-900 text-lg">{formatUGX(data.savings.targetAmount - availableBalance)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500 font-medium">Est. Completion</span>
-                <span className="font-bold text-emerald-600 flex items-center gap-1"><Clock size={14} /> December 2026</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Est. Completion</span>
+                <span className="font-black text-emerald-500 flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-xl"><Clock size={16} /> December 2026</span>
               </div>
             </div>
           </div>
@@ -268,27 +295,27 @@ const DashboardPage = () => {
 
       {/* Section 6: Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+        <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <button onClick={() => navigate('/wallet')} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-primary hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"><Wallet size={20} /></div>
-            <span className="text-xs font-bold text-slate-700">Wallet</span>
+          <button onClick={() => navigate('/wallet')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Wallet size={24} /></div>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Wallet</span>
           </button>
-          <button onClick={() => navigate('/applications')} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-primary hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"><FileText size={20} /></div>
-            <span className="text-xs font-bold text-slate-700">Applications</span>
+          <button onClick={() => navigate('/applications')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><FileText size={24} /></div>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Applications</span>
           </button>
-          <button onClick={() => navigate('/vehicles')} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-primary hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"><Car size={20} /></div>
-            <span className="text-xs font-bold text-slate-700">Vehicles</span>
+          <button onClick={() => navigate('/vehicles')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Car size={24} /></div>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Vehicles</span>
           </button>
-          <button onClick={() => navigate('/my-vehicle')} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-primary hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"><CarFront size={20} /></div>
-            <span className="text-xs font-bold text-slate-700">My Vehicle</span>
+          <button onClick={() => navigate('/my-vehicle')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><CarFront size={24} /></div>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">My Vehicle</span>
           </button>
-          <button onClick={() => navigate('/support')} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-primary hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"><LifeBuoy size={20} /></div>
-            <span className="text-xs font-bold text-slate-700">Support</span>
+          <button onClick={() => navigate('/support')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><LifeBuoy size={24} /></div>
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Support</span>
           </button>
         </div>
       </motion.div>

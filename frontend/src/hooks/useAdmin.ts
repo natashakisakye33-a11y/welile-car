@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import type { Profile } from './useProfile';
 import { API_URL } from '@/config';
+import { fetchWithTimeout } from '@/lib/api';
 
 export type AdminProfile = Profile;
 export type AdminTransaction = any;
@@ -374,9 +375,7 @@ export function usePendingDeposits() {
     queryKey: ['admin-pending-deposits'],
     queryFn: async () => {
       if (!session?.access_token) return [];
-      const res = await fetch(`${API_URL}/admin/deposits/pending`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
+      const res = await fetchWithTimeout(`${API_URL}/admin/deposits/pending`);
       if (!res.ok) throw new Error('Failed to fetch pending deposits');
       const data = await res.json();
       return data.deposits;
@@ -392,9 +391,8 @@ export function useApproveDeposit() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_URL}/admin/deposits/${id}/approve`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      const res = await fetchWithTimeout(`${API_URL}/admin/deposits/${id}/approve`, {
+        method: 'POST'
       });
       if (!res.ok) throw new Error('Failed to approve deposit');
       return res.json();
@@ -411,9 +409,8 @@ export function useRejectDeposit() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_URL}/admin/deposits/${id}/reject`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      const res = await fetchWithTimeout(`${API_URL}/admin/deposits/${id}/reject`, {
+        method: 'POST'
       });
       if (!res.ok) throw new Error('Failed to reject deposit');
       return res.json();
@@ -431,9 +428,7 @@ export function usePendingWithdrawals() {
     queryKey: ['admin-pending-withdrawals'],
     queryFn: async () => {
       if (!session?.access_token) return [];
-      const res = await fetch(`${API_URL}/admin/withdrawals/pending`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
+      const res = await fetchWithTimeout(`${API_URL}/admin/withdrawals/pending`);
       if (!res.ok) throw new Error('Failed to fetch pending withdrawals');
       const data = await res.json();
       return data.withdrawals;
@@ -449,9 +444,8 @@ export function useApproveWithdrawal() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      const res = await fetchWithTimeout(`${API_URL}/admin/withdrawals/${id}/approve`, {
+        method: 'POST'
       });
       if (!res.ok) throw new Error('Failed to approve withdrawal');
       return res.json();
@@ -468,9 +462,8 @@ export function useRejectWithdrawal() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      const res = await fetchWithTimeout(`${API_URL}/admin/withdrawals/${id}/reject`, {
+        method: 'POST'
       });
       if (!res.ok) throw new Error('Failed to reject withdrawal');
       return res.json();
