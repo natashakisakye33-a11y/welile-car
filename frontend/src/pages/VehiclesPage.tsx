@@ -1,14 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Heart, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { carsData } from '@/data/cars';
+import { API_URL } from '@/config';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function VehiclesPage() {
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   
+  const [carsData, setCarsData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/vehicles`, {
+      headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
+    })
+    .then(res => res.json())
+    .then(data => {
+      setCarsData(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }, [session]);
+
   const [likedCars, setLikedCars] = useState<string[]>(() => {
     const stored = localStorage.getItem('likedCars');
     return stored ? JSON.parse(stored) : [];
@@ -28,7 +48,7 @@ export default function VehiclesPage() {
 
   const filteredCars = carsData.filter(car => {
     const matchesSearch = car.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          car.tagline.toLowerCase().includes(searchQuery.toLowerCase());
+                          (car.tagline && car.tagline.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === 'All' || car.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -90,7 +110,13 @@ export default function VehiclesPage() {
           })}
         </div>
 
-        {filteredCars.length === 0 && (
+        {loading && (
+          <div className="text-center py-16">
+            <p className="text-lg text-slate-400 font-bold">Loading vehicles...</p>
+          </div>
+        )}
+
+        {!loading && filteredCars.length === 0 && (
           <div className="text-center py-16">
             <p className="text-lg text-slate-400 font-bold">No vehicles found matching "{searchQuery}"</p>
           </div>
@@ -98,7 +124,7 @@ export default function VehiclesPage() {
 
         {/* 2-column mobile grid, scaling to 3/4 columns on desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {filteredCars.map((car) => {
+          {!loading && filteredCars.map((car) => {
             const isLiked = likedCars.includes(car.id);
             
             return (

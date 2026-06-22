@@ -18,8 +18,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
+const path = require('path');
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Basic health route
 app.get('/api/health', async (req, res) => {

@@ -22,27 +22,40 @@ const CarDetailsPage = () => {
   const selectCar = useSelectCarDetails();
   const requestFinancing = useRequestFinancing();
 
-  const [car, setCar] = useState<Car | null>(null);
+  const [car, setCar] = useState<any | null>(null);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [userSavings, setUserSavings] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [paymentFreq, setPaymentFreq] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
+
+  // Modals state
   const [showInspectionForm, setShowInspectionForm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plan' | 'method'>('plan');
+  const [paymentFreq, setPaymentFreq] = useState<'daily'|'weekly'|'monthly'>('monthly');
 
   useEffect(() => {
-    const foundCar = carsData.find(c => c.id === id);
-    if (foundCar) {
-      setCar(foundCar);
-    } else {
+    fetch(`${API_URL}/vehicles/${id}`, {
+      headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Vehicle not found');
+      return res.json();
+    })
+    .then(data => {
+      setCar(data);
+    })
+    .catch(err => {
+      console.error(err);
+      toast.error('Vehicle not found');
       navigate('/vehicles');
-    }
-  }, [id, navigate]);
+    });
+  }, [id, session, navigate]);
 
   useEffect(() => {
     if (session?.access_token) {
-      fetchWithTimeout(`${API_URL}/dashboard/summary`)
+      fetchWithTimeout(`${API_URL}/dashboard/summary`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      })
         .then(res => res.json())
         .then(data => {
           if (data.savings) {
@@ -272,8 +285,8 @@ const CarDetailsPage = () => {
                   { id: 'weekly', label: 'Weekly Payment', divisor: 4 },
                   { id: 'monthly', label: 'Monthly Payment', divisor: 1 },
                 ].map(plan => {
-                  const pLoan = Math.round(monthlyInstallment / plan.divisor);
-                  const pIns = Math.round(car.estimatedCosts.insurance / plan.divisor);
+                  const pLoan = Math.round(monthlyLoan / plan.divisor);
+                  const pIns = Math.round(monthlyInsurance / plan.divisor);
                   const pTotal = pLoan + pIns;
                   const isSelected = paymentFreq === plan.id;
 
