@@ -36,6 +36,7 @@ const DealerDashboard = () => {
 
   useEffect(() => {
     fetchVehicles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   const handleAddVehicle = async (e: React.FormEvent) => {

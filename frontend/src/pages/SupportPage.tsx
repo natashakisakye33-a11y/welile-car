@@ -97,7 +97,8 @@ const SupportPage = () => {
       {/* FAQs */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
-          <MessageCircle size={20} className="text-primary" /> Frequently Asked Questions
+          <MessageCircle size={20} className="text-primary" />
+          {" "}Frequently Asked Questions
         </h2>
         
         <div className="space-y-4">
@@ -140,7 +141,7 @@ const SupportPage = () => {
       {/* Report an Issue */}
       <div className="bg-slate-900 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
         <div>
-          <h2 className="text-xl font-bold text-white mb-2">Can't find what you're looking for?</h2>
+          <h2 className="text-xl font-bold text-white mb-2">Can&apos;t find what you&apos;re looking for?</h2>
           <p className="text-slate-400 text-sm max-w-md">Our technical team is ready to resolve any bugs, app issues, or complex disputes immediately.</p>
         </div>
         <button 
