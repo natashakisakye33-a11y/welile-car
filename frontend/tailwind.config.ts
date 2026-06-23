@@ -1,3 +1,6 @@
+import tailwindcssAnimate from "tailwindcss-animate";
+import tailwindcssForms from "@tailwindcss/forms";
+import tailwindcssContainerQueries from "@tailwindcss/container-queries";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -193,5 +196,9 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/forms"), require("@tailwindcss/container-queries")],
+  plugins: [
+    tailwindcssAnimate, 
+    tailwindcssForms, 
+    tailwindcssContainerQueries
+  ],
 } satisfies Config;

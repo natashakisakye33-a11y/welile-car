@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
@@ -30,8 +31,9 @@ const CarDetailsPage = () => {
   // Modals state
   const [showInspectionForm, setShowInspectionForm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'plan' | 'method'>('plan');
+  const [paymentStep, setPaymentStep] = useState<'amount' | 'plan' | 'method'>('amount');
   const [paymentFreq, setPaymentFreq] = useState<'daily'|'weekly'|'monthly'>('monthly');
+  const [savingsAmount, setSavingsAmount] = useState('5000');
 
   useEffect(() => {
     fetch(`${API_URL}/vehicles/${id}`, {
@@ -170,7 +172,7 @@ const CarDetailsPage = () => {
               <div className="mt-auto">
                 <button
                   onClick={() => {
-                    setPaymentStep('plan');
+                    setPaymentStep('amount');
                     setShowPaymentModal(true);
                   }}
                   className="w-full shimmer-btn font-black py-4 rounded-2xl transition-all bg-primary hover:bg-fuchsia-700 text-white shadow-xl shadow-primary/30 text-lg hover:-translate-y-1"
@@ -370,7 +372,39 @@ const CarDetailsPage = () => {
             className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            {paymentStep === 'plan' ? (
+            {paymentStep === 'amount' ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-bold text-2xl text-slate-900">Deposit Amount</h3>
+                    <p className="text-sm text-slate-500">Start saving towards your dream car.</p>
+                  </div>
+                  <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="mb-8">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">How much do you want to start with?</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">UGX</span>
+                    <input
+                      type="number"
+                      value={savingsAmount}
+                      onChange={(e) => setSavingsAmount(e.target.value)}
+                      className="w-full h-16 bg-slate-50 border-2 border-slate-200 rounded-2xl pl-16 pr-4 text-2xl font-black text-primary focus:border-primary focus:ring-0 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setPaymentStep('method')}
+                  className="w-full font-bold py-4 rounded-xl transition-all bg-primary hover:bg-purple-800 text-white shadow-lg shadow-primary/30 text-lg"
+                >
+                  Continue to Payment Method
+                </button>
+              </>
+            ) : paymentStep === 'plan' ? (
               <>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-2xl text-slate-900">Select Payment Plan</h3>
@@ -389,11 +423,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Daily Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalDaily)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalDaily)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(dailyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(dailyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(dailyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(dailyInsurance)}</span></span>
                     </div>
                   </div>
 
@@ -406,11 +440,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Weekly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalWeekly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalWeekly)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(weeklyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(weeklyInsurance)}</span></span>
                     </div>
                   </div>
 
@@ -423,11 +457,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Monthly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalMonthly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalMonthly)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(monthlyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(monthlyInsurance)}</span></span>
                     </div>
                   </div>
                 </div>
@@ -452,19 +486,19 @@ const CarDetailsPage = () => {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Welile Wallet</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Mobile Money</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Card</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Transfer</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,16 +32,25 @@ const PaymentDetailsPage = () => {
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
   const [receiptUploaded, setReceiptUploaded] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [transactionTime, setTransactionTime] = useState(new Date().toTimeString().split(' ')[0].substring(0, 5));
+
+  const amountParam = searchParams.get('amount');
 
   useEffect(() => {
     if (carId) {
       const foundCar = carsData.find((c) => c.id === carId);
       if (foundCar) {
         setCar(foundCar);
-        setAmountToPay(foundCar.priceUgx.toString());
+        if (amountParam) {
+          setAmountToPay(amountParam);
+        } else {
+          setAmountToPay(foundCar.priceUgx.toString());
+        }
       }
     }
-  }, [carId]);
+  }, [carId, amountParam]);
 
   const walletBalance = profile?.wallet_balance || 0;
   const parsedAmount = parseInt(amountToPay || '0', 10);
@@ -52,23 +62,35 @@ const PaymentDetailsPage = () => {
     setIsProcessing(true);
     
     try {
-      if (method === 'mtn' || method === 'airtel' || method === 'mobile_money') {
-        if (!phoneNumber || !buyerName) {
+      if (method === 'mtn' || method === 'airtel' || method === 'mobile_money' || method === 'bank') {
+        if ((method === 'mtn' || method === 'airtel') && (!phoneNumber || !buyerName)) {
           alert('Please enter both the Buyer Name and Mobile Number');
           setIsProcessing(false);
           return;
         }
-        setUssdMessage('Connecting to USSD... Please check your phone to enter your Mobile Money PIN.');
-        // Call the real backend API (mocked in useDeposit)
-        await makeDeposit({ amount: parsedAmount, method: method === 'mobile_money' ? 'mtn' : method });
+        if (!transactionId || !transactionDate || !transactionTime) {
+          alert('Please enter the Transaction ID, Date, and Time to submit your payment proof.');
+          setIsProcessing(false);
+          return;
+        }
         
-        setUssdMessage('Processing transaction...');
+        setUssdMessage('Submitting payment proof for Finance verification...');
+        
+        // Call the real backend API
+        await makeDeposit({ 
+          amount: parsedAmount, 
+          method: method === 'mobile_money' ? 'mtn' : method,
+          transactionId,
+          transactionDate,
+          transactionTime
+        });
+        
         setTimeout(() => {
           setIsProcessing(false);
           setUssdMessage('');
           setSuccess(true);
           setTimeout(() => navigate('/dashboard'), 3000);
-        }, 3000);
+        }, 1500);
       } else if (method === 'wallet') {
         setUssdMessage('Processing payment securely from your wallet...');
         await payFromWallet({ amount: parsedAmount, reason: `Payment for ${car?.name || 'Vehicle'}` });
@@ -78,7 +100,7 @@ const PaymentDetailsPage = () => {
         setSuccess(true);
         setTimeout(() => navigate('/dashboard'), 3000);
       } else {
-        // Fallback for mock flows (bank, etc)
+        // Fallback for mock flows (card)
         setTimeout(() => {
           setIsProcessing(false);
           setSuccess(true);
@@ -229,8 +251,47 @@ const PaymentDetailsPage = () => {
                       />
                     </div>
                     
+                    <div className="pt-4 border-t border-border/50">
+                      <p className="text-sm font-semibold mb-3">Payment Proof</p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Transaction ID</label>
+                          <input 
+                            type="text" 
+                            required
+                            placeholder="e.g. 1234567890"
+                            className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                            value={transactionId}
+                            onChange={(e) => setTransactionId(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Date</label>
+                            <input 
+                              type="date" 
+                              required
+                              className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                              value={transactionDate}
+                              onChange={(e) => setTransactionDate(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Time</label>
+                            <input 
+                              type="time" 
+                              required
+                              className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                              value={transactionTime}
+                              onChange={(e) => setTransactionTime(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Please ensure your mobile money account has sufficient funds. You will receive a prompt on your phone to enter your PIN to confirm the payment.
+                      Please ensure your payment details are correct. The Finance Department will verify this transaction before it reflects on your account.
                     </p>
                   </div>
                 )}
@@ -300,17 +361,56 @@ const PaymentDetailsPage = () => {
                       <p className="text-sm text-muted-foreground mb-1">Account Number</p>
                       <p className="font-mono text-lg font-bold text-primary tracking-wider">9030001234567</p>
                     </div>
+                    <div className="pt-4 border-t border-border/50">
+                      <p className="text-sm font-semibold mb-3">Transfer Proof Details</p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Bank Receipt / Transaction Ref No.</label>
+                          <input 
+                            type="text" 
+                            required
+                            placeholder="e.g. FT231..."
+                            className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                            value={transactionId}
+                            onChange={(e) => setTransactionId(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Date of Transfer</label>
+                            <input 
+                              type="date" 
+                              required
+                              className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                              value={transactionDate}
+                              onChange={(e) => setTransactionDate(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Time</label>
+                            <input 
+                              type="time" 
+                              required
+                              className="w-full h-12 bg-surface rounded-xl px-4 border border-border focus:border-primary focus:ring-0 outline-none transition-colors text-sm"
+                              value={transactionTime}
+                              onChange={(e) => setTransactionTime(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="pt-2">
-                      <label className="block text-sm font-semibold mb-3">Upload Transfer Receipt</label>
+                      <label className="block text-sm font-semibold mb-3">Upload Transfer Receipt (Optional)</label>
                       <button 
                         type="button"
                         onClick={() => setReceiptUploaded(true)}
-                        className={`w-full h-16 border-2 border-dashed rounded-xl flex items-center justify-center gap-2 transition-colors ${
+                        className={`w-full h-14 border-2 border-dashed rounded-xl flex items-center justify-center gap-2 transition-colors ${
                           receiptUploaded ? 'bg-success/10 border-success text-success' : 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10'
                         }`}
                       >
                         {receiptUploaded ? (
-                          <><CheckCircle2 size={20} /> Receipt Uploaded</>
+                          <><CheckCircle2 size={20} /> Receipt Attached</>
                         ) : (
                           <><Upload size={20} /> Tap to Upload PDF/Image</>
                         )}
@@ -364,8 +464,8 @@ const PaymentDetailsPage = () => {
                     disabled={
                       isProcessing || 
                       parsedAmount <= 0 ||
-                      ((method === 'mtn' || method === 'airtel' || method === 'mobile_money') && (!phoneNumber || !buyerName)) ||
-                      (method === 'bank' && !receiptUploaded)
+                      ((method === 'mtn' || method === 'airtel' || method === 'mobile_money' || method === 'bank') && (!transactionId || !transactionDate || !transactionTime)) ||
+                      ((method === 'mtn' || method === 'airtel') && (!phoneNumber || !buyerName))
                     }
                     className="w-full h-14 gradient-primary text-primary-foreground font-bold rounded-2xl disabled:opacity-50 text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 mt-8"
                   >

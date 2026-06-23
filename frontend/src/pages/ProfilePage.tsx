@@ -43,6 +43,9 @@ export default function ProfilePage() {
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', phone: '', residence: '' });
+  
   const [cameraMode, setCameraMode] = useState<'options' | 'webcam' | 'preview'>('options');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export default function ProfilePage() {
     name: profile?.name || user?.user_metadata?.name || "John Doe",
     email: user?.email || "john.doe@example.com",
     phone: profile?.phone || user?.user_metadata?.phone || "+256 700 123 456",
-    residence: user?.user_metadata?.residence || "Ntinda, Kampala",
+    residence: profile?.residence || user?.user_metadata?.residence || "Ntinda, Kampala",
     kycStatus: "Verified",
     joinDate: profile?.created_at 
       ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
@@ -244,6 +247,34 @@ export default function ProfilePage() {
     setCapturedPhoto(null);
   };
 
+  const openEditModal = () => {
+    setEditForm({
+      name: customer.name,
+      phone: customer.phone,
+      residence: customer.residence
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    updateProfileMutation.mutate(
+      { name: editForm.name, phone: editForm.phone, residence: editForm.residence },
+      {
+        onSuccess: () => {
+          toast.success("Profile details updated successfully!");
+          setIsEditModalOpen(false);
+          setIsLoading(false);
+        },
+        onError: () => {
+          toast.error("Failed to update profile details.");
+          setIsLoading(false);
+        }
+      }
+    );
+  };
+
   const handleLogout = async () => {
     await signOut();
     toast.success("Logged out successfully");
@@ -307,10 +338,18 @@ export default function ProfilePage() {
           <div className="p-8 sm:p-12">
             
             {/* Details Grid */}
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <FileText size={20} className="text-[#4C158D]" />
-              Personal Details
-            </h3>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <FileText size={20} className="text-[#4C158D]" />
+                Personal Details
+              </h3>
+              <button 
+                onClick={openEditModal}
+                className="text-sm font-bold text-[#4C158D] hover:bg-[#4C158D]/10 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+              >
+                Edit Details
+              </button>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               
@@ -355,14 +394,24 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              {(isAdmin || isCfo) && (
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              {isAdmin && (
                 <button 
-                  onClick={() => navigate('/cfo')}
+                  onClick={() => navigate('/admin')}
                   className="w-full sm:w-auto bg-[#4C158D]/10 hover:bg-[#4C158D]/20 text-[#4C158D] font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
                 >
                   <ShieldCheck size={18} />
                   Admin Dashboard
+                </button>
+              )}
+              
+              {isCfo && (
+                <button 
+                  onClick={() => navigate('/cfo')}
+                  className="w-full sm:w-auto bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
+                >
+                  <ShieldCheck size={18} />
+                  CFO Portal
                 </button>
               )}
 
@@ -526,6 +575,70 @@ export default function ProfilePage() {
             )}
 
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* Edit Profile Details Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-[28px] overflow-hidden border border-slate-100 p-6 bg-white shadow-2xl">
+          <DialogHeader className="pb-4 border-b border-slate-100 text-center sm:text-left">
+            <DialogTitle className="text-xl font-extrabold text-slate-800">Edit Personal Details</DialogTitle>
+            <DialogDescription className="text-slate-500 text-sm mt-1">
+              Update your contact information and residence.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveProfile} className="py-4 flex flex-col gap-4">
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Full Name</label>
+              <input 
+                type="text" 
+                value={editForm.name}
+                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                required
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all"
+              />
+            </div>
+            
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Phone Number</label>
+              <input 
+                type="text" 
+                value={editForm.phone}
+                onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                required
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all"
+              />
+            </div>
+            
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Residence</label>
+              <input 
+                type="text" 
+                value={editForm.residence}
+                onChange={(e) => setEditForm(prev => ({ ...prev, residence: e.target.value }))}
+                required
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all"
+              />
+            </div>
+
+            <div className="flex gap-3 mt-4">
+              <button 
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 h-13 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all text-sm py-3"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 h-13 bg-[#4C158D] hover:bg-[#3f2bc2] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#4C158D]/20 flex items-center justify-center gap-2 text-sm disabled:opacity-50 py-3"
+              >
+                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                Save Changes
+              </button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
