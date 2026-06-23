@@ -281,6 +281,29 @@ export default function ProfilePage() {
     navigate('/');
   };
 
+  const handleSwitchRole = async (role: 'ADMIN' | 'CFO') => {
+    setIsLoading(true);
+    try {
+      const { fetchWithTimeout } = await import('@/lib/api');
+      const { API_URL } = await import('@/config');
+      const res = await fetchWithTimeout(`${API_URL}/users/me/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      if (res.ok) {
+        toast.success(`Role changed to ${role}. Refreshing...`);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        toast.error('Failed to change role');
+      }
+    } catch (e) {
+      toast.error('Network error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#4C158D]/20 flex flex-col pb-24">
 
@@ -412,6 +435,26 @@ export default function ProfilePage() {
                 >
                   <ShieldCheck size={18} />
                   CFO Portal
+                </button>
+              )}
+
+              {!isAdmin && (
+                <button 
+                  onClick={() => handleSwitchRole('ADMIN')}
+                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
+                >
+                  <ShieldCheck size={18} />
+                  Switch to Admin Role
+                </button>
+              )}
+
+              {!isCfo && (
+                <button 
+                  onClick={() => handleSwitchRole('CFO')}
+                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
+                >
+                  <ShieldCheck size={18} />
+                  Switch to CFO Role
                 </button>
               )}
 

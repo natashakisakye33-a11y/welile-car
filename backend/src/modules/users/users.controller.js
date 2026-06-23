@@ -79,8 +79,22 @@ const approveKyc = async (req, res) => {
   }
 };
 
+const updateMyRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { role }
+    });
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: 'fail' });
+  }
+};
+
 module.exports = {
   submitKyc,
   getMyProfile,
-  approveKyc
+  approveKyc,
+  updateMyRole
 };
