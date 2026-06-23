@@ -56,8 +56,8 @@ export default function VehiclesPage() {
   return (
     <div className="bg-[#f8f9fa] min-h-screen pb-24 font-sans text-slate-900 selection:bg-[#4C158D]/20 selection:text-[#4C158D]">
       
-      {/* Header section (retained from old styling but without sticky Navbar as AppLayout provides it) */}
-      <header className="bg-white border-b border-slate-200/60 pt-6 pb-6 px-4 sm:px-6 relative overflow-hidden z-10 shadow-sm">
+      {/* Header section */}
+      <header className="sticky top-0 bg-white/90 backdrop-blur-lg border-b border-slate-200/60 pt-6 pb-6 px-4 sm:px-6 overflow-hidden z-40 shadow-sm">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#4C158D]/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
         
         <div className="max-w-5xl mx-auto">

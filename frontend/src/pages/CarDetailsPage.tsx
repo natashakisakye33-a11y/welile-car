@@ -413,6 +413,32 @@ const CarDetailsPage = () => {
                   </button>
                 </div>
 
+                <div className="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200 shadow-inner">
+                  <h4 className="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">Financing Breakdown</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Vehicle Price</span>
+                      <span className="font-bold text-slate-900">{formatUGX(car.priceUgx)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Your Deposit (30%)</span>
+                      <span className="font-bold text-slate-900">{formatUGX(requiredDeposit)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Financed Amount (70%)</span>
+                      <span className="font-bold text-slate-900">{formatUGX(financedAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Interest (28% flat)</span>
+                      <span className="font-bold text-slate-900">{formatUGX(financedAmount * 0.28)}</span>
+                    </div>
+                    <div className="pt-2 mt-2 border-t border-slate-200 flex justify-between">
+                      <span className="font-bold text-slate-700">Total Loan to Repay</span>
+                      <span className="font-black text-primary">{formatUGX(financedAmount * 1.28)}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-4 mb-6">
                   {/* Daily */}
                   <div onClick={() => setPaymentFreq('daily')} className={`border rounded-2xl p-4 cursor-pointer transition-all ${paymentFreq === 'daily' ? 'border-primary ring-1 ring-primary bg-purple-50/50' : 'border-slate-200 hover:border-slate-300'}`}>
