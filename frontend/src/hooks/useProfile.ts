@@ -135,9 +135,10 @@ export function useProfile() {
         const profile: Profile = {
           id: me.id.toString(),
           user_id: me.id.toString(),
-          name: me.name,
-          phone: me.phone || '',
-          avatar_url: '',
+          name: mockP.name !== 'John Doe' ? mockP.name : me.name,
+          phone: mockP.phone !== '+256 700 123 456' ? mockP.phone : (me.phone || ''),
+          residence: mockP.residence || '',
+          avatar_url: mockP.avatar_url || '',
           referral_code: '',
           referred_by: null,
           wallet_balance: summary.savings.totalSaved,
