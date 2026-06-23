@@ -240,7 +240,7 @@ const CfoPage = () => {
       
       {/* Top AppBar (Merged & Sticky) */}
       <header className="bg-surface sticky top-0 z-50 w-full border-b border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center px-4 h-16 w-full max-w-7xl mx-auto">
+        <div className="flex justify-between items-center px-4 lg:px-8 h-16 w-full">
           
           {/* Left: CFO Indicator */}
           <div className="flex items-center gap-3 flex-1">
@@ -266,7 +266,7 @@ const CfoPage = () => {
         </div>
       </header>
 
-      <main className="pb-24 max-w-7xl mx-auto">
+      <main className="pb-24 w-full">
         {/* Hero Header Area */}
         <section className="glass-header text-white px-4 py-8 relative overflow-hidden rounded-b-3xl">
           <div className="relative z-10">

@@ -28,6 +28,7 @@ const AdminPage = () => {
   const [selectedUser, setSelectedUser] = useState<AdminProfile | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'saving' | 'flagged' | 'cfo_requests'>('all');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'transactions'>('dashboard');
   
   const [email, setEmail] = useState('admin@admin.com');
   const [password, setPassword] = useState('admin123');
@@ -142,15 +143,15 @@ const AdminPage = () => {
           </div>
         </div>
         <nav className="flex-1 space-y-2">
-          <a className="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-surface-container rounded-xl transition-colors cursor-pointer">
+          <a onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'dashboard' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">dashboard</span>
             <span className="font-body-md">Dashboard</span>
           </a>
-          <a className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-colors cursor-pointer">
+          <a onClick={() => setActiveTab('customers')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'customers' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">group</span>
             <span className="font-body-md">Customers</span>
           </a>
-          <a className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-colors cursor-pointer">
+          <a onClick={() => setActiveTab('transactions')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'transactions' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">receipt_long</span>
             <span className="font-body-md">Transactions</span>
           </a>
@@ -187,47 +188,50 @@ const AdminPage = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-6 space-y-8">
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                  <span className="material-symbols-outlined">savings</span>
+          {activeTab === 'dashboard' && (
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                    <span className="material-symbols-outlined">savings</span>
+                  </div>
                 </div>
+                <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Total Savings</p>
+                <h3 className="text-headline-md font-bold text-on-surface">{formatUGX(totalSavings)}</h3>
               </div>
-              <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Total Savings</p>
-              <h3 className="text-headline-md font-bold text-on-surface">{formatUGX(totalSavings)}</h3>
-            </div>
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-secondary/10 text-secondary rounded-lg">
-                  <span className="material-symbols-outlined">trending_up</span>
+              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-secondary/10 text-secondary rounded-lg">
+                    <span className="material-symbols-outlined">trending_up</span>
+                  </div>
                 </div>
+                <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Growth Credited</p>
+                <h3 className="text-headline-md font-bold text-on-surface">{formatUGX(totalGrowth)}</h3>
               </div>
-              <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Growth Credited</p>
-              <h3 className="text-headline-md font-bold text-on-surface">{formatUGX(totalGrowth)}</h3>
-            </div>
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-tertiary-container/10 text-tertiary-container rounded-lg">
-                  <span className="material-symbols-outlined">person</span>
+              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-tertiary-container/10 text-tertiary-container rounded-lg">
+                    <span className="material-symbols-outlined">person</span>
+                  </div>
                 </div>
+                <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Total Customers</p>
+                <h3 className="text-headline-md font-bold text-on-surface">{users.length}</h3>
               </div>
-              <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Total Customers</p>
-              <h3 className="text-headline-md font-bold text-on-surface">{users.length}</h3>
-            </div>
-            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-error/10 text-error rounded-lg">
-                  <span className="material-symbols-outlined">rate_review</span>
+              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant transition-all hover:border-primary/30">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 bg-error/10 text-error rounded-lg">
+                    <span className="material-symbols-outlined">rate_review</span>
+                  </div>
                 </div>
+                <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Needs Review</p>
+                <h3 className="text-headline-md font-bold text-on-surface">{usersPending.length}</h3>
               </div>
-              <p className="text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Needs Review</p>
-              <h3 className="text-headline-md font-bold text-on-surface">{usersPending.length}</h3>
-            </div>
-          </section>
+            </section>
+          )}
 
           <div className="flex flex-col xl:flex-row gap-6">
-            <div className="flex-grow space-y-4">
+            {(activeTab === 'dashboard' || activeTab === 'customers') && (
+              <div className="flex-grow space-y-4">
               <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
                 <div className="p-4 lg:p-6 border-b border-outline-variant flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                   <div className="flex flex-wrap gap-2">
@@ -295,10 +299,12 @@ const AdminPage = () => {
                   )}
                 </div>
               </div>
-            </div>
+              </div>
+            )}
 
-            <aside className="w-full xl:w-[360px] space-y-4 shrink-0">
-              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant h-full flex flex-col max-h-[800px]">
+            {(activeTab === 'dashboard' || activeTab === 'transactions') && (
+              <aside className={`w-full ${activeTab === 'dashboard' ? 'xl:w-[360px]' : ''} space-y-4 shrink-0`}>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant h-full flex flex-col max-h-[800px]">
                 <div className="border-b border-outline-variant flex items-center justify-between p-6">
                   <h3 className="text-headline-sm text-on-surface">Payments Feed</h3>
                   <span className="material-symbols-outlined text-outline">refresh</span>
@@ -347,6 +353,7 @@ const AdminPage = () => {
                 </div>
               </div>
             </aside>
+            )}
           </div>
         </main>
       </div>
