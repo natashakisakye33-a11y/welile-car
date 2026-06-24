@@ -32,9 +32,6 @@ export default function LandingPage() {
           <button onClick={() => navigate('/auth')} className="text-on-surface-variant hover:text-primary transition-colors font-label-md">Home</button>
           <button onClick={() => navigate('/auth')} className="text-on-surface-variant hover:text-primary transition-colors font-label-md">Journey</button>
           <button onClick={() => navigate('/auth')} className="text-on-surface-variant hover:text-primary transition-colors font-label-md">Bonuses</button>
-          <button onClick={() => navigate('/auth')} className="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md hover:bg-primary/90 transition-all shadow-sm">
-            Sign In
-          </button>
         </nav>
 
         <button onClick={() => navigate('/auth')} className="flex items-center justify-center w-10 h-10 active:scale-95 duration-100 md:hidden">
