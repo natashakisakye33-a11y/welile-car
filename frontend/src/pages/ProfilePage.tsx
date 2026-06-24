@@ -26,7 +26,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useUser, useClerk, useSession } from '@clerk/clerk-react';
 import { useProfile, useUpdateProfile, CARS } from '@/hooks/useProfile';
 import { 
   Dialog, 
@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 export default function ProfilePage() {
   const { isAdmin, isCfo } = useAuth();
   const { signOut } = useClerk();
+  const { session } = useSession();
   const { user: clerkUser } = useUser();
   const { data: profile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
@@ -289,9 +290,13 @@ export default function ProfilePage() {
     try {
       const { fetchWithTimeout } = await import('@/lib/api');
       const { API_URL } = await import('@/config');
+      const token = await session?.getToken();
       const res = await fetchWithTimeout(`${API_URL}/users/me/role`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ role })
       });
       if (res.ok) {
