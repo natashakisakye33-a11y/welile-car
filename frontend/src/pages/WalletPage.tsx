@@ -411,8 +411,13 @@ const WalletPage = () => {
                   </div>
                   <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                      <p className="font-bold text-slate-900 capitalize">{tx.type} {tx.method ? `via ${tx.method}` : ''}</p>
-                      <span className={`font-black ${tx.type === 'withdrawal' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-slate-900 capitalize">{tx.type} {tx.method ? `via ${tx.method}` : ''}</p>
+                        {tx.status === 'PENDING' && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Pending</span>}
+                        {tx.status === 'REJECTED' && <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Rejected</span>}
+                        {tx.status === 'COMPLETED' && <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Approved</span>}
+                      </div>
+                      <span className={`font-black ${tx.type === 'withdrawal' ? 'text-rose-500' : 'text-emerald-500'} ${tx.status === 'REJECTED' ? 'line-through opacity-50' : ''}`}>
                         {tx.type === 'withdrawal' ? '-' : '+'}{formatUGX(tx.amount)}
                       </span>
                     </div>
