@@ -1,6 +1,9 @@
-const { requireAuth } = require('@clerk/express');
-
-const authenticateToken = requireAuth();
+const authenticateToken = (req, res, next) => {
+  if (!req.auth || !req.auth.userId) {
+    return res.status(401).json({ error: 'Unauthenticated' });
+  }
+  next();
+};
 
 const requirePermission = (permission) => {
   return async (req, res, next) => {
