@@ -1,7 +1,158 @@
  
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { SignIn, SignUp } from '@clerk/clerk-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+
+export const CustomSignIn = () => {
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signIn(phone, password);
+    setLoading(false);
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success('Successfully signed in!');
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+        <input 
+          type="tel" 
+          value={phone} 
+          onChange={e => setPhone(e.target.value)} 
+          required 
+          placeholder="+256 700 000000"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Password</label>
+        <input 
+          type="password" 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+          required 
+          placeholder="••••••••"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <button 
+        type="submit" 
+        disabled={loading}
+        className="w-full h-11 mt-2 bg-primary hover:bg-primary-container text-on-primary font-label-md font-bold rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
+      >
+        {loading ? 'Signing in...' : 'Sign In'}
+      </button>
+    </form>
+  );
+};
+
+export const CustomSignUp = () => {
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [residence, setResidence] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signUp(phone, password, name, email, residence);
+    setLoading(false);
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success('Account created successfully!');
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Full Name</label>
+        <input 
+          type="text" 
+          value={name} 
+          onChange={e => setName(e.target.value)} 
+          required 
+          placeholder="Joshua Wanda"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Email Address</label>
+        <input 
+          type="email" 
+          value={email} 
+          onChange={e => setEmail(e.target.value)} 
+          required 
+          placeholder="joshua@example.com"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+        <input 
+          type="tel" 
+          value={phone} 
+          onChange={e => setPhone(e.target.value)} 
+          required 
+          placeholder="+256 700 000000"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Residence</label>
+        <input 
+          type="text" 
+          value={residence} 
+          onChange={e => setResidence(e.target.value)} 
+          required 
+          placeholder="Kampala, Uganda"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <div>
+        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Password</label>
+        <input 
+          type="password" 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+          required 
+          placeholder="••••••••"
+          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+        />
+      </div>
+      <button 
+        type="submit" 
+        disabled={loading}
+        className="w-full h-11 mt-3 bg-primary hover:bg-primary-container text-on-primary font-label-md font-bold rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
+      >
+        {loading ? 'Creating Account...' : 'Create Account'}
+      </button>
+    </form>
+  );
+};
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -62,22 +213,21 @@ const AuthPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Right Side: Clerk Auth Component */}
-          <div className="md:w-1/2 flex flex-col bg-surface-container-lowest justify-center items-center py-12">
-            <div className="w-full max-w-md flex justify-center">
-              {isLogin ? (
-                <SignIn fallbackRedirectUrl="/dashboard" />
-              ) : (
-                <SignUp fallbackRedirectUrl="/dashboard" />
-              )}
+          {/* Right Side: Custom Auth Component */}
+          <div className="md:w-1/2 flex flex-col bg-surface-container-lowest justify-center items-center py-12 px-6">
+            <div className="w-full max-w-[360px] flex flex-col justify-center">
+              <h2 className="text-headline-md font-bold text-on-surface mb-2">{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
+              <p className="text-body-md text-on-surface-variant mb-8">{isLogin ? 'Sign in to access your dashboard' : 'Join Welile Cars to start financing'}</p>
+              
+              {isLogin ? <CustomSignIn /> : <CustomSignUp />}
             </div>
             
             {/* Custom Toggle */}
             <div className="mt-8 text-center text-sm text-on-surface-variant">
               {isLogin ? (
-                <p>Want to register instead? <button onClick={() => setIsLogin(false)} className="text-primary font-bold hover:underline">Click here to Sign up</button></p>
+                <p>Want to register instead? <button onClick={() => setIsLogin(false)} className="text-primary font-bold hover:underline transition-colors">Click here to Sign up</button></p>
               ) : (
-                <p>Already have an account? <button onClick={() => setIsLogin(true)} className="text-primary font-bold hover:underline">Click here to Sign in</button></p>
+                <p>Already have an account? <button onClick={() => setIsLogin(true)} className="text-primary font-bold hover:underline transition-colors">Click here to Sign in</button></p>
               )}
             </div>
           </div>

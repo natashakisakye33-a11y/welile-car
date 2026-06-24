@@ -22,7 +22,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
 import { API_URL } from '@/config';
 import { fetchWithTimeout } from '@/lib/api';
 
@@ -33,18 +32,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCfo, setIsCfo] = useState(false);
 
-  const { isLoaded: clerkAuthLoaded, userId, getToken, signOut: clerkSignOut } = useClerkAuth();
-  const { isLoaded: clerkUserLoaded, user: clerkUser } = useClerkUser();
-
-  const fetchUser = async () => {
+  const fetchUser = async (token: string) => {
     try {
-      const token = await getToken();
-      if (!token) {
-        setUser(null);
-        return;
-      }
-      
-      const res = await fetchWithTimeout(`${API_URL}/users/me`);
+      const res = await fetchWithTimeout(`${API_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         if (data) {
@@ -55,45 +49,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
       }
-      
-      if (clerkUser) {
-        // Fallback if webhook hasn't created the user in DB yet, or API failed
-        const localRole = localStorage.getItem('customRoleOverride') || 'CUSTOMER';
-        setUser({
-          id: clerkUser.id,
-          name: clerkUser.fullName || '',
-          email: clerkUser.primaryEmailAddress?.emailAddress || '',
-          role: localRole
-        });
-        setIsAdmin(localRole === 'ADMIN');
-        setIsCfo(localRole === 'CFO');
-      } else {
-        setUser(null);
-      }
+      setUser(null);
     } catch (e) {
       setUser(null);
     }
   };
 
   useEffect(() => {
-    if (clerkAuthLoaded && clerkUserLoaded) {
-      if (userId) {
-        setSession({ access_token: 'clerk-token' }); // Placeholder just so things relying on session exist
-        fetchUser().finally(() => setLoading(false));
-      } else {
-        // Fallback to local token if no clerk
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          setSession({ access_token: token });
-          fetchUser().finally(() => setLoading(false));
-        } else {
-          setLoading(false);
-          setUser(null);
-          setSession(null);
-        }
-      }
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setSession({ access_token: token });
+      fetchUser(token).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+      setUser(null);
+      setSession(null);
     }
-  }, [clerkAuthLoaded, clerkUserLoaded, userId]);
+  }, []);
 
   const signUp = async (phone: string, password: string, name: string, email: string, residence: string) => {
     try {
@@ -138,13 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    if (clerkSignOut) {
-      try {
-        await clerkSignOut();
-      } catch (e) {
-        console.error('Clerk sign out error', e);
-      }
-    }
     setUser(null);
     setSession(null);
     setIsAdmin(false);
