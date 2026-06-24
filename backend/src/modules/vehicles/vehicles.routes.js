@@ -18,9 +18,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Publicly accessible to authenticated users
-router.get('/', authenticateToken, getAllVehicles);
-router.get('/:id', authenticateToken, getVehicleById);
+// Publicly accessible
+router.get('/', getAllVehicles);
+router.get('/:id', getVehicleById);
 
 // Restricted to Admins
 router.post('/', authenticateToken, requirePermission('org:vehicles:create'), upload.array('gallery', 10), addVehicle);
