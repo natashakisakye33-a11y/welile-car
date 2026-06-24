@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { PrismaClient } = require('@prisma/client');
 const { clerkMiddleware } = require('@clerk/express');
 const { authenticateToken } = require('./shared/middleware/auth.middleware');
 
