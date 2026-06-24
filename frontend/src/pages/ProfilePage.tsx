@@ -26,6 +26,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { useProfile, useUpdateProfile, CARS } from '@/hooks/useProfile';
 import { 
   Dialog, 
@@ -37,7 +38,9 @@ import {
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
-  const { user, signOut, isAdmin, isCfo } = useAuth();
+  const { isAdmin, isCfo } = useAuth();
+  const { signOut } = useClerk();
+  const { user: clerkUser } = useUser();
   const { data: profile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
   const navigate = useNavigate();
@@ -57,20 +60,20 @@ export default function ProfilePage() {
 
   // Dynamic customer details populated from hooks, falling back to mock defaults
   const customer = {
-    name: profile?.name || user?.user_metadata?.name || "John Doe",
-    email: user?.email || "john.doe@example.com",
-    phone: profile?.phone || user?.user_metadata?.phone || "+256 700 123 456",
-    residence: profile?.residence || user?.user_metadata?.residence || "Ntinda, Kampala",
+    name: profile?.name || clerkUser?.fullName || clerkUser?.firstName || "N/A",
+    email: clerkUser?.primaryEmailAddress?.emailAddress || "N/A",
+    phone: profile?.phone || clerkUser?.primaryPhoneNumber?.phoneNumber || "N/A",
+    residence: profile?.residence || "N/A",
     kycStatus: "Verified",
-    joinDate: profile?.created_at 
-      ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
+    joinDate: clerkUser?.createdAt 
+      ? new Date(clerkUser.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
       : "May 15, 2026",
     activeLoan: profile?.selected_car_id 
       ? (CARS.find(c => c.id === profile.selected_car_id)?.name || "Toyota Vitz (UBM 492X)") 
       : "Toyota Vitz (UBM 492X)"
   };
 
-  const currentAvatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
+  const currentAvatarUrl = profile?.avatar_url || clerkUser?.imageUrl;
 
   // Compress/resize image helper to fit in localStorage limits
   const compressImage = (base64Str: string, maxWidth = 256, maxHeight = 256): Promise<string> => {
