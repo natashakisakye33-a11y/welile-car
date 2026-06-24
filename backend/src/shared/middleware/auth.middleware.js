@@ -1,34 +1,29 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-const authenticateToken = async (req, res, next) => {
-  try {
-    // Temporary bypass to allow frontend to render without Clerk keys
-    const firstUser = await prisma.user.findFirst();
-    if (firstUser) {
-      req.user = { id: firstUser.id };
-      req.auth = { userId: firstUser.id, has: () => true };
-      return next();
-    }
-  } catch (err) {
-    console.error(err);
+const authenticateToken = (req, res, next) => {
+  if (!req.auth || !req.auth.userId) {
+    return res.status(401).json({ error: 'Unauthenticated' });
   }
-  return res.status(401).json({ error: 'Unauthenticated' });
+  req.user = { id: req.auth.userId };
+  next();
 };
 
 const requirePermission = (permission) => {
   return async (req, res, next) => {
-    try {
-      const firstUser = await prisma.user.findFirst();
-      if (firstUser) {
-        req.user = { id: firstUser.id };
-        req.auth = { userId: firstUser.id, has: () => true };
-        return next();
-      }
-    } catch (err) {
-      console.error(err);
+    // Ensure the user is authenticated first
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).json({ error: 'Unauthenticated' });
     }
-    return res.status(401).json({ error: 'Unauthenticated' });
+    
+    req.user = { id: req.auth.userId };
+
+    const hasPermission = req.auth.has({ permission });
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        error: "Forbidden"
+      });
+    }
+
+    next();
   };
 };
 

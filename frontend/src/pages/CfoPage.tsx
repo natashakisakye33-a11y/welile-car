@@ -86,20 +86,6 @@ const CfoPage = () => {
     }
   };
 
-  const handleWithdrawalAction = async (id: number, action: 'approve' | 'reject') => {
-    try {
-      if (action === 'approve') {
-        await approveWithdrawal.mutateAsync(id);
-        toast.success('Withdrawal approved and funds released.');
-      } else {
-        await rejectWithdrawal.mutateAsync(id);
-        toast.success('Withdrawal rejected, funds refunded to user.');
-      }
-    } catch (err: any) {
-      toast.error(err.message || `Failed to ${action} withdrawal`);
-    }
-  };
-
   const handleLogout = async () => {
     await signOut();
     navigate('/');
@@ -483,6 +469,20 @@ const CfoPage = () => {
                           <span className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{dep.provider || 'MTN'}</span>
                         </div>
                       </div>
+                      <div className="bg-surface-container-low border border-outline-variant p-3 rounded-lg my-3 space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-on-surface-variant">TID:</span>
+                          <span className="font-bold text-on-surface">{dep.providerRef || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-on-surface-variant">Time:</span>
+                          <span className="font-bold text-on-surface">{dep.providerTime || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-on-surface-variant">Date:</span>
+                          <span className="font-bold text-on-surface">{dep.providerDate || 'N/A'}</span>
+                        </div>
+                      </div>
                       <div className="flex gap-2 mt-4">
                         <button onClick={() => handleDepositAction(dep.id, 'approve')} className="flex-grow bg-primary hover:bg-primary-container text-white text-[12px] font-bold py-2 rounded-lg transition-colors">Verify & Approve</button>
                         <button onClick={() => handleDepositAction(dep.id, 'reject')} className="px-4 border border-outline-variant hover:border-error text-error py-2 rounded-lg transition-colors">
@@ -496,67 +496,6 @@ const CfoPage = () => {
                     <div className="text-center py-12 text-on-surface-variant">
                       <span className="material-symbols-outlined text-[40px] opacity-50 mb-2">verified</span>
                       <p className="text-sm">All deposits verified</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Withdrawal Verification Queue */}
-            <section>
-              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm h-full">
-                <div className="p-4 flex justify-between items-center border-b border-outline-variant bg-surface-container-low/30">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-secondary text-[20px]">account_balance</span>
-                    <h2 className="font-headline-sm text-[16px] text-on-surface">Withdrawal Verification Queue</h2>
-                  </div>
-                  <span className="bg-secondary/10 text-secondary text-[10px] font-bold px-3 py-1 rounded-full">{pendingWithdrawals.length} Pending</span>
-                </div>
-                <div className="divide-y divide-outline-variant max-h-[400px] overflow-y-auto custom-scrollbar">
-                  {pendingWithdrawals.map((wd: any) => (
-                    <div key={wd.id} className="p-4 hover:bg-surface-container-low/30 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-bold text-on-surface uppercase">{wd.account?.user?.name || 'Unknown'}</h4>
-                          <p className="text-xs text-on-surface-variant tracking-wider">{wd.account?.user?.phone || ''}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-secondary font-bold text-base">{formatUGX(wd.amount)}</div>
-                          <span className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{wd.provider || 'MTN'}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Payout Details */}
-                      <div className="bg-surface-container-low p-3 rounded-lg mb-4 mt-2 border border-outline-variant">
-                        <p className="text-xs font-bold text-on-surface uppercase tracking-wider mb-2 border-b border-outline-variant pb-1">Payout Details</p>
-                        {wd.provider === 'bank' ? (
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="text-on-surface-variant">Bank:</div><div className="font-medium text-on-surface">{wd.withdrawalBank}</div>
-                            <div className="text-on-surface-variant">Acct Name:</div><div className="font-medium text-on-surface">{wd.withdrawalName}</div>
-                            <div className="text-on-surface-variant">Acct No:</div><div className="font-medium text-on-surface tracking-wider">{wd.withdrawalAccount}</div>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="text-on-surface-variant">Network:</div><div className="font-medium text-on-surface uppercase">{wd.provider || 'MTN'}</div>
-                            <div className="text-on-surface-variant">Name:</div><div className="font-medium text-on-surface">{wd.withdrawalName}</div>
-                            <div className="text-on-surface-variant">Phone:</div><div className="font-medium text-on-surface tracking-wider">{wd.withdrawalPhone}</div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button onClick={() => handleWithdrawalAction(wd.id, 'approve')} className="flex-grow bg-secondary hover:bg-secondary-container text-white hover:text-on-secondary-container text-[12px] font-bold py-2 rounded-lg transition-colors border border-transparent hover:border-secondary">Release Funds</button>
-                        <button onClick={() => handleWithdrawalAction(wd.id, 'reject')} className="px-4 border border-outline-variant hover:border-error text-error py-2 rounded-lg transition-colors">
-                          <span className="material-symbols-outlined text-[18px]">close</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {pendingWithdrawals.length === 0 && (
-                    <div className="text-center py-12 text-on-surface-variant">
-                      <span className="material-symbols-outlined text-[40px] opacity-50 mb-2">verified_user</span>
-                      <p className="text-sm">All withdrawals processed</p>
                     </div>
                   )}
                 </div>

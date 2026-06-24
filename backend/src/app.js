@@ -26,7 +26,7 @@ app.use(cors());
 app.use('/api/webhooks', webhooksRoutes);
 
 app.use(express.json());
-// app.use(clerkMiddleware()); // Temporarily disabled to prevent 500 errors on Render without keys
+app.use(clerkMiddleware());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Basic health route

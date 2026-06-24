@@ -221,7 +221,6 @@ export function useTransactions() {
         type: tx.type === 'DEPOSIT' ? 'deposit' : tx.type,
         amount: tx.amount,
         method: 'system',
-        status: tx.status,
         created_at: tx.date
       }));
     },

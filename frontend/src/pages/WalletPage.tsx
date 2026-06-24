@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedNumber from '@/components/AnimatedNumber';
 import BottomNav from '@/components/BottomNav';
 import { formatUGX, formatDate } from '@/lib/format';
-import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus, ArrowRight } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { PageLoader } from '@/components/ui/spinner';
@@ -248,54 +248,65 @@ const WalletPage = () => {
           </div>
         </div>
 
-        {/* Hero Wallet Card Redesigned - Dark Theme Mockup */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="print:hidden bg-black rounded-[2.5rem] p-6 pb-8 shadow-2xl flex flex-col gap-6">
+        {/* Hero Wallet Card Redesigned */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="print:hidden relative bg-[#4C158D] text-white rounded-[3rem] p-8 min-h-[440px] flex flex-col items-center justify-between shadow-2xl shadow-[#4C158D]/30 overflow-hidden">
+          {/* Background decorations */}
+          <div className="absolute top-[-50%] right-[-20%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[60px] pointer-events-none"></div>
+          <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[50px] pointer-events-none"></div>
           
-          {/* Gradient Card */}
-          <div className="relative rounded-[2rem] w-full aspect-[1.6/1] p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#A060C8] via-[#DD8A9B] to-[#D56550] shadow-inner shadow-white/20">
-            
-            {/* Dynamic Texture/Lines Overlay (Approximating the blur lines) */}
-            <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)' }}></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-
-            {/* Top Row inside Card */}
-            <div className="relative z-10 flex justify-between items-start w-full">
-              <span className="text-white/90 font-medium tracking-wide text-sm">card balance</span>
-              <div className="flex flex-col items-end gap-1">
-                <span className="text-white font-medium text-sm tracking-wider">*6745</span>
-                <div className="flex relative w-8 h-5">
-                  <div className="absolute right-3 w-5 h-5 rounded-full bg-[#EB001B] opacity-90 mix-blend-multiply"></div>
-                  <div className="absolute right-0 w-5 h-5 rounded-full bg-[#F79E1B] opacity-90 mix-blend-multiply"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row inside Card (Balance) */}
-            <div className="relative z-10 w-full mb-2">
-              <AnimatedNumber value={availableBalance} className="text-[3.5rem] md:text-[4.5rem] leading-none font-black text-white drop-shadow-sm tracking-tight" />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4 px-2">
-            <button 
-              onClick={() => { setAmount(''); setShowDeposit(true); }} 
-              disabled={profile.savings_locked}
-              className="flex-1 bg-white hover:bg-slate-100 text-black rounded-[1.5rem] py-4 px-6 flex justify-between items-center transition-colors disabled:opacity-50"
-            >
-              <span className="font-bold text-[15px]">add money</span>
-              <Plus size={20} strokeWidth={2.5} />
+          {/* Top section */}
+          <div className="relative z-10 flex flex-col items-center w-full mt-4">
+            <button className="text-white/70 hover:text-white font-medium flex items-center gap-1 mb-6 transition-colors">
+              Wallet 1 <ChevronDown size={16} />
             </button>
             
-            <button 
-              onClick={() => { setAmount(''); setShowWithdraw(true); }} 
-              className="flex-1 bg-white hover:bg-slate-100 text-black rounded-[1.5rem] py-4 px-6 flex justify-between items-center transition-colors disabled:opacity-50"
-            >
-              <span className="font-bold text-[15px]">transfer</span>
-              <ArrowRight size={20} strokeWidth={2.5} />
-            </button>
+            <AnimatedNumber value={availableBalance} className="text-5xl md:text-6xl font-black drop-shadow-lg text-center tracking-tight" />
+            
+            <p className="text-sm text-white/60 mt-3 font-medium flex items-center gap-2">
+              {profile.savings_locked ? (
+                <><ShieldCheck size={14} /> Savings Locked</>
+              ) : (
+                <>{formatUGX(dashboardData.savings.interestEarned)} Earned <TrendingUp size={14} /></>
+              )}
+            </p>
           </div>
           
+          {/* Bottom actions */}
+          <div className="relative z-10 flex flex-col items-center w-full mt-10 space-y-8">
+            <div className="flex items-center justify-center gap-3 w-full max-w-sm">
+              {/* Deposit Button */}
+              <button 
+                onClick={() => { setAmount(''); setShowDeposit(true); }} 
+                disabled={profile.savings_locked}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
+              >
+                <ArrowDownLeft size={16} /> <span className="text-sm">Deposit</span>
+              </button>
+              
+              {/* Center Plus Button */}
+              <button 
+                onClick={() => { setAmount(''); setShowDeposit(true); }} 
+                disabled={profile.savings_locked}
+                className="w-[60px] h-[60px] bg-white/5 border border-white/10 hover:bg-white/10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-50 backdrop-blur-md text-white"
+              >
+                <Plus size={24} />
+              </button>
+              
+              {/* Withdraw Button */}
+              <button 
+                onClick={() => { setAmount(''); setShowWithdraw(true); }} 
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
+              >
+                <ArrowUpRight size={16} /> <span className="text-sm">Withdraw</span>
+              </button>
+            </div>
+            
+            {/* Status indicator */}
+            <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full backdrop-blur-md flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+              <span className="text-xs font-medium text-white/70 tracking-wide">Synchronized</span>
+            </div>
+          </div>
         </motion.div>
 
         {/* Quick Stats Grid */}
@@ -400,13 +411,8 @@ const WalletPage = () => {
                   </div>
                   <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-slate-900 capitalize">{tx.type} {tx.method ? `via ${tx.method}` : ''}</p>
-                        {tx.status === 'PENDING' && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Pending</span>}
-                        {tx.status === 'REJECTED' && <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Rejected</span>}
-                        {tx.status === 'COMPLETED' && <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Approved</span>}
-                      </div>
-                      <span className={`font-black ${tx.type === 'withdrawal' ? 'text-rose-500' : 'text-emerald-500'} ${tx.status === 'REJECTED' ? 'line-through opacity-50' : ''}`}>
+                      <p className="font-bold text-slate-900 capitalize">{tx.type} {tx.method ? `via ${tx.method}` : ''}</p>
+                      <span className={`font-black ${tx.type === 'withdrawal' ? 'text-rose-500' : 'text-emerald-500'}`}>
                         {tx.type === 'withdrawal' ? '-' : '+'}{formatUGX(tx.amount)}
                       </span>
                     </div>
