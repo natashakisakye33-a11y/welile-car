@@ -3,6 +3,7 @@ import { Search, Heart, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { carsData as mockCarsData } from '@/data/cars';
 
 export default function VehiclesPage() {
   const navigate = useNavigate();
@@ -20,11 +21,16 @@ export default function VehiclesPage() {
     })
     .then(res => res.json())
     .then(data => {
-      setCarsData(data);
+      if (data && data.length > 0) {
+        setCarsData(data);
+      } else {
+        setCarsData(mockCarsData);
+      }
       setLoading(false);
     })
     .catch(err => {
       console.error(err);
+      setCarsData(mockCarsData);
       setLoading(false);
     });
   }, [session]);

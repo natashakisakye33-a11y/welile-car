@@ -2,6 +2,7 @@ const authenticateToken = (req, res, next) => {
   if (!req.auth || !req.auth.userId) {
     return res.status(401).json({ error: 'Unauthenticated' });
   }
+  req.user = { id: req.auth.userId };
   next();
 };
 
@@ -11,6 +12,8 @@ const requirePermission = (permission) => {
     if (!req.auth || !req.auth.userId) {
       return res.status(401).json({ error: 'Unauthenticated' });
     }
+    
+    req.user = { id: req.auth.userId };
 
     const hasPermission = req.auth.has({ permission });
 
