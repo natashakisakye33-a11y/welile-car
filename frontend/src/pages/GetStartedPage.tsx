@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SignIn, SignUp } from '@clerk/clerk-react';
+import { CustomSignIn, CustomSignUp } from './AuthPage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Car as CarIcon, 
@@ -559,12 +559,12 @@ export default function GetStartedPage() {
                         </motion.div>
                       )}
 
-                      {/* Clerk Auth Component */}
-                      <div className="flex justify-center mt-4 w-full [&_.cl-card]:w-full [&_.cl-card]:max-w-none [&_.cl-card]:shadow-none [&_.cl-card]:border [&_.cl-card]:border-border/60">
+                      {/* Custom Auth Component */}
+                      <div className="flex justify-center mt-4 w-full">
                         {isLogin ? (
-                           <SignIn fallbackRedirectUrl="/dashboard" routing="virtual" />
+                           <CustomSignIn />
                         ) : (
-                           <SignUp fallbackRedirectUrl="/dashboard" routing="virtual" />
+                           <CustomSignUp />
                         )}
                       </div>
                     </div>

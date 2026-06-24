@@ -26,7 +26,6 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUser, useClerk, useSession } from '@clerk/clerk-react';
 import { useProfile, useUpdateProfile, CARS } from '@/hooks/useProfile';
 import { 
   Dialog, 
@@ -38,10 +37,7 @@ import {
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
-  const { isAdmin, isCfo } = useAuth();
-  const { signOut } = useClerk();
-  const { session } = useSession();
-  const { user: clerkUser } = useUser();
+  const { isAdmin, isCfo, signOut, user: customUser, session } = useAuth();
   const { data: profile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
   const navigate = useNavigate();
@@ -61,20 +57,20 @@ export default function ProfilePage() {
 
   // Dynamic customer details populated from hooks, falling back to mock defaults
   const customer = {
-    name: profile?.name || clerkUser?.fullName || clerkUser?.firstName || "N/A",
-    email: clerkUser?.primaryEmailAddress?.emailAddress || "N/A",
-    phone: profile?.phone || clerkUser?.primaryPhoneNumber?.phoneNumber || "N/A",
+    name: profile?.name || customUser?.name || "N/A",
+    email: customUser?.email || "N/A",
+    phone: profile?.phone || (customUser as any)?.phone || "N/A",
     residence: profile?.residence || "N/A",
     kycStatus: "Verified",
-    joinDate: clerkUser?.createdAt 
-      ? new Date(clerkUser.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
+    joinDate: customUser?.createdAt 
+      ? new Date(customUser.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
       : "May 15, 2026",
     activeLoan: profile?.selected_car_id 
       ? (CARS.find(c => c.id === profile.selected_car_id)?.name || "Toyota Vitz (UBM 492X)") 
       : "Toyota Vitz (UBM 492X)"
   };
 
-  const currentAvatarUrl = profile?.avatar_url || clerkUser?.imageUrl;
+  const currentAvatarUrl = profile?.avatar_url || undefined;
 
   // Compress/resize image helper to fit in localStorage limits
   const compressImage = (base64Str: string, maxWidth = 256, maxHeight = 256): Promise<string> => {
