@@ -17,145 +17,86 @@ export default {
     },
     extend: {
       colors: {
-      "on-surface": "#131b2e",
-      "surface": "#faf8ff",
-      "secondary-fixed-dim": "#3cddc7",
-      "outline-variant": "#cfc2d7",
-      "tertiary-fixed": "#ffddb8",
-      "surface-dim": "#d2d9f4",
-      "surface-container-low": "#f2f3ff",
-      "outline": "#7e7386",
-      "tertiary-container": "#965e00",
-      "on-primary-fixed": "#2c0051",
-      "primary-fixed-dim": "#ddb8ff",
-      "error-container": "#ffdad6",
-      "on-primary-fixed-variant": "#6800b4",
-      "primary-fixed": "#f0dbff",
-      "surface-container": "#eaedff",
-      "on-primary": "#ffffff",
-      "inverse-primary": "#ddb8ff",
-      "error": "#ba1a1a",
-      "on-tertiary-fixed-variant": "#653e00",
-      "on-secondary-fixed": "#00201c",
-      "surface-container-high": "#e2e7ff",
-      "on-surface-variant": "#4d4354",
-      "tertiary-fixed-dim": "#ffb95f",
-      "secondary-container": "#62fae3",
-      "primary": "#4C158D",
-      "tertiary": "#754900",
-      "surface-tint": "#4C158D",
-      "surface-container-highest": "#dae2fd",
-      "on-error-container": "#93000a",
-      "on-secondary-container": "#007165",
-      "background": "#faf8ff",
-      "inverse-on-surface": "#eef0ff",
-      "on-primary-container": "#f6e6ff",
-      "primary-container": "#691dbf",
-      "surface-bright": "#faf8ff",
-      "surface-variant": "#dae2fd",
-      "secondary-fixed": "#62fae3",
-      "inverse-surface": "#283044",
-      "on-background": "#131b2e",
-      "on-tertiary-container": "#ffe8d1",
-      "surface-container-lowest": "#ffffff",
-      "on-secondary-fixed-variant": "#005047",
-      "on-secondary": "#ffffff",
-      "on-error": "#ffffff",
-      "on-tertiary": "#ffffff",
-      "secondary": "#006b5f",
-      "on-tertiary-fixed": "#2a1700"
-},
-      borderRadius: {
-      "DEFAULT": "0.25rem",
-      "lg": "0.5rem",
-      "xl": "0.75rem",
-      "full": "9999px"
-},
-      spacing: {
-      "base": "4px",
-      "stack-lg": "24px",
-      "stack-md": "16px",
-      "stack-sm": "8px",
-      "margin-mobile": "20px",
-      "gutter": "16px",
-      "section-gap": "40px"
-},
-      fontFamily: {
-      "body-md": [
-            "Manrope"
-      ],
-      "headline-lg": [
-            "Plus Jakarta Sans"
-      ],
-      "body-lg": [
-            "Manrope"
-      ],
-      "label-sm": [
-            "Manrope"
-      ],
-      "label-md": [
-            "Manrope"
-      ],
-      "headline-lg-mobile": [
-            "Plus Jakarta Sans"
-      ],
-      "headline-xl": [
-            "Plus Jakarta Sans"
-      ]
-},
-      fontSize: {
-      "body-md": [
-            "16px",
-            {
-                  "lineHeight": "1.6",
-                  "fontWeight": "400"
-            }
-      ],
-      "headline-lg": [
-            "24px",
-            {
-                  "lineHeight": "1.3",
-                  "fontWeight": "700"
-            }
-      ],
-      "body-lg": [
-            "18px",
-            {
-                  "lineHeight": "1.6",
-                  "fontWeight": "400"
-            }
-      ],
-      "label-sm": [
-            "12px",
-            {
-                  "lineHeight": "1.4",
-                  "fontWeight": "500"
-            }
-      ],
-      "label-md": [
-            "14px",
-            {
-                  "lineHeight": "1.4",
-                  "letterSpacing": "0.05em",
-                  "fontWeight": "600"
-            }
-      ],
-      "headline-lg-mobile": [
-            "22px",
-            {
-                  "lineHeight": "1.3",
-                  "fontWeight": "700"
-            }
-      ],
-      "headline-xl": [
-            "32px",
-            {
-                  "lineHeight": "1.2",
-                  "letterSpacing": "-0.02em",
-                  "fontWeight": "800"
-            }
-      ]
-},
+                        "on-background": "#0b1c30",
+                        "secondary-fixed": "#f0dbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#7642b9",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-fixed-dim": "#2fe19d",
+                        "on-surface": "#0b1c30",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#4f1291",
+                        "on-primary-fixed": "#290055",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-primary-fixed-variant": "#5d269f",
+                        "outline-variant": "#cdc3d4",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#00bb7f",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#d8b9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed": "#58feb8",
+                        "surface-container": "#e5eeff",
+                        "outline": "#7c7483",
+                        "tertiary": "#002b1a",
+                        "primary-fixed-dim": "#d8b9ff",
+                        "secondary-container": "#c284ff",
+                        "surface-dim": "#cbdbf5",
+                        "error": "#ba1a1a",
+                        "secondary": "#7c3fb6",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#005235",
+                        "tertiary-container": "#00432b",
+                        "secondary-fixed-dim": "#ddb8ff",
+                        "on-tertiary-fixed": "#002113",
+                        "on-secondary-fixed-variant": "#63239c",
+                        "on-surface-variant": "#4b4452",
+                        "background": "#f8f9ff",
+                        "primary": "#340068",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#52088c",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary-fixed": "#eddcff",
+                        "on-primary-container": "#bd8cff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "sidebar-width": "260px",
+                        "gutter": "24px",
+                        "card-padding": "24px",
+                        "base": "8px"
+                    },
+                    fontFamily: {
+                        "label-caps": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-sm": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "price-lg": ["Manrope"]
+                    },
+                    fontSize: {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "price-lg": ["18px", {"lineHeight": "1", "fontWeight": "800"}]
+                    },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
