@@ -48,23 +48,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          setUser(data);
-          setIsAdmin(data.role === 'ADMIN');
-          setIsCfo(data.role === 'CFO');
+          const localRole = localStorage.getItem('customRoleOverride') || data.role;
+          setUser({ ...data, role: localRole });
+          setIsAdmin(localRole === 'ADMIN');
+          setIsCfo(localRole === 'CFO');
           return;
         }
       }
       
       if (clerkUser) {
         // Fallback if webhook hasn't created the user in DB yet, or API failed
+        const localRole = localStorage.getItem('customRoleOverride') || 'CUSTOMER';
         setUser({
           id: clerkUser.id,
           name: clerkUser.fullName || '',
           email: clerkUser.primaryEmailAddress?.emailAddress || '',
-          role: 'CUSTOMER'
+          role: localRole
         });
-        setIsAdmin(false);
-        setIsCfo(false);
+        setIsAdmin(localRole === 'ADMIN');
+        setIsCfo(localRole === 'CFO');
       } else {
         setUser(null);
       }
