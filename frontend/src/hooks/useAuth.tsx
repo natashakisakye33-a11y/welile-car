@@ -22,6 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
 import { API_URL } from '@/config';
 import { fetchWithTimeout } from '@/lib/api';
 
@@ -32,31 +33,64 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCfo, setIsCfo] = useState(false);
 
-  const fetchUser = async (token: string) => {
+  const { isLoaded: clerkAuthLoaded, userId, getToken, signOut: clerkSignOut } = useClerkAuth();
+  const { isLoaded: clerkUserLoaded, user: clerkUser } = useClerkUser();
+
+  const fetchUser = async () => {
     try {
+      const token = await getToken();
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      
       const res = await fetchWithTimeout(`${API_URL}/users/me`);
       if (res.ok) {
         const data = await res.json();
-        setUser(data);
-        setIsAdmin(data.role === 'ADMIN');
-        setIsCfo(data.role === 'CFO');
+        if (data) {
+          setUser(data);
+          setIsAdmin(data.role === 'ADMIN');
+          setIsCfo(data.role === 'CFO');
+        } else if (clerkUser) {
+          // Fallback if webhook hasn't created the user in DB yet
+          setUser({
+            id: clerkUser.id,
+            name: clerkUser.fullName || '',
+            email: clerkUser.primaryEmailAddress?.emailAddress || '',
+            role: 'CUSTOMER'
+          });
+          setIsAdmin(false);
+          setIsCfo(false);
+        } else {
+          setUser(null);
+        }
       } else {
-        signOut();
+        setUser(null);
       }
     } catch (e) {
-      signOut();
+      setUser(null);
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setSession({ access_token: token });
-      fetchUser(token).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    if (clerkAuthLoaded && clerkUserLoaded) {
+      if (userId) {
+        setSession({ access_token: 'clerk-token' }); // Placeholder just so things relying on session exist
+        fetchUser().finally(() => setLoading(false));
+      } else {
+        // Fallback to local token if no clerk
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          setSession({ access_token: token });
+          fetchUser().finally(() => setLoading(false));
+        } else {
+          setLoading(false);
+          setUser(null);
+          setSession(null);
+        }
+      }
     }
-  }, []);
+  }, [clerkAuthLoaded, clerkUserLoaded, userId]);
 
   const signUp = async (phone: string, password: string, name: string, email: string, residence: string) => {
     try {
@@ -101,6 +135,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    if (clerkSignOut) {
+      try {
+        await clerkSignOut();
+      } catch (e) {
+        console.error('Clerk sign out error', e);
+      }
+    }
     setUser(null);
     setSession(null);
     setIsAdmin(false);
