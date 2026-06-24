@@ -4,7 +4,6 @@ const { clerkMiddleware } = require('@clerk/express');
 const { authenticateToken } = require('./shared/middleware/auth.middleware');
 
 // Routes
-const authRoutes = require('./modules/auth/auth.routes');
 const usersRoutes = require('./modules/users/users.routes');
 const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const transactionsRoutes = require('./modules/transactions/transactions.routes');
@@ -41,7 +40,6 @@ app.get('/api/health', async (req, res) => {
 });
 
 // App routes
-app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionsRoutes);
