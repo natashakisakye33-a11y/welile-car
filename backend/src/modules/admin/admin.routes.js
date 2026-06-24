@@ -4,13 +4,13 @@ const {
   getPendingDeposits, approveDeposit, rejectDeposit,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal
 } = require('./admin.controller');
-const { authenticateToken, requireAdmin } = require('../../shared/middleware/auth.middleware');
+const { authenticateToken, requirePermission } = require('../../shared/middleware/auth.middleware');
 
 const router = express.Router();
 
-// Apply auth and requireAdmin to all routes in this router
+// Apply auth and requirePermission to all routes in this router
 router.use(authenticateToken);
-router.use(requireAdmin);
+router.use(requirePermission('org:system:manage'));
 
 router.get('/stats/executive', getExecutiveStats);
 router.get('/stats/recovery', getRecoveryStats);
