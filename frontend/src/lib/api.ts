@@ -9,7 +9,13 @@ export async function fetchWithTimeout(resource: string | URL | Request, options
   
   // Only add if not explicitly omitted or already set
   if (!headers.has('Authorization')) {
-    const token = localStorage.getItem('authToken');
+    let token = null;
+    if (typeof window !== 'undefined' && (window as any).Clerk?.session) {
+      token = await (window as any).Clerk.session.getToken();
+    }
+    if (!token) {
+      token = localStorage.getItem('authToken');
+    }
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }

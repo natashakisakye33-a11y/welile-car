@@ -66,9 +66,9 @@ const AuthPage: React.FC = () => {
           <div className="md:w-1/2 flex flex-col bg-surface-container-lowest justify-center items-center py-12">
             <div className="w-full max-w-md flex justify-center">
               {isLogin ? (
-                <SignIn fallbackRedirectUrl="/vehicles" />
+                <SignIn fallbackRedirectUrl="/dashboard" />
               ) : (
-                <SignUp fallbackRedirectUrl="/vehicles" />
+                <SignUp fallbackRedirectUrl="/dashboard" />
               )}
             </div>
             

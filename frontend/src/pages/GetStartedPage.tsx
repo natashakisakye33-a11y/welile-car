@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SignIn, SignUp } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Car as CarIcon, 
@@ -89,12 +90,7 @@ export default function GetStartedPage() {
 
   // Auth/Sign-In State
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   // Dynamic Calculations
   const deposit30 = Math.round(selectedCar.priceUgx * 0.3);
@@ -133,12 +129,6 @@ export default function GetStartedPage() {
     setTimeout(() => {
       setActiveTab('signin');
     }, 800);
-  };
-
-  const handleAuthSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate successful login/signup and route to user dashboard
-    navigate('/dashboard');
   };
 
   const tabsConfig = [
@@ -569,69 +559,14 @@ export default function GetStartedPage() {
                         </motion.div>
                       )}
 
-                      {/* Login Form */}
-                      <form onSubmit={handleAuthSubmit} className="space-y-3 mt-4">
-                        
-                        {!isLogin && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-0.5">
-                              <label className="text-[9px] font-bold text-muted-foreground uppercase">Full Name</label>
-                              <input
-                                type="text"
-                                required
-                                placeholder="E.g., Welile Kisa"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full h-9 px-3 rounded-lg border border-border bg-muted/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs transition"
-                              />
-                            </div>
-                            <div className="space-y-0.5">
-                              <label className="text-[9px] font-bold text-muted-foreground uppercase">Phone Number</label>
-                              <input
-                                type="tel"
-                                required
-                                placeholder="E.g., +256 700 123"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full h-9 px-3 rounded-lg border border-border bg-muted/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs transition"
-                              />
-                            </div>
-                          </div>
+                      {/* Clerk Auth Component */}
+                      <div className="flex justify-center mt-4 w-full [&_.cl-card]:w-full [&_.cl-card]:max-w-none [&_.cl-card]:shadow-none [&_.cl-card]:border [&_.cl-card]:border-border/60">
+                        {isLogin ? (
+                           <SignIn fallbackRedirectUrl="/dashboard" routing="virtual" />
+                        ) : (
+                           <SignUp fallbackRedirectUrl="/dashboard" routing="virtual" />
                         )}
-
-                        <div className="space-y-0.5">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Email Address</label>
-                          <input
-                            type="email"
-                            required
-                            placeholder="E.g., welile@kisa.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full h-9 px-3 rounded-lg border border-border bg-muted/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs transition"
-                          />
-                        </div>
-
-                        <div className="space-y-0.5">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Password</label>
-                          <input
-                            type="password"
-                            required
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full h-9 px-3 rounded-lg border border-border bg-muted/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs transition"
-                          />
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={loading}
-                          className="w-full h-11 gradient-primary text-primary-foreground font-bold rounded-xl hover:opacity-95 transition shadow-sm mt-3 flex items-center justify-center gap-1.5 text-xs"
-                        >
-                          <span>{isLogin ? 'Log In & Access Portal' : 'Create Account & Start Saving'}</span>
-                          <ArrowRight size={14} />
-                        </button>
-                      </form>
+                      </div>
                     </div>
 
                     {/* Toggle Auth mode */}
