@@ -29,31 +29,31 @@ export const CustomSignIn = () => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
         <input 
           type="tel" 
           value={phone} 
           onChange={e => setPhone(e.target.value)} 
           required 
           placeholder="+256 700 000000"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Password</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
         <input 
           type="password" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
           required 
           placeholder="••••••••"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full h-11 mt-2 bg-primary hover:bg-primary-container text-on-primary font-label-md font-bold rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
+        className="w-full h-12 mt-4 bg-primary hover:bg-primary/90 text-white font-label-lg font-bold rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-70 shadow-md hover:shadow-lg hover:-translate-y-0.5"
       >
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
@@ -96,57 +96,57 @@ export const CustomSignUp = () => {
           onChange={e => setName(e.target.value)} 
           required 
           placeholder="Joshua Wanda"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Email Address</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
         <input 
           type="email" 
           value={email} 
           onChange={e => setEmail(e.target.value)} 
           required 
           placeholder="joshua@example.com"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
         <input 
           type="tel" 
           value={phone} 
           onChange={e => setPhone(e.target.value)} 
           required 
           placeholder="+256 700 000000"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Residence</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Residence</label>
         <input 
           type="text" 
           value={residence} 
           onChange={e => setResidence(e.target.value)} 
           required 
           placeholder="Kampala, Uganda"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Password</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
         <input 
           type="password" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
           required 
           placeholder="••••••••"
-          className="w-full h-11 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface transition-colors"
+          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full h-11 mt-3 bg-primary hover:bg-primary-container text-on-primary font-label-md font-bold rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
+        className="w-full h-12 mt-4 bg-primary hover:bg-primary/90 text-white font-label-lg font-bold rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-70 shadow-md hover:shadow-lg hover:-translate-y-0.5"
       >
         {loading ? 'Creating Account...' : 'Create Account'}
       </button>
@@ -188,7 +188,7 @@ const AuthPage: React.FC = () => {
           <div className="md:w-1/2 relative min-h-[400px] md:min-h-full overflow-hidden">
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" 
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1DmtbA_3scJICx2_GITfuKrBDE7jm0bVFt-e019I-Yrf5_FTpVbgaYjnpjs5TglmxVKGBWWWxB5xBp01hYq0VfRa4ai8hpNlmOsBlzKGlAAn3xl8ZE9iD9eyvqLZWrwlMdtB4LrC4-yZrr5achd_MymvAkvMG2R0DzIYdydtPbUkX5sLtcnhAhDfKC6bcAbg_5bhvBwnjCWu4CUFtkW4A45OmEaRE5S-TJQ5ZDdPrL_AKhP6HEP1Ri6sdYomlDEEj89Z9lj9NxkU')" }}
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=800&auto=format&fit=crop')" }}
             />
             <div className="absolute inset-0 flex flex-col justify-end p-12 text-white" style={{ background: 'linear-gradient(180deg, rgba(52, 0, 104, 0.4) 0%, rgba(52, 0, 104, 0.8) 100%)' }}>
               <div className="mb-8 bg-white/20 backdrop-blur-md w-12 h-12 flex items-center justify-center rounded-xl">
