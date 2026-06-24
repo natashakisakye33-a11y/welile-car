@@ -64,11 +64,11 @@ const AppLayout = () => {
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/executive" element={<ProtectedRoute permission="org:system:manage"><ExecutiveDashboard /></ProtectedRoute>} />
-        <Route path="/admin/loans" element={<ProtectedRoute permission="org:bookings:view"><LoanDashboard /></ProtectedRoute>} />
-        <Route path="/admin/recovery" element={<ProtectedRoute permission="org:transactions:view"><RecoveryDashboard /></ProtectedRoute>} />
-        <Route path="/admin/savings" element={<ProtectedRoute permission="org:wallet:view"><SavingsDashboard /></ProtectedRoute>} />
-        <Route path="/admin/dealers" element={<ProtectedRoute permission="org:users:manage"><DealerDashboard /></ProtectedRoute>} />
+        <Route path="/admin/executive" element={<ProtectedRoute requireAdmin><ExecutiveDashboard /></ProtectedRoute>} />
+        <Route path="/admin/loans" element={<ProtectedRoute requireAdmin><LoanDashboard /></ProtectedRoute>} />
+        <Route path="/admin/recovery" element={<ProtectedRoute requireAdmin><RecoveryDashboard /></ProtectedRoute>} />
+        <Route path="/admin/savings" element={<ProtectedRoute requireAdmin><SavingsDashboard /></ProtectedRoute>} />
+        <Route path="/admin/dealers" element={<ProtectedRoute requireAdmin><DealerDashboard /></ProtectedRoute>} />
         <Route path="/cfo" element={<CfoPage />} />
 
         {/* Customer Routes with Sidebar */}
