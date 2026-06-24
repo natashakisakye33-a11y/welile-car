@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { PrismaClient } = require('@prisma/client');
+const { clerkMiddleware } = require('@clerk/express');
 const { authenticateToken } = require('./shared/middleware/auth.middleware');
 
 // Routes
@@ -13,6 +13,7 @@ const repaymentsRoutes = require('./modules/repayments/repayments.routes');
 const vehiclesRoutes = require('./modules/vehicles/vehicles.routes');
 const savingsRoutes = require('./modules/savings/savings.routes');
 const adminRoutes = require('./modules/admin/admin.routes');
+const webhooksRoutes = require('./modules/webhooks/webhooks.routes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +21,12 @@ const prisma = new PrismaClient();
 
 const path = require('path');
 app.use(cors());
+
+// Webhook needs raw body, so mount it BEFORE express.json()
+app.use('/api/webhooks', webhooksRoutes);
+
 app.use(express.json());
+app.use(clerkMiddleware());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Basic health route
