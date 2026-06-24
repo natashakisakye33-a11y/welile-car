@@ -14,6 +14,13 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Phone number already in use' });
     }
 
+    if (email) {
+      const existingEmail = await prisma.user.findUnique({ where: { email } });
+      if (existingEmail) {
+        return res.status(400).json({ error: 'Email address already in use' });
+      }
+    }
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
