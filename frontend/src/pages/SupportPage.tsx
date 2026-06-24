@@ -94,7 +94,10 @@ const SupportPage = () => {
           <span className="text-primary font-black mt-auto">support@welilecar.com</span>
         </a>
       </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> acf479d709a9666d96d6618fd4c7a1bada0e966d
       {/* FAQs */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
