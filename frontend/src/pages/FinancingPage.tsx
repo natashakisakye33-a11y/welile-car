@@ -291,39 +291,6 @@ const FinancingPage = () => {
                   </div>
                 </motion.div>
 
-                {/* Commitments */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
-                  <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
-                    <ShieldCheck size={22} className="text-primary" /> Your Commitments
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <FileText size={20} className="text-primary mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Logbook Retention</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Welile Car holds the original logbook until 100% of the financing is cleared.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <ShieldCheck size={20} className="text-primary mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Active Insurance</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Comprehensive insurance must be maintained active at all times.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <AlertCircle size={20} className="text-amber-500 mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Certified Maintenance</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Major servicing must be done at verified partner garages.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <AlertCircle size={20} className="text-red-500 mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Payment Defaults</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Missing payments for 30 consecutive days may result in repossession.</p>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Right Column: Requirements & Payment Selection */}
-              <div className="lg:col-span-5 space-y-8">
-                
                 {/* Requirements Checklist */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm flex flex-col">
                   <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight flex items-center justify-between">
@@ -458,6 +425,39 @@ const FinancingPage = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Right Column: Requirements & Payment Selection */}
+              <div className="lg:col-span-5 space-y-8">
+                
+                {/* Commitments */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
+                  <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
+                    <ShieldCheck size={22} className="text-primary" /> Your Commitments
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+                      <FileText size={20} className="text-primary mb-3" />
+                      <h4 className="font-bold text-slate-900 text-sm mb-1">Logbook Retention</h4>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Welile Car holds the original logbook until 100% of the financing is cleared.</p>
+                    </div>
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+                      <ShieldCheck size={20} className="text-primary mb-3" />
+                      <h4 className="font-bold text-slate-900 text-sm mb-1">Active Insurance</h4>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Comprehensive insurance must be maintained active at all times.</p>
+                    </div>
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+                      <AlertCircle size={20} className="text-amber-500 mb-3" />
+                      <h4 className="font-bold text-slate-900 text-sm mb-1">Certified Maintenance</h4>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Major servicing must be done at verified partner garages.</p>
+                    </div>
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+                      <AlertCircle size={20} className="text-red-500 mb-3" />
+                      <h4 className="font-bold text-slate-900 text-sm mb-1">Payment Defaults</h4>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Missing payments for 30 consecutive days may result in repossession.</p>
+                    </div>
                   </div>
                 </motion.div>
 

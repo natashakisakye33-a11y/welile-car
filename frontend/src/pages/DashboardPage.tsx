@@ -143,7 +143,7 @@ const DashboardPage = () => {
           </a>
         </div>
         
-        <div className="w-full h-80 bg-slate-100 rounded-[2rem] overflow-hidden relative border border-slate-200">
+        <div className="w-64 mx-auto aspect-square bg-slate-100 rounded-[2rem] overflow-hidden relative border border-slate-200">
           <iframe 
             src="https://maps.google.com/maps?q=Palm+Lane+Kabaale,+Entebbe&t=&z=15&ie=UTF8&iwloc=&output=embed" 
             width="100%" 
@@ -155,14 +155,14 @@ const DashboardPage = () => {
             className="absolute inset-0"
           ></iframe>
         </div>
-        <div className="mt-6 flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
+        <div className="mt-6 flex items-start gap-4 p-4 bg-slate-50 rounded-xl w-64 mx-auto">
           <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center shrink-0 text-primary">
             <MapPin size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-slate-900">Welile Technologies Headquaters</h4>
-            <p className="text-slate-600 text-sm">Palm Lane Kabaale, Entebbe</p>
-            <p className="text-slate-400 text-xs mt-1">Open Mon-Fri: 9:00AM - 5:00PM</p>
+            <h4 className="font-bold text-slate-900 text-xs">Welile Technologies</h4>
+            <p className="text-slate-600 text-[10px]">Palm Lane Kabaale, Entebbe</p>
+            <p className="text-slate-400 text-[10px] mt-1">Open Mon-Fri: 9AM-5PM</p>
           </div>
         </div>
       </motion.div>
@@ -334,27 +334,41 @@ const DashboardPage = () => {
       {/* Section 6: Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} >
         <h3 className="text-xl font-black text-slate-900 mb-6 tracking-tight">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <button onClick={() => navigate('/wallet')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
-            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Wallet size={24} /></div>
-            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Wallet</span>
+        <div className="flex flex-col gap-4">
+          <button onClick={() => navigate('/vehicles')} className="w-full bg-gradient-to-r from-primary to-fuchsia-600 text-white p-6 md:p-8 rounded-[2rem] shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-between group overflow-hidden relative">
+            <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-white/20 transition-colors duration-700"></div>
+            <div className="flex items-center gap-5 relative z-10">
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/20 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                <CarFront size={32} className="text-white drop-shadow-md" />
+              </div>
+              <div className="text-left">
+                <span className="block text-xs md:text-sm font-black uppercase tracking-widest text-white/80 mb-1">Ready to own?</span>
+                <span className="block text-2xl md:text-3xl font-black tracking-tight drop-shadow-md">Purchase a Vehicle</span>
+              </div>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md relative z-10 group-hover:bg-white/20 transition-colors">
+              <ArrowRight size={24} className="group-hover:translate-x-1.5 transition-transform text-white" />
+            </div>
           </button>
-          <button onClick={() => navigate('/applications')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
-            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><FileText size={24} /></div>
-            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Applications</span>
-          </button>
-          <button onClick={() => navigate('/vehicles')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
-            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Car size={24} /></div>
-            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Vehicles</span>
-          </button>
-          <button onClick={() => navigate('/my-vehicle')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
-            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><CarFront size={24} /></div>
-            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">My Vehicle</span>
-          </button>
-          <button onClick={() => navigate('/support')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
-            <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><LifeBuoy size={24} /></div>
-            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Support</span>
-          </button>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button onClick={() => navigate('/wallet')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+              <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Wallet size={24} /></div>
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Wallet</span>
+            </button>
+            <button onClick={() => navigate('/applications')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+              <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><FileText size={24} /></div>
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Applications</span>
+            </button>
+            <button onClick={() => navigate('/my-vehicle')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+              <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><Car size={24} /></div>
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">My Vehicle</span>
+            </button>
+            <button onClick={() => navigate('/support')} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:card-shadow hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center gap-4 group">
+              <div className="w-14 h-14 rounded-full bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300"><LifeBuoy size={24} /></div>
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Support</span>
+            </button>
+          </div>
         </div>
       </motion.div>
 

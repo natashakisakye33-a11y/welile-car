@@ -69,6 +69,22 @@ const CarDetailsPage = () => {
     }
   }, [session]);
 
+  const handlePaymentMethodSelect = async (method: string) => {
+    try {
+      await selectCar.mutateAsync({
+        carId: car?.id || id,
+        condition: car?.condition || 'used',
+        price: car?.priceUgx || 0
+      });
+      toast.success('Vehicle selected as target!');
+      setShowPaymentModal(false);
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error('Failed to select vehicle.');
+    }
+  };
+
+
   if (!car || loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -169,10 +185,7 @@ const CarDetailsPage = () => {
 
               <div className="mt-auto">
                 <button
-                  onClick={() => {
-                    setPaymentStep('plan');
-                    setShowPaymentModal(true);
-                  }}
+                  onClick={() => navigate('/wallet')}
                   className="w-full shimmer-btn font-black py-4 rounded-2xl transition-all bg-primary hover:bg-fuchsia-700 text-white shadow-xl shadow-primary/30 text-lg hover:-translate-y-1"
                 >
                   Start with UGX 5,000
@@ -452,19 +465,19 @@ const CarDetailsPage = () => {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handlePaymentMethodSelect('wallet')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Welile Wallet</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handlePaymentMethodSelect('mobile_money')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Mobile Money</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handlePaymentMethodSelect('card')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Card</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&plan=${paymentFreq}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handlePaymentMethodSelect('bank')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Transfer</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
