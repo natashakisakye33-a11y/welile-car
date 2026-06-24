@@ -51,19 +51,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(data);
           setIsAdmin(data.role === 'ADMIN');
           setIsCfo(data.role === 'CFO');
-        } else if (clerkUser) {
-          // Fallback if webhook hasn't created the user in DB yet
-          setUser({
-            id: clerkUser.id,
-            name: clerkUser.fullName || '',
-            email: clerkUser.primaryEmailAddress?.emailAddress || '',
-            role: 'CUSTOMER'
-          });
-          setIsAdmin(false);
-          setIsCfo(false);
-        } else {
-          setUser(null);
+          return;
         }
+      }
+      
+      if (clerkUser) {
+        // Fallback if webhook hasn't created the user in DB yet, or API failed
+        setUser({
+          id: clerkUser.id,
+          name: clerkUser.fullName || '',
+          email: clerkUser.primaryEmailAddress?.emailAddress || '',
+          role: 'CUSTOMER'
+        });
+        setIsAdmin(false);
+        setIsCfo(false);
       } else {
         setUser(null);
       }
