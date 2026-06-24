@@ -14,6 +14,8 @@ import {
   Settings, Fuel, Calendar, Car as CarIcon, Gauge, Users,
   Droplet, AlertCircle, PhoneCall, CalendarPlus, ChevronRight, X
 } from 'lucide-react';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 
 const CarDetailsPage = () => {
   const { id } = useParams();
@@ -27,6 +29,7 @@ const CarDetailsPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [userSavings, setUserSavings] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Modals state
   const [showInspectionForm, setShowInspectionForm] = useState(false);
@@ -36,6 +39,7 @@ const CarDetailsPage = () => {
   const [savingsAmount, setSavingsAmount] = useState('5000');
 
   useEffect(() => {
+    setError(null);
     fetch(`${API_URL}/vehicles/${id}`, {
       headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
     })
@@ -49,7 +53,7 @@ const CarDetailsPage = () => {
     .catch(err => {
       console.error(err);
       toast.error('Vehicle not found');
-      navigate('/vehicles');
+      setError('Vehicle not found or connection error');
     });
   }, [id, session, navigate]);
 
@@ -87,8 +91,12 @@ const CarDetailsPage = () => {
   };
 
 
-  if (!car || loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return <PageLoader message="Loading Vehicle Details..." />;
+  }
+
+  if (error || !car) {
+    return <ErrorState message={error || "Vehicle could not be loaded."} onRetry={() => window.location.reload()} />;
   }
 
   const requiredDeposit = car.priceUgx * 0.3;
@@ -187,14 +195,10 @@ const CarDetailsPage = () => {
 
               <div className="mt-auto">
                 <button
-<<<<<<< HEAD
-                  onClick={() => navigate('/wallet')}
-=======
                   onClick={() => {
                     setPaymentStep('amount');
                     setShowPaymentModal(true);
                   }}
->>>>>>> acf479d709a9666d96d6618fd4c7a1bada0e966d
                   className="w-full shimmer-btn font-black py-4 rounded-2xl transition-all bg-primary hover:bg-fuchsia-700 text-white shadow-xl shadow-primary/30 text-lg hover:-translate-y-1"
                 >
                   Start with UGX 5,000
@@ -528,21 +532,6 @@ const CarDetailsPage = () => {
                 </div>
 
                 <div className="space-y-3 mb-6">
-<<<<<<< HEAD
-                  <button onClick={() => handlePaymentMethodSelect('wallet')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-                    <span className="font-bold text-slate-700">Welile Wallet</span>
-                    <ChevronRight size={18} className="text-slate-400" />
-                  </button>
-                  <button onClick={() => handlePaymentMethodSelect('mobile_money')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-                    <span className="font-bold text-slate-700">Mobile Money</span>
-                    <ChevronRight size={18} className="text-slate-400" />
-                  </button>
-                  <button onClick={() => handlePaymentMethodSelect('card')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-                    <span className="font-bold text-slate-700">Bank Card</span>
-                    <ChevronRight size={18} className="text-slate-400" />
-                  </button>
-                  <button onClick={() => handlePaymentMethodSelect('bank')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
-=======
                   <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Welile Wallet</span>
                     <ChevronRight size={18} className="text-slate-400" />
@@ -556,7 +545,6 @@ const CarDetailsPage = () => {
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
                   <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
->>>>>>> acf479d709a9666d96d6618fd4c7a1bada0e966d
                     <span className="font-bold text-slate-700">Bank Transfer</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>

@@ -13,6 +13,8 @@ import { formatUGX, formatDate } from '@/lib/format';
 import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 
 const paymentMethods = [
   { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: '📱' },
@@ -67,6 +69,7 @@ const WalletPage = () => {
   // Live Data State
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
 
   // Purchase State
   const searchParams = new URLSearchParams(location.search);
@@ -91,13 +94,17 @@ const WalletPage = () => {
     if (!user) return;
     const fetchData = async () => {
       try {
+        setDashboardError(null);
         const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           const json = await res.json();
           setDashboardData(json);
+        } else {
+          setDashboardError("Failed to fetch wallet data.");
         }
       } catch (e) {
         console.error(e);
+        setDashboardError("Network error occurred while loading wallet.");
       } finally {
         setLoadingDashboard(false);
       }
@@ -125,10 +132,12 @@ const WalletPage = () => {
   }, [calcTarget, calcMonthly]);
 
   if (!authLoading && !user) { navigate('/'); return null; }
-  if (isLoading || loadingDashboard || !profile || !dashboardData) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="animate-pulse text-slate-400 font-medium">Loading Wallet...</div>
-    </div>;
+  if (isLoading || loadingDashboard) {
+    return <PageLoader message="Loading Wallet..." />;
+  }
+
+  if (dashboardError || !profile || !dashboardData) {
+    return <ErrorState message={dashboardError || "Wallet data could not be loaded."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
   const walletDeduction = Number(localStorage.getItem('mockWalletDeduction') || 0);
