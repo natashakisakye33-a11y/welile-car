@@ -6,6 +6,8 @@ import { carsData } from '@/data/cars';
 import { useProfile } from '@/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const MyVehiclePage = () => {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, error } = useProfile();
   const navigate = useNavigate();
 
   // Dialog states
@@ -28,7 +30,11 @@ const MyVehiclePage = () => {
   const [mileageInput, setMileageInput] = useState('65240');
 
   if (isLoading) {
-    return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Vehicle Data...</div>;
+    return <PageLoader message="Loading Vehicle Data..." />;
+  }
+
+  if (error || !profile) {
+    return <ErrorState message="Could not load your vehicle data." />;
   }
 
   const car = profile?.selected_car_id 

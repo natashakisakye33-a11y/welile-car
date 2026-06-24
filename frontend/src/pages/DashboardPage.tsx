@@ -8,6 +8,8 @@ import { formatUGX } from '@/lib/format';
 import { PlusCircle, Wallet, FileText, Car, CarFront, LifeBuoy, CheckCircle2, Circle, TrendingUp, Target, Clock, ArrowRight, MapPin, ExternalLink } from 'lucide-react';
 import { carsData } from '@/data/cars';
 import { useProfile } from '@/hooks/useProfile';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 
 interface DashboardData {
   health: {
@@ -46,6 +48,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { data: profile } = useProfile();
 
   useEffect(() => {
@@ -57,6 +60,7 @@ const DashboardPage = () => {
 
     const fetchData = async () => {
       try {
+        setError(null);
         const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           const json = await res.json();
@@ -77,9 +81,12 @@ const DashboardPage = () => {
               }
             }
           });
+        } else {
+          setError("Failed to fetch dashboard data. Please try again later.");
         }
       } catch (e) {
         console.error(e);
+        setError("An unexpected network error occurred. Please check your connection.");
       } finally {
         setLoading(false);
       }
@@ -87,12 +94,12 @@ const DashboardPage = () => {
     fetchData();
   }, [user, session, authLoading, navigate]);
 
-  if (loading || !data) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400 font-medium">Loading Dashboard...</div>
-      </div>
-    );
+  if (loading) {
+    return <PageLoader message="Loading Dashboard..." />;
+  }
+
+  if (error || !data) {
+    return <ErrorState message={error || "Could not load dashboard data."} onRetry={() => { setLoading(true); }} />;
   }
 
   const isQualified = data.health.creditScore >= 70 && data.savings.progressPercent >= 30;

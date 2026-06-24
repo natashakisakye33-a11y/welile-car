@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
@@ -14,6 +14,8 @@ import {
   Settings, Fuel, Calendar, Car as CarIcon, Gauge, Users,
   Droplet, AlertCircle, PhoneCall, CalendarPlus, ChevronRight, X
 } from 'lucide-react';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 
 const CarDetailsPage = () => {
   const { id } = useParams();
@@ -27,6 +29,7 @@ const CarDetailsPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [userSavings, setUserSavings] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Modals state
   const [showInspectionForm, setShowInspectionForm] = useState(false);
@@ -36,6 +39,7 @@ const CarDetailsPage = () => {
   const [savingsAmount, setSavingsAmount] = useState('5000');
 
   useEffect(() => {
+    setError(null);
     fetch(`${API_URL}/vehicles/${id}`, {
       headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
     })
@@ -49,7 +53,7 @@ const CarDetailsPage = () => {
     .catch(err => {
       console.error(err);
       toast.error('Vehicle not found');
-      navigate('/vehicles');
+      setError('Vehicle not found or connection error');
     });
   }, [id, session, navigate]);
 
@@ -87,8 +91,12 @@ const CarDetailsPage = () => {
   };
 
 
-  if (!car || loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return <PageLoader message="Loading Vehicle Details..." />;
+  }
+
+  if (error || !car) {
+    return <ErrorState message={error || "Vehicle could not be loaded."} onRetry={() => window.location.reload()} />;
   }
 
   const requiredDeposit = car.priceUgx * 0.3;

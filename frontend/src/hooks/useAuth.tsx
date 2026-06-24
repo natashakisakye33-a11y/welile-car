@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-refresh/only-export-components, react-hooks/exhaustive-deps */
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps */
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export interface User {

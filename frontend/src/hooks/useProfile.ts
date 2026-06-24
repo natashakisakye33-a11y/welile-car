@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { API_URL } from '@/config';
@@ -160,7 +160,7 @@ export function useProfile() {
         
         return profile;
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         return null;
       }
     },

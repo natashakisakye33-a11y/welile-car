@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useRequestFinancing } from '@/hooks/useProfile';
 import { carsData } from '@/data/cars';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PageLoader } from '@/components/ui/spinner';
+import { ErrorState } from '@/components/ui/error-state';
 import { formatUGX } from '@/lib/format';
 import BottomNav from '@/components/BottomNav';
 import { useState, useEffect, useRef } from 'react';
@@ -41,6 +43,7 @@ const FinancingPage = () => {
   // Live Data State
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   const { session } = useAuth();
 
   // Custom Deposit State
@@ -70,12 +73,16 @@ const FinancingPage = () => {
     if (!user) return;
     const fetchData = async () => {
       try {
+        setDashboardError(null);
         const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
         if (res.ok) {
           setDashboardData(await res.json());
+        } else {
+          setDashboardError("Failed to fetch financing details.");
         }
       } catch (e) {
         console.error(e);
+        setDashboardError("Network error occurred while fetching details.");
       } finally {
         setLoadingDashboard(false);
       }
@@ -84,10 +91,12 @@ const FinancingPage = () => {
   }, [user, session]);
 
   if (!authLoading && !user) { navigate('/'); return null; }
-  if (isLoading || loadingDashboard || !profile || !dashboardData) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="animate-pulse text-slate-400 font-bold">Loading Application...</div>
-    </div>;
+  if (isLoading || loadingDashboard) {
+    return <PageLoader message="Loading Application..." />;
+  }
+
+  if (dashboardError || !profile || !dashboardData) {
+    return <ErrorState message={dashboardError || "Application data is unavailable."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
   const car = carsData.find(c => c.id === profile.selected_car_id) || carsData[0];
