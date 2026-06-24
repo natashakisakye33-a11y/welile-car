@@ -12,26 +12,24 @@ export default function VehiclesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   
-  const [carsData, setCarsData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [carsData, setCarsData] = useState<any[]>(mockCarsData);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/vehicles`, {
       headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error('API Error');
+      return res.json();
+    })
     .then(data => {
-      if (data && data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         setCarsData(data);
-      } else {
-        setCarsData(mockCarsData);
       }
-      setLoading(false);
     })
     .catch(err => {
-      console.error(err);
-      setCarsData(mockCarsData);
-      setLoading(false);
+      console.error('Failed to load vehicles from API, using mock data:', err);
     });
   }, [session]);
 
