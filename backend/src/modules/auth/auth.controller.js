@@ -54,8 +54,14 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { phone } });
+    const { phone, password } = req.body; // 'phone' could be an email string from the frontend
+
+    // Determine if the input is an email or phone number
+    const isEmail = phone && phone.includes('@');
+    
+    const user = await prisma.user.findFirst({ 
+      where: isEmail ? { email: phone } : { phone } 
+    });
     
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
