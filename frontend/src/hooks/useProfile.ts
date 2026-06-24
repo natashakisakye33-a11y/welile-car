@@ -160,7 +160,7 @@ export function useProfile() {
         
         return profile;
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         return null;
       }
     },
