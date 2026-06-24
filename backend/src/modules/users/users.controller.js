@@ -43,7 +43,7 @@ const submitKyc = async (req, res) => {
 
 const getMyProfile = async (req, res) => {
   try {
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkUserId: req.auth.userId },
       select: { 
         id: true, email: true, name: true, role: true, 
@@ -51,8 +51,21 @@ const getMyProfile = async (req, res) => {
         address: true, employmentStatus: true 
       }
     });
+
+    if (!user) {
+      // Auto-create missing user to handle cases where DB was reset
+      user = await prisma.user.create({
+        data: {
+          clerkUserId: req.auth.userId,
+          name: 'Restored User',
+          phone: `TEMP_${req.auth.userId}`
+        }
+      });
+    }
+
     res.json(user);
   } catch (error) {
+    console.error('Get Profile Error:', error);
     res.status(500).json({ error: 'Server error retrieving profile' });
   }
 };
@@ -89,6 +102,23 @@ const approveKyc = async (req, res) => {
 const updateMyRole = async (req, res) => {
   try {
     const { role } = req.body;
+    
+    // Upsert equivalent since Prisma upsert requires unique non-nullable fields we might not have in update
+    let existingUser = await prisma.user.findUnique({
+      where: { clerkUserId: req.auth.userId }
+    });
+
+    if (!existingUser) {
+       const newUser = await prisma.user.create({
+          data: {
+            clerkUserId: req.auth.userId,
+            name: 'Restored User',
+            phone: `TEMP_${req.auth.userId}`,
+            role
+          }
+       });
+       return res.json(newUser);
+    }
     
     const user = await prisma.user.update({
       where: { clerkUserId: req.auth.userId },
