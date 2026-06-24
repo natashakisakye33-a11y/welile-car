@@ -284,7 +284,7 @@ const DashboardPage = () => {
             <div key={car.id} className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden group hover:shadow-md transition-shadow">
               <div className="h-56 bg-surface-container-low flex items-center justify-center p-8 relative overflow-hidden">
                 <img 
-                  src={car.images[0]} 
+                  src={car.image} 
                   alt={car.name} 
                   className="h-full object-contain group-hover:scale-105 transition-transform duration-500" 
                 />
@@ -295,18 +295,18 @@ const DashboardPage = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-headline-md text-headline-md">{car.name}</h3>
-                    <p className="font-price-lg text-price-lg text-primary">{formatUGX(car.price)}</p>
+                    <p className="font-price-lg text-price-lg text-primary">{formatUGX(car.priceUgx)}</p>
                   </div>
                   {index !== 2 && <span className="px-2 py-1 bg-tertiary-fixed/20 text-on-tertiary-fixed-variant rounded text-[10px] font-bold uppercase">In Stock</span>}
                 </div>
                 <div className="space-y-2 mb-6 text-body-sm">
                   <div className="flex justify-between border-b border-outline-variant/20 pb-2">
                     <span className="text-on-surface-variant">Required Deposit (30%)</span>
-                    <span className="font-bold text-on-surface">{formatUGX(car.price * 0.3)}</span>
+                    <span className="font-bold text-on-surface">{formatUGX(car.priceUgx * 0.3)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-on-surface-variant">Est. Monthly (36m)</span>
-                    <span className="font-bold text-on-surface">{formatUGX((car.price * 0.8) / 36)}</span>
+                    <span className="font-bold text-on-surface">{formatUGX((car.priceUgx * 0.8) / 36)}</span>
                   </div>
                 </div>
                 <Link to={`/vehicles/${car.id}`} className="w-full py-3 border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center">
