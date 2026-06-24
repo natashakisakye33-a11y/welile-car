@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { API_URL } from '@/config';
@@ -9,6 +10,7 @@ export interface Profile {
   user_id: string;
   name: string;
   phone: string;
+  residence?: string;
   avatar_url?: string;
   referral_code: string;
   referred_by: string | null;
@@ -43,6 +45,7 @@ const getMockProfile = (userId: string): Profile => {
   
   let name = 'John Doe';
   let phone = '+256 700 123 456';
+  let residence = 'Ntinda, Kampala';
   let avatar_url = '';
   const storedUser = localStorage.getItem('mockUser');
   if (storedUser) {
@@ -50,6 +53,7 @@ const getMockProfile = (userId: string): Profile => {
       const u = JSON.parse(storedUser);
       if (u.user_metadata?.name) name = u.user_metadata.name;
       if (u.user_metadata?.phone) phone = u.user_metadata.phone;
+      if (u.user_metadata?.residence) residence = u.user_metadata.residence;
       if (u.user_metadata?.avatar_url) avatar_url = u.user_metadata.avatar_url;
     } catch (e) {
       console.error(e);
@@ -131,9 +135,10 @@ export function useProfile() {
         const profile: Profile = {
           id: me.id.toString(),
           user_id: me.id.toString(),
-          name: me.name,
-          phone: me.phone || '',
-          avatar_url: '',
+          name: mockP.name !== 'John Doe' ? mockP.name : me.name,
+          phone: mockP.phone !== '+256 700 123 456' ? mockP.phone : (me.phone || ''),
+          residence: mockP.residence || '',
+          avatar_url: mockP.avatar_url || '',
           referral_code: '',
           referred_by: null,
           wallet_balance: summary.savings.totalSaved,

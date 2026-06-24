@@ -3,29 +3,33 @@ const { logAction } = require('../../shared/utils/audit.util');
 
 const prisma = new PrismaClient();
 
+const getDbUser = async (clerkUserId) => {
+  return await prisma.user.findUnique({ where: { clerkUserId } });
+};
+
 const submitKyc = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const dbUser = await getDbUser(req.auth.userId);
+    if (!dbUser) return res.status(404).json({ error: 'User not found' });
+    
     const { nationalId, selfieUrl, address, employmentStatus } = req.body;
 
-    // Ensure all required KYC fields are present
     if (!nationalId || !selfieUrl || !address || !employmentStatus) {
       return res.status(400).json({ error: 'Missing required KYC fields' });
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: dbUser.id },
       data: {
         nationalId,
         selfieUrl,
         address,
         employmentStatus,
-        kycStatus: 'PENDING' // Sets it back to pending if they are updating
+        kycStatus: 'PENDING'
       }
     });
 
-    // Log the KYC submission
-    await logAction(userId, 'KYC_SUBMISSION', JSON.stringify({ nationalId, employmentStatus }), req.ip);
+    await logAction(dbUser.id, 'KYC_SUBMISSION', JSON.stringify({ nationalId, employmentStatus }), req.ip);
 
     res.json({ message: 'KYC documents submitted successfully', user: updatedUser });
   } catch (error) {
@@ -40,7 +44,7 @@ const submitKyc = async (req, res) => {
 const getMyProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+      where: { clerkUserId: req.auth.userId },
       select: { 
         id: true, email: true, name: true, role: true, 
         status: true, kycStatus: true, nationalId: true, 
@@ -55,8 +59,9 @@ const getMyProfile = async (req, res) => {
 
 const approveKyc = async (req, res) => {
   try {
+    const adminUser = await getDbUser(req.auth.userId);
     const { userId } = req.params;
-    const { status } = req.body; // e.g., 'APPROVED', 'REJECTED'
+    const { status } = req.body; 
 
     if (!['APPROVED', 'REJECTED'].includes(status)) {
       return res.status(400).json({ error: 'Status must be APPROVED or REJECTED' });
@@ -70,7 +75,9 @@ const approveKyc = async (req, res) => {
       }
     });
 
-    await logAction(req.user.id, 'KYC_REVIEWED', `Admin reviewed KYC for user ${userId}. Result: ${status}`, req.ip);
+    if (adminUser) {
+      await logAction(adminUser.id, 'KYC_REVIEWED', `Admin reviewed KYC for user ${userId}. Result: ${status}`, req.ip);
+    }
 
     res.json({ message: 'KYC status updated successfully', user: updatedUser });
   } catch (error) {
@@ -79,8 +86,25 @@ const approveKyc = async (req, res) => {
   }
 };
 
+const updateMyRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    
+    const user = await prisma.user.update({
+      where: { clerkUserId: req.auth.userId },
+      data: { role }
+    });
+    
+    res.json(user);
+  } catch (e) {
+    console.error('Update Role Error:', e);
+    res.status(500).json({ error: 'fail' });
+  }
+};
+
 module.exports = {
   submitKyc,
   getMyProfile,
-  approveKyc
+  approveKyc,
+  updateMyRole
 };

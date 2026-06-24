@@ -1,33 +1,27 @@
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../utils/jwt.util');
+const { requireAuth } = require('@clerk/express');
 
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
+const authenticateToken = requireAuth();
 
-  if (token == null) {
-    return res.status(401).json({ error: 'Authentication token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
+const requirePermission = (permission) => {
+  return async (req, res, next) => {
+    // Ensure the user is authenticated first
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).json({ error: 'Unauthenticated' });
     }
-    
-    // Store user info in request for downstream use
-    req.user = user;
-    next();
-  });
-};
 
-const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'ADMIN') {
-    return res.status(403).json({ error: 'Forbidden: Admin access required' });
-  }
-  next();
+    const hasPermission = req.auth.has({ permission });
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        error: "Forbidden"
+      });
+    }
+
+    next();
+  };
 };
 
 module.exports = {
   authenticateToken,
-  requireAdmin
+  requirePermission
 };

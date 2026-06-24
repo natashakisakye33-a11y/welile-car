@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { getAllVehicles, getVehicleById, addVehicle, updateVehicle } = require('./vehicles.controller');
-const { authenticateToken, requireAdmin } = require('../../shared/middleware/auth.middleware');
+const { authenticateToken, requirePermission } = require('../../shared/middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -18,12 +18,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Publicly accessible to authenticated users
-router.get('/', authenticateToken, getAllVehicles);
-router.get('/:id', authenticateToken, getVehicleById);
+// Publicly accessible
+router.get('/', getAllVehicles);
+router.get('/:id', getVehicleById);
 
 // Restricted to Admins
-router.post('/', authenticateToken, requireAdmin, upload.array('gallery', 10), addVehicle);
-router.put('/:id', authenticateToken, requireAdmin, upload.array('gallery', 10), updateVehicle);
+router.post('/', authenticateToken, requirePermission('org:vehicles:create'), upload.array('gallery', 10), addVehicle);
+router.put('/:id', authenticateToken, requirePermission('org:vehicles:update'), upload.array('gallery', 10), updateVehicle);
 
 module.exports = router;

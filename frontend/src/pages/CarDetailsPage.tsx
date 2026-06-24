@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '@/config';
@@ -30,8 +31,9 @@ const CarDetailsPage = () => {
   // Modals state
   const [showInspectionForm, setShowInspectionForm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'plan' | 'method'>('plan');
+  const [paymentStep, setPaymentStep] = useState<'amount' | 'plan' | 'method'>('amount');
   const [paymentFreq, setPaymentFreq] = useState<'daily'|'weekly'|'monthly'>('monthly');
+  const [savingsAmount, setSavingsAmount] = useState('5000');
 
   useEffect(() => {
     fetch(`${API_URL}/vehicles/${id}`, {
@@ -383,7 +385,61 @@ const CarDetailsPage = () => {
             className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            {paymentStep === 'plan' ? (
+            {paymentStep === 'amount' ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-bold text-2xl text-slate-900">Deposit Amount</h3>
+                    <p className="text-sm text-slate-500">Start saving towards your dream car.</p>
+                  </div>
+                  <button onClick={() => setShowPaymentModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200 shadow-inner">
+                  <h4 className="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">Financing Breakdown</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Vehicle Price</span>
+                      <span className="font-bold text-slate-900">{formatUGX(car.priceUgx)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Your Deposit (30%)</span>
+                      <span className="font-bold text-slate-900">{formatUGX(requiredDeposit)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Financed Amount (70%)</span>
+                      <span className="font-bold text-slate-900">{formatUGX(financedAmount)}</span>
+                    </div>
+                    <div className="pt-2 mt-2 border-t border-slate-200 flex justify-between">
+                      <span className="font-bold text-slate-700">Total Loan to Repay</span>
+                      <span className="font-black text-primary">{formatUGX(financedAmount * 1.28)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">How much do you want to start with?</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">UGX</span>
+                    <input
+                      type="number"
+                      value={savingsAmount}
+                      onChange={(e) => setSavingsAmount(e.target.value)}
+                      className="w-full h-16 bg-slate-50 border-2 border-slate-200 rounded-2xl pl-16 pr-4 text-2xl font-black text-primary focus:border-primary focus:ring-0 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setPaymentStep('plan')}
+                  className="w-full font-bold py-4 rounded-xl transition-all bg-primary hover:bg-purple-800 text-white shadow-lg shadow-primary/30 text-lg"
+                >
+                  Continue to Payment Plan
+                </button>
+              </>
+            ) : paymentStep === 'plan' ? (
               <>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-2xl text-slate-900">Select Payment Plan</h3>
@@ -402,11 +458,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Daily Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalDaily)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalDaily)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(dailyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(dailyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(dailyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(dailyInsurance)}</span></span>
                     </div>
                   </div>
 
@@ -419,11 +475,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Weekly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalWeekly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalWeekly)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(weeklyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(weeklyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(weeklyInsurance)}</span></span>
                     </div>
                   </div>
 
@@ -436,11 +492,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Monthly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">UGX {formatUGX(totalMonthly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(totalMonthly)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
-                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">UGX {formatUGX(monthlyInsurance)}</span></span>
+                      <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(monthlyLoan)}</span></span>
+                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(monthlyInsurance)}</span></span>
                     </div>
                   </div>
                 </div>
