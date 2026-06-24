@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
-const { clerkMiddleware } = require('@clerk/express');
 const { authenticateToken } = require('./shared/middleware/auth.middleware');
 
 // Routes
@@ -26,7 +25,6 @@ app.use(cors());
 app.use('/api/webhooks', webhooksRoutes);
 
 app.use(express.json());
-app.use(clerkMiddleware());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Basic health route
@@ -40,7 +38,10 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+const authRoutes = require('./modules/auth/auth.routes');
+
 // App routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/transactions', transactionsRoutes);
