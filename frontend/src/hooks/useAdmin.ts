@@ -169,7 +169,7 @@ const getAllMockProfiles = (): AdminProfile[] => {
     });
     return MOCK_PROFILES_DATA;
   }
-  return keys.map(k => JSON.parse(localStorage.getItem(k) || '{}'));
+  return keys.map(k => JSON.parse(localStorage.getItem(k) || '{}')).filter((p: any) => p.name !== 'John Doe');
 };
 
 const getMockTransactionsForUser = (userId: string) => {
