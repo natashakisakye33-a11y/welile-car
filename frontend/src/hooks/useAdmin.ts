@@ -17,8 +17,12 @@ export function useAllProfiles() {
       const res = await fetchWithTimeout(`${API_URL}/admin/profiles`, {
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
-      if (!res.ok) throw new Error('Failed to fetch profiles');
+      if (!res.ok) {
+        console.error('Failed to fetch profiles', res.status);
+        throw new Error('Failed to fetch profiles');
+      }
       const data = await res.json();
+      console.log('Profiles data:', data);
       return data.profiles;
     },
     enabled: isAdmin && !!session?.access_token,

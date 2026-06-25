@@ -18,10 +18,12 @@ import { formatUGX } from '@/lib/format';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminPage = () => {
-  const { isAdmin, loading: authLoading, signOut, signIn } = useAuth();
+  const { isAdmin, isCfo, loading: authLoading, signOut, signIn } = useAuth();
   const navigate = useNavigate();
-  const { data: users = [], isLoading } = useAllProfiles();
-  const { data: allTransactions = [] } = useAllTransactions();
+  const { data: users = [], isLoading, error: usersError } = useAllProfiles();
+  const { data: allTransactions = [], error: txsError } = useAllTransactions();
+  
+  console.log('AdminPage render:', { users, isLoading, usersError, allTransactions, txsError, isAdmin, isCfo });
   const flagUser = useAdminFlagUser();
   const assignAgent = useAdminAssignAgent();
   const submitCfoRequest = useSubmitCfoRequest();
