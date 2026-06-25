@@ -106,27 +106,28 @@ const CarDetailsPage = () => {
 
   const requiredDeposit = car.priceUgx * 0.3;
   const financedAmount = car.priceUgx * 0.7;
+  const annualInterest = financedAmount * 0.28;
+  const totalLoanRepayment = financedAmount + annualInterest;
+  
   const remainingNeeded = Math.max(0, requiredDeposit - userSavings);
   const isEligible = remainingNeeded === 0;
 
-  const monthlyLoan = (financedAmount * 1.28) / 36;
-  const monthlyInsurance = car.estimatedCosts?.insurance || (car.priceUgx * 0.08 / 12);
-  const totalMonthly = monthlyLoan + monthlyInsurance;
+  // Monthly
+  const monthlyPayment = totalLoanRepayment / 12;
+  const monthlyLoan = financedAmount / 12;
+  const monthlyInterest = annualInterest / 12;
 
-  const weeklyLoan = monthlyLoan / 4;
-  const weeklyInsurance = monthlyInsurance / 4;
-  const totalWeekly = weeklyLoan + weeklyInsurance;
+  // Weekly
+  const weeklyPayment = totalLoanRepayment / 52;
+  const weeklyLoan = financedAmount / 52;
+  const weeklyInterest = annualInterest / 52;
 
-  const dailyLoan = monthlyLoan / 30;
-  const dailyInsurance = monthlyInsurance / 30;
-  const totalDaily = dailyLoan + dailyInsurance;
+  // Daily
+  const dailyPayment = totalLoanRepayment / 365;
+  const dailyLoan = financedAmount / 365;
+  const dailyInterest = annualInterest / 365;
 
-  const divisor = paymentFreq === 'daily' ? 30 : paymentFreq === 'weekly' ? 4 : 1;
   const periodLabel = paymentFreq === 'daily' ? 'Daily' : paymentFreq === 'weekly' ? 'Weekly' : 'Monthly';
-
-  const installment = monthlyLoan / divisor;
-  const insurance = monthlyInsurance / divisor;
-  const totalCost = installment + insurance;
 
   return (
     <>
@@ -430,7 +431,7 @@ const CarDetailsPage = () => {
                     </div>
                     <div className="pt-2 mt-2 border-t border-slate-200 flex justify-between">
                       <span className="font-bold text-slate-700">Total Loan to Repay</span>
-                      <span className="font-black text-primary">{formatUGX(financedAmount * 1.28)}</span>
+                      <span className="font-black text-primary">{formatUGX(totalLoanRepayment)}</span>
                     </div>
                   </div>
                 </div>
@@ -474,11 +475,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Daily Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">{formatUGX(totalDaily)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(dailyPayment)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
                       <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(dailyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(dailyInsurance)}</span></span>
+                      <span className="text-slate-500">Interest: <span className="font-medium text-slate-700">{formatUGX(dailyInterest)}</span></span>
                     </div>
                   </div>
 
@@ -491,11 +492,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Weekly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">{formatUGX(totalWeekly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(weeklyPayment)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
                       <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(weeklyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(weeklyInsurance)}</span></span>
+                      <span className="text-slate-500">Interest: <span className="font-medium text-slate-700">{formatUGX(weeklyInterest)}</span></span>
                     </div>
                   </div>
 
@@ -508,11 +509,11 @@ const CarDetailsPage = () => {
                         </div>
                         <span className="font-bold text-slate-800 text-lg">Monthly Payment</span>
                       </div>
-                      <span className="font-bold text-primary text-xl">{formatUGX(totalMonthly)}</span>
+                      <span className="font-bold text-primary text-xl">{formatUGX(monthlyPayment)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm pl-8">
                       <span className="text-slate-500">Loan: <span className="font-medium text-slate-700">{formatUGX(monthlyLoan)}</span></span>
-                      <span className="text-slate-500">Insurance: <span className="font-medium text-slate-700">{formatUGX(monthlyInsurance)}</span></span>
+                      <span className="text-slate-500">Interest: <span className="font-medium text-slate-700">{formatUGX(monthlyInterest)}</span></span>
                     </div>
                   </div>
                 </div>
