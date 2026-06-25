@@ -154,7 +154,7 @@ const WalletPage = () => {
     }
 
     // Transaction ID parsing
-    const tidMatch = text.match(/(?:ID|Txn ?ID|Transaction ?ID|TxId|Ref|Receipt)[:\s\-]*([A-Z0-9]{8,15})/i) || text.match(/\b([A-Z0-9]{10,12})\b/);
+    const tidMatch = text.match(/(?:ID|Txn ?ID|Transaction ?ID|TxId|Ref|Receipt)[:\s-]*([A-Z0-9]{8,15})/i) || text.match(/\b([A-Z0-9]{10,12})\b/);
     if (tidMatch && tidMatch[1]) {
       setTransactionId(tidMatch[1].toUpperCase());
     }
