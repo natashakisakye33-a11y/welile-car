@@ -117,82 +117,111 @@ const CfoPage = () => {
   // CFO Gateway Login
   if (!isCfo) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 px-4 py-12 text-white font-sans selection:bg-primary/20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="w-full max-w-[440px] bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 sm:p-10 rounded-[32px] shadow-2xl relative overflow-hidden"
-        >
-          <div className="absolute top-[-50px] right-[-50px] w-48 h-48 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-[-50px] left-[-50px] w-48 h-48 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
+      <main className="w-full min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#0f172a_100%)] p-4 font-sans text-slate-200">
+        <div className="w-full max-w-lg">
+          <section className="backdrop-blur-xl bg-slate-800/70 border border-white/10 rounded-[2rem] p-8 md:p-12 shadow-2xl">
+            {/* Branding & Header Section */}
+            <header className="flex flex-col items-center text-center mb-8">
+              {/* Secure Shield Icon */}
+              <div className="mb-6 p-4 bg-emerald-500/20 rounded-2xl border border-emerald-500/30">
+                <svg className="h-10 w-10 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round"></path>
+                </svg>
+              </div>
+              <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Welile Cars
+              </h1>
+              <p className="text-xs font-bold tracking-[0.2em] text-emerald-400 uppercase mb-4">
+                CFO Dashboard Gateway
+              </p>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
+                Restricted financial area. Sign in with Chief Financial Officer credentials to approve lines of credit and inspect audits.
+              </p>
+            </header>
+            
+            {/* Authentication Form */}
+            <form className="space-y-6" onSubmit={handleCfoLogin}>
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="block text-[10px] font-bold tracking-widest text-slate-500 uppercase ml-1" htmlFor="cfo_email">
+                  CFO Email
+                </label>
+                <input 
+                  className="w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6] focus:border-[#8b5cf6] transition-all duration-200" 
+                  id="cfo_email" 
+                  placeholder="name@welilecars.com" 
+                  type="email" 
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="block text-[10px] font-bold tracking-widest text-slate-500 uppercase ml-1" htmlFor="password">
+                  Password
+                </label>
+                <input 
+                  className="w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6] focus:border-[#8b5cf6] transition-all duration-200" 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="text-center mb-8 relative z-10">
-            <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
-              <ShieldCheck size={28} className="text-white" />
-            </div>
-            <h1 className="font-chewy text-4xl tracking-wide mb-1.5 text-white">Welile Cars</h1>
-            <p className="text-emerald-300/80 font-bold text-xs uppercase tracking-widest">CFO Dashboard Gateway</p>
-            <p className="text-slate-400 text-sm font-medium mt-3">
-              Restricted financial area. Sign in with Chief Financial Officer credentials to approve lines of credit and inspect audits.
-            </p>
-          </div>
-
-          <form onSubmit={handleCfoLogin} className="space-y-4 relative z-10">
-            <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">CFO Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="cfo@admin.com"
-                className="w-full h-13 px-4 rounded-xl bg-slate-950/60 border border-slate-800 outline-none focus:border-emerald-500 transition text-sm font-semibold text-white placeholder:text-slate-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full h-13 px-4 rounded-xl bg-slate-950/60 border border-slate-800 outline-none focus:border-emerald-500 transition text-sm font-semibold text-white placeholder:text-slate-600"
-              />
-            </div>
-
-            {loginError && (
-              <p className="text-red-400 text-xs font-semibold text-center mt-2">{loginError}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full h-13 mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[14px] rounded-xl transition disabled:opacity-50 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
-            >
-              {loginLoading ? 'Checking ledger...' : 'Unlock CFO Dashboard'}
-            </button>
-          </form>
-
-          <div className="relative z-10 border-t border-slate-800/80 mt-6 pt-6 flex flex-col gap-3">
-            <button
-              onClick={() => handleCfoLogin()}
-              disabled={loginLoading}
-              className="w-full h-11 bg-white/5 border border-white/10 hover:bg-white/10 text-emerald-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
-            >
-              <span>Instant CFO Login</span>
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="w-full h-11 bg-slate-950/40 hover:bg-slate-950 text-slate-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
-            >
-              <span>Return to Home</span>
-            </button>
-          </div>
-        </motion.div>
-      </div>
+              {loginError && (
+                <p className="text-red-400 text-xs font-semibold text-center mt-2">{loginError}</p>
+              )}
+              
+              {/* Primary Action Button */}
+              <div className="pt-2">
+                <button 
+                  disabled={loginLoading}
+                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] text-white font-semibold py-4 rounded-xl shadow-lg shadow-[#8b5cf6]/20 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2" 
+                  type="submit"
+                >
+                  {loginLoading ? 'Checking ledger...' : 'Unlock CFO Dashboard'}
+                </button>
+              </div>
+              
+              {/* Divider Line */}
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-slate-800"></div>
+                <span className="flex-shrink mx-4 text-[10px] text-slate-600 font-medium uppercase tracking-widest">Navigation</span>
+                <div className="flex-grow border-t border-slate-800"></div>
+              </div>
+              
+              {/* Secondary Action Buttons */}
+              <div className="grid grid-cols-1 gap-3">
+                <button 
+                  onClick={() => handleCfoLogin()}
+                  disabled={loginLoading}
+                  className="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-medium py-3 rounded-xl border border-white/5 transition-all duration-200 disabled:opacity-50" 
+                  type="button"
+                >
+                  Instant CFO Login
+                </button>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="w-full bg-transparent hover:text-white text-slate-500 font-medium py-2 transition-all duration-200 text-sm" 
+                  type="button"
+                >
+                  Return to Home
+                </button>
+              </div>
+            </form>
+          </section>
+          
+          {/* Footer Copyright */}
+          <footer className="mt-8 text-center text-slate-600 text-xs">
+            © 2026 Welile Cars Financial Systems. Secure Session Active.
+          </footer>
+        </div>
+      </main>
     );
   }
 
