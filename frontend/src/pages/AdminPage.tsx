@@ -31,6 +31,7 @@ const AdminPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'saving' | 'flagged' | 'cfo_requests'>('all');
   const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'transactions'>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const [email, setEmail] = useState('admin@admin.com');
   const [password, setPassword] = useState('admin123');
@@ -119,8 +120,15 @@ const AdminPage = () => {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cdc3d4; border-radius: 10px; }
       `}</style>
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+      )}
       
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-[280px] bg-surface border-r border-outline-variant flex-col py-8 px-6 z-50">
+      <aside className={`fixed left-0 top-0 h-full w-[280px] bg-surface border-r border-outline-variant flex-col py-8 px-6 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 flex' : '-translate-x-full lg:flex hidden'}`}>
         <div className="mb-10 flex items-center gap-3">
           <div className="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container">
             <span className="material-symbols-outlined">account_balance_wallet</span>
@@ -131,19 +139,19 @@ const AdminPage = () => {
           </div>
         </div>
         <nav className="flex-1 space-y-2">
-          <a onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'dashboard' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
+          <a onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'dashboard' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">dashboard</span>
             <span className="font-body-md">Dashboard</span>
           </a>
-          <a onClick={() => setActiveTab('customers')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'customers' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
+          <a onClick={() => { setActiveTab('customers'); setIsSidebarOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'customers' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">group</span>
             <span className="font-body-md">Customers</span>
           </a>
-          <a onClick={() => setActiveTab('transactions')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'transactions' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
+          <a onClick={() => { setActiveTab('transactions'); setIsSidebarOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors cursor-pointer ${activeTab === 'transactions' ? 'text-primary font-bold bg-surface-container' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
             <span className="material-symbols-outlined">receipt_long</span>
             <span className="font-body-md">Transactions</span>
           </a>
-          <a onClick={() => navigate('/cfo')} className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-colors cursor-pointer">
+          <a onClick={() => { navigate('/cfo'); setIsSidebarOpen(false); }} className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-colors cursor-pointer">
             <span className="material-symbols-outlined">payments</span>
             <span className="font-body-md">CFO Portal</span>
           </a>
@@ -159,6 +167,9 @@ const AdminPage = () => {
       <div className="flex-1 lg:ml-[280px] flex flex-col h-full bg-background overflow-hidden">
         <header className="h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-4 lg:px-8 shrink-0">
           <div className="flex items-center gap-4">
+            <button className="lg:hidden p-2 -ml-2 text-on-surface" onClick={() => setIsSidebarOpen(true)}>
+              <span className="material-symbols-outlined">menu</span>
+            </button>
             <h2 className="text-headline-sm font-bold text-primary">FinOps Dashboard</h2>
           </div>
           <div className="flex items-center gap-6">
