@@ -157,6 +157,10 @@ const AdminPage = () => {
             <span className="material-symbols-outlined">payments</span>
             <span className="font-body-md">CFO Portal</span>
           </a>
+          <a onClick={() => { navigate('/admin/dealers'); setIsSidebarOpen(false); }} className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-xl transition-colors cursor-pointer">
+            <span className="material-symbols-outlined">directions_car</span>
+            <span className="font-body-md">Dealer Portal</span>
+          </a>
         </nav>
         <div className="mt-auto pt-6 border-t border-outline-variant space-y-2">
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container rounded-xl transition-colors text-left cursor-pointer">
