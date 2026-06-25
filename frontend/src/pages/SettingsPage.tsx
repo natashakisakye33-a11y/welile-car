@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -7,7 +7,7 @@ import {
   ShieldCheck, Smartphone, CheckCircle2, Search, Send, MessageSquare, FileText
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
+import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/translations';
@@ -20,6 +20,27 @@ export default function SettingsPage() {
   const { data: profile } = useProfile();
   const [activeSection, setActiveSection] = useState<SettingsSection>('Menu');
   
+  // Profile edit state
+  const updateProfileMutation = useUpdateProfile();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    residence: ''
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        residence: profile.residence || ''
+      });
+    }
+  }, [profile]);
+
   // Toggles state
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
@@ -58,9 +79,64 @@ export default function SettingsPage() {
     exit: { x: '10%', opacity: 0 }
   };
 
+  const handleSaveProfile = () => {
+    updateProfileMutation.mutate({
+      name: profileForm.name,
+      email: profileForm.email,
+      phone: profileForm.phone,
+      residence: profileForm.residence
+    }, {
+      onSuccess: () => {
+        setIsEditingProfile(false);
+        toast.success("Profile updated successfully");
+      },
+      onError: (err) => {
+        toast.error("Failed to update profile: " + err.message);
+      }
+    });
+  };
+
   const renderAccount = () => (
     <div className="space-y-6">
-      <div className="flex flex-col items-center justify-center py-6">
+      <div className="flex justify-end">
+        {!isEditingProfile ? (
+          <button 
+            onClick={() => setIsEditingProfile(true)}
+            className="text-primary font-bold text-sm bg-primary/5 px-4 py-2 rounded-full hover:bg-primary/10 transition-colors"
+          >
+            Edit Profile
+          </button>
+        ) : (
+          <div className="flex gap-3">
+            <button 
+              onClick={() => {
+                setIsEditingProfile(false);
+                // Reset form to current profile
+                if (profile) {
+                  setProfileForm({
+                    name: profile.name || '',
+                    email: profile.email || '',
+                    phone: profile.phone || '',
+                    residence: profile.residence || ''
+                  });
+                }
+              }}
+              className="text-on-surface-variant font-bold text-sm px-4 py-2 hover:bg-surface-container-high rounded-full transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleSaveProfile}
+              disabled={updateProfileMutation.isPending}
+              className="bg-primary text-on-primary px-4 py-2 rounded-full font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+            >
+              {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col items-center justify-center py-2">
         <div className="relative w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-[#4C158D] shadow-sm mb-4">
           {localAvatar || profile?.avatar_url ? (
             <img src={localAvatar || profile?.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
@@ -81,35 +157,79 @@ export default function SettingsPage() {
             <Camera size={14} />
           </button>
         </div>
-        <h2 className="text-xl font-bold text-slate-900">{profile?.name || 'John Doe'}</h2>
-        <p className="text-sm text-slate-500">Member since 2026</p>
+        
+        {isEditingProfile ? (
+          <input 
+            type="text" 
+            value={profileForm.name}
+            onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+            className="text-xl font-bold text-center bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full max-w-[200px]"
+            placeholder="Your Name"
+          />
+        ) : (
+          <h2 className="text-xl font-bold text-slate-900">{profile?.name || 'John Doe'}</h2>
+        )}
+        <p className="text-sm text-slate-500 mt-1">Member since 2026</p>
       </div>
 
       <div className="space-y-3">
-        <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-4 border border-slate-100">
-          <Mail size={20} className="text-[#4C158D]" />
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase">Email</p>
-            <p className="font-medium text-slate-800">{profile?.email || 'john.doe@example.com'}</p>
+        {/* Email */}
+        <div className={`bg-slate-50 p-4 rounded-xl flex items-center gap-4 border ${isEditingProfile ? 'border-primary/30 bg-primary/5' : 'border-slate-100'}`}>
+          <Mail size={20} className="text-[#4C158D] shrink-0" />
+          <div className="w-full">
+            <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">Email</p>
+            {isEditingProfile ? (
+              <input 
+                type="email" 
+                value={profileForm.email}
+                onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
+                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                placeholder="john.doe@example.com"
+              />
+            ) : (
+              <p className="font-medium text-slate-800 break-all">{profile?.email || 'john.doe@example.com'}</p>
+            )}
           </div>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-4 border border-slate-100">
-          <Phone size={20} className="text-[#4C158D]" />
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase">Phone</p>
-            <p className="font-medium text-slate-800">{profile?.phone || '+256 700 123 456'}</p>
+
+        {/* Phone */}
+        <div className={`bg-slate-50 p-4 rounded-xl flex items-center gap-4 border ${isEditingProfile ? 'border-primary/30 bg-primary/5' : 'border-slate-100'}`}>
+          <Phone size={20} className="text-[#4C158D] shrink-0" />
+          <div className="w-full">
+            <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">Phone</p>
+            {isEditingProfile ? (
+              <input 
+                type="tel" 
+                value={profileForm.phone}
+                onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                placeholder="+256 700 123 456"
+              />
+            ) : (
+              <p className="font-medium text-slate-800">{profile?.phone || '+256 700 123 456'}</p>
+            )}
           </div>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-4 border border-slate-100">
-          <MapPin size={20} className="text-[#4C158D]" />
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase">Residence</p>
-            <p className="font-medium text-slate-800">{profile?.residence || 'Ntinda, Kampala'}</p>
+
+        {/* Residence */}
+        <div className={`bg-slate-50 p-4 rounded-xl flex items-center gap-4 border ${isEditingProfile ? 'border-primary/30 bg-primary/5' : 'border-slate-100'}`}>
+          <MapPin size={20} className="text-[#4C158D] shrink-0" />
+          <div className="w-full">
+            <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">Residence</p>
+            {isEditingProfile ? (
+              <input 
+                type="text" 
+                value={profileForm.residence}
+                onChange={(e) => setProfileForm({...profileForm, residence: e.target.value})}
+                className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                placeholder="Ntinda, Kampala"
+              />
+            ) : (
+              <p className="font-medium text-slate-800">{profile?.residence || 'Ntinda, Kampala'}</p>
+            )}
           </div>
         </div>
       </div>
-      
-
     </div>
   );
 
