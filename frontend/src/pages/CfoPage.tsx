@@ -52,12 +52,12 @@ const CfoPage = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) {
-        setLoginError(error);
+        setLoginError('Invalid credentials');
       } else {
         toast.success("Welcome back, Chief Financial Officer!");
       }
     } catch (err) {
-      setLoginError('An error occurred during authentication.');
+      setLoginError('Invalid credentials');
     } finally {
       setLoginLoading(false);
     }
@@ -117,7 +117,7 @@ const CfoPage = () => {
   // CFO Gateway Login
   if (!isCfo) {
     return (
-      <main className="w-full min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#0f172a_100%)] p-4 font-sans text-slate-200">
+      <main className="w-full min-h-screen flex items-center justify-center bg-white p-4 font-sans text-slate-200">
         <div className="w-full max-w-lg">
           <section className="backdrop-blur-xl bg-slate-800/70 border border-white/10 rounded-[2rem] p-8 md:p-12 shadow-2xl">
             {/* Branding & Header Section */}
