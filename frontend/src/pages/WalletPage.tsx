@@ -143,6 +143,43 @@ const WalletPage = () => {
   const walletDeduction = Number(localStorage.getItem('mockWalletDeduction') || 0);
   const availableBalance = dashboardData.savings.totalSaved - walletDeduction;
 
+  const handlePasteMessage = (text: string) => {
+    // Amount parsing
+    const amountMatch = text.match(/UGX\s*([\d,]+)/i) || text.match(/(?:received|deposited)\s*([\d,]+)\s*(?:UGX|Shs)/i) || text.match(/(?:UGX|Shs)\.?\s*([\d,]+)/i);
+    if (amountMatch) {
+      const rawAmount = amountMatch[1].replace(/,/g, '');
+      if (!isNaN(Number(rawAmount))) {
+        setAmount(rawAmount);
+      }
+    }
+
+    // Transaction ID parsing
+    const tidMatch = text.match(/(?:ID|Txn ?ID|Transaction ?ID|TxId|Ref|Receipt)[:\s\-]*([A-Z0-9]{8,15})/i) || text.match(/\b([A-Z0-9]{10,12})\b/);
+    if (tidMatch && tidMatch[1]) {
+      setTransactionId(tidMatch[1].toUpperCase());
+    }
+
+    // Date parsing
+    const dateMatch = text.match(/(\d{4}[-/]\d{2}[-/]\d{2})/) || text.match(/(\d{2}[-/]\d{2}[-/]\d{4})/);
+    if (dateMatch) {
+      let d = dateMatch[1];
+      if (d.match(/^\d{2}[-/]\d{2}[-/]\d{4}$/)) {
+        const sep = d.includes('/') ? '/' : '-';
+        const parts = d.split(sep);
+        d = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      } else {
+        d = d.replace(/\//g, '-');
+      }
+      setTransactionDate(d);
+    }
+
+    // Time parsing
+    const timeMatch = text.match(/([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?/);
+    if (timeMatch) {
+      setTransactionTime(`${timeMatch[1]}:${timeMatch[2]}`);
+    }
+  };
+
   const handleDeposit = async () => {
     const val = parseInt(amount);
     if (!val || val < 1000) return;
@@ -450,6 +487,19 @@ const WalletPage = () => {
                         {method === pm.id && <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>}
                       </button>
                     ))}
+                  </div>
+
+                  {/* Auto-fill from SMS */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">content_paste</span>
+                      Auto-fill from SMS
+                    </label>
+                    <textarea 
+                      placeholder="Paste your MTN or Airtel Money message here..."
+                      className="w-full p-3 rounded-xl bg-primary/5 border border-primary/20 text-slate-900 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none min-h-[80px]"
+                      onChange={(e) => handlePasteMessage(e.target.value)}
+                    />
                   </div>
                   
                   <div className="mb-4">
