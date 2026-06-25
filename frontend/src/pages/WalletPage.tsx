@@ -396,10 +396,6 @@ const WalletPage = () => {
             </div>
           </div>
         </div>
-
-        <div className="print:hidden mt-8">
-          <BottomNav />
-        </div>
       </div>
 
       {/* Deposit Modal (Glassmorphism Slide-Up) */}
