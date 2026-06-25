@@ -470,85 +470,117 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center selection:bg-[#4C158D]/20">
-      <main className="w-full max-w-md bg-white min-h-screen shadow-2xl overflow-hidden relative">
-        <div className="p-4 pt-10">
-          <div className="flex items-center justify-center relative mb-8">
-            <button 
-              onClick={() => activeSection === 'Menu' ? navigate(-1) : setActiveSection('Menu')} 
-              className="absolute left-0 p-2 text-slate-700 hover:bg-slate-100 rounded-full transition-colors z-10"
-            >
-              <ArrowLeft size={20} className="stroke-[2.5px]" />
-            </button>
-            <motion.h3 
-              key={activeSection}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-[17px] font-extrabold text-slate-900 tracking-tight"
-            >
-              {activeSection === 'Menu' ? t('settings.title.menu') : 
-               activeSection === 'Account' ? t('settings.title.account') : 
-               activeSection === 'Language' ? t('settings.title.language') : 
-               activeSection === 'Help' ? t('settings.help') : activeSection}
-            </motion.h3>
-          </div>
-          
-          <AnimatePresence mode="wait">
-            {activeSection === 'Menu' ? (
-              <motion.div 
-                key="menu"
-                initial={{ x: '-10%', opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: '-10%', opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="space-y-1"
-              >
-                {[
-                  { icon: User, label: t('settings.account'), section: 'Account' },
-                  { icon: Bell, label: t('settings.notification'), section: 'Notification' },
-                  { icon: Monitor, label: t('settings.display'), section: 'Display' },
-                  { icon: Lock, label: t('settings.privacy'), section: 'Privacy' },
-                  { icon: Globe, label: t('settings.language'), section: 'Language' },
-                  { icon: AlertCircle, label: t('settings.help'), section: 'Help' },
-                ].map((item, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setActiveSection(item.section as SettingsSection)}
-                    className="w-full flex items-center justify-between py-3.5 px-4 bg-white hover:bg-slate-50 rounded-xl transition-colors group"
-                  >
-                    <div className="flex items-center gap-4 text-slate-700 group-hover:text-slate-900">
-                      <item.icon size={22} className="stroke-[1.5px]" />
-                      <span className="font-semibold text-[15px]">{item.label}</span>
-                    </div>
-                    <ChevronRight size={20} className="text-slate-400 group-hover:text-slate-600" />
-                  </button>
-                ))}
-                
-                <button onClick={handleLogout} className="w-full flex items-center justify-between py-3.5 px-4 bg-white hover:bg-red-50 rounded-xl transition-colors group mt-4">
-                  <div className="flex items-center gap-4 text-red-500 group-hover:text-red-600">
-                    <LogOut size={22} className="stroke-[1.5px]" />
-                    <span className="font-semibold text-[15px]">Logout</span>
-                  </div>
-                  <ChevronRight size={20} className="text-red-300 group-hover:text-red-500" />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="subview"
-                variants={slideVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="px-2"
-              >
-                {renderActiveSection()}
-              </motion.div>
-            )}
-          </AnimatePresence>
+    <div className="animate-fade-in w-full h-full relative">
+      {/* Background Decoration (Subtle animated light leak feel) */}
+      <div className="absolute top-0 right-0 -z-10 w-1/2 h-1/2 bg-primary/5 rounded-full blur-[120px]"></div>
+      
+      <div className="max-w-3xl mx-auto space-y-10 w-full pb-20">
+        {/* Back Action */}
+        <button 
+          onClick={() => activeSection === 'Menu' ? navigate('/dashboard') : setActiveSection('Menu')}
+          className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all group"
+        >
+          <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <span className="font-bold text-sm">{activeSection === 'Menu' ? 'Back to Dashboard' : 'Back to Settings'}</span>
+        </button>
 
-        </div>
-      </main>
+        <AnimatePresence mode="wait">
+          {activeSection === 'Menu' ? (
+            <motion.div 
+              key="menu"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-10"
+            >
+              {/* Settings Container */}
+              <div className="glass-card rounded-[24px] p-6 md:p-10 overflow-hidden relative">
+                <div className="mb-12 text-center">
+                  <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">Settings Menu</h2>
+                  <p className="text-on-surface-variant font-body-lg">Manage your account preferences and app experience</p>
+                </div>
+                
+                {/* Category List */}
+                <div className="space-y-2">
+                  {[
+                    { icon: 'person', label: t('settings.account'), section: 'Account' },
+                    { icon: 'notifications', label: t('settings.notification'), section: 'Notification' },
+                    { icon: 'desktop_windows', label: t('settings.display'), section: 'Display' },
+                    { icon: 'lock', label: t('settings.privacy'), section: 'Privacy' },
+                    { icon: 'language', label: t('settings.language'), section: 'Language' },
+                    { icon: 'help_outline', label: t('settings.help'), section: 'Help' },
+                  ].map((item, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => setActiveSection(item.section as SettingsSection)}
+                      className="group flex items-center justify-between p-5 rounded-2xl hover:bg-primary/5 transition-all cursor-pointer border border-transparent hover:border-primary/10"
+                    >
+                      <div className="flex items-center gap-6">
+                        <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
+                          <span className="material-symbols-outlined">{item.icon}</span>
+                        </div>
+                        <span className="font-headline-md text-headline-md text-on-surface">{item.label}</span>
+                      </div>
+                      <span className="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+                    </div>
+                  ))}
+                  
+                  {/* Divider for destructive action */}
+                  <div className="py-4 px-5">
+                    <div className="h-[1px] bg-outline-variant/30 w-full"></div>
+                  </div>
+                  
+                  {/* Logout */}
+                  <div 
+                    onClick={handleLogout}
+                    className="group flex items-center justify-between p-5 rounded-2xl hover:bg-error/5 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="w-12 h-12 rounded-xl bg-error-container/20 flex items-center justify-center text-error group-hover:bg-error group-hover:text-on-error transition-all">
+                        <span className="material-symbols-outlined">logout</span>
+                      </div>
+                      <span className="font-headline-md text-headline-md text-error">Logout</span>
+                    </div>
+                    <span className="material-symbols-outlined text-error/40 group-hover:text-error group-hover:translate-x-1 transition-all">chevron_right</span>
+                  </div>
+                </div>
+                
+                {/* Subtle Brand Footnote */}
+                <div className="mt-12 text-center">
+                  <p className="text-label-caps font-label-caps text-on-surface-variant/40">Welile Car v2.4.0 • Secured by Amethyst Pro</p>
+                </div>
+              </div>
+
+              {/* Featured Section: Promo */}
+              <div className="relative rounded-[24px] overflow-hidden bg-primary p-8 flex flex-col md:flex-row items-center justify-between text-on-primary gap-6">
+                <div className="relative z-10 w-full md:max-w-md">
+                  <h3 className="font-headline-md text-headline-md mb-2">Unlock Premium Security</h3>
+                  <p className="font-body-lg text-body-lg text-primary-fixed opacity-90 mb-6">Upgrade to our Advanced Protection plan for 2FA, biometric login, and instant fraudulent activity alerts.</p>
+                  <button className="bg-secondary text-on-secondary px-8 py-3 rounded-full font-bold hover:bg-secondary/90 transition-all active:scale-95">Upgrade Now</button>
+                </div>
+                <span className="material-symbols-outlined text-[120px] absolute md:static right-4 top-1/2 md:translate-y-0 -translate-y-1/2 opacity-10 md:opacity-50">shield</span>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="subview"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="glass-card rounded-[24px] p-6 md:p-10 overflow-hidden relative"
+            >
+              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-8 border-b border-outline-variant/30 pb-4">
+                {activeSection === 'Account' ? t('settings.title.account') : 
+                 activeSection === 'Language' ? t('settings.title.language') : 
+                 activeSection === 'Help' ? t('settings.help') : activeSection}
+              </h2>
+              {renderActiveSection()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
