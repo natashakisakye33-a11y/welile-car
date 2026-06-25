@@ -115,39 +115,46 @@ const CfoPage = () => {
   }
 
   // CFO Gateway Login
+  // CFO Gateway Login
   if (!isCfo) {
     return (
-      <main className="w-full min-h-screen flex items-center justify-center bg-white p-4 font-sans text-slate-200">
-        <div className="w-full max-w-lg">
-          <section className="backdrop-blur-xl bg-slate-800/70 border border-white/10 rounded-[2rem] p-8 md:p-12 shadow-2xl">
+      <main className="w-full min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans text-slate-900 relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-200/50 blur-3xl opacity-50 mix-blend-multiply"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-200/50 blur-3xl opacity-50 mix-blend-multiply"></div>
+        </div>
+
+        <div className="w-full max-w-md relative z-10">
+          <section className="bg-white border border-slate-100/50 rounded-[2rem] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
             {/* Branding & Header Section */}
             <header className="flex flex-col items-center text-center mb-8">
               {/* Secure Shield Icon */}
-              <div className="mb-6 p-4 bg-emerald-500/20 rounded-2xl border border-emerald-500/30">
-                <svg className="h-10 w-10 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <div className="mb-5 p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-500 shadow-sm">
+                <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round"></path>
                 </svg>
               </div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 Welile Cars
               </h1>
-              <p className="text-xs font-bold tracking-[0.2em] text-emerald-400 uppercase mb-4">
-                CFO Dashboard Gateway
+              <p className="text-[11px] font-bold tracking-[0.25em] text-emerald-600 uppercase mb-4">
+                CFO Gateway
               </p>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-                Restricted financial area. Sign in with Chief Financial Officer credentials to approve lines of credit and inspect audits.
+              <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                Enter your credentials to access the secure financial dashboard and approve lines of credit.
               </p>
             </header>
             
             {/* Authentication Form */}
-            <form className="space-y-6" onSubmit={handleCfoLogin}>
+            <form className="space-y-5" onSubmit={handleCfoLogin}>
               {/* Email Input */}
-              <div className="space-y-2">
-                <label className="block text-[10px] font-bold tracking-widest text-slate-500 uppercase ml-1" htmlFor="cfo_email">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold tracking-wider text-slate-500 uppercase ml-1" htmlFor="cfo_email">
                   CFO Email
                 </label>
                 <input 
-                  className="w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6] focus:border-[#8b5cf6] transition-all duration-200" 
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
                   id="cfo_email" 
                   placeholder="name@welilecars.com" 
                   type="email" 
@@ -158,15 +165,15 @@ const CfoPage = () => {
               </div>
               
               {/* Password Input */}
-              <div className="space-y-2">
-                <label className="block text-[10px] font-bold tracking-widest text-slate-500 uppercase ml-1" htmlFor="password">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold tracking-wider text-slate-500 uppercase ml-1" htmlFor="password">
                   Password
                 </label>
                 <input 
-                  className="w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6] focus:border-[#8b5cf6] transition-all duration-200" 
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
                   id="password" 
                   type="password" 
-                  placeholder="••••••"
+                  placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
@@ -174,40 +181,40 @@ const CfoPage = () => {
               </div>
 
               {loginError && (
-                <p className="text-red-400 text-xs font-semibold text-center mt-2">{loginError}</p>
+                <p className="text-red-500 text-sm font-medium text-center mt-2 animate-in fade-in slide-in-from-top-1">{loginError}</p>
               )}
               
               {/* Primary Action Button */}
               <div className="pt-2">
                 <button 
                   disabled={loginLoading}
-                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] text-white font-semibold py-4 rounded-xl shadow-lg shadow-[#8b5cf6]/20 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2" 
+                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-[#8b5cf6]/25 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2" 
                   type="submit"
                 >
-                  {loginLoading ? 'Checking ledger...' : 'Unlock CFO Dashboard'}
+                  {loginLoading ? 'Authenticating...' : 'Unlock CFO Dashboard'}
                 </button>
               </div>
               
               {/* Divider Line */}
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-slate-800"></div>
-                <span className="flex-shrink mx-4 text-[10px] text-slate-600 font-medium uppercase tracking-widest">Navigation</span>
-                <div className="flex-grow border-t border-slate-800"></div>
+              <div className="relative flex items-center py-4">
+                <div className="flex-grow border-t border-slate-100"></div>
+                <span className="flex-shrink mx-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest">Navigation</span>
+                <div className="flex-grow border-t border-slate-100"></div>
               </div>
               
               {/* Secondary Action Buttons */}
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2.5">
                 <button 
                   onClick={() => handleCfoLogin()}
                   disabled={loginLoading}
-                  className="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-medium py-3 rounded-xl border border-white/5 transition-all duration-200 disabled:opacity-50" 
+                  className="w-full bg-white hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl border border-slate-200 shadow-sm transition-all duration-200 disabled:opacity-50" 
                   type="button"
                 >
                   Instant CFO Login
                 </button>
                 <button 
                   onClick={() => navigate('/')}
-                  className="w-full bg-transparent hover:text-white text-slate-500 font-medium py-2 transition-all duration-200 text-sm" 
+                  className="w-full bg-transparent hover:text-slate-900 text-slate-500 font-medium py-2 transition-colors duration-200 text-sm mt-1" 
                   type="button"
                 >
                   Return to Home
@@ -217,7 +224,7 @@ const CfoPage = () => {
           </section>
           
           {/* Footer Copyright */}
-          <footer className="mt-8 text-center text-slate-600 text-xs">
+          <footer className="mt-8 text-center text-slate-500 text-[11px] font-medium tracking-wide">
             © 2026 Welile Cars Financial Systems. Secure Session Active.
           </footer>
         </div>
