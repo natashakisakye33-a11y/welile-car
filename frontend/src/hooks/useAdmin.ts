@@ -8,207 +8,50 @@ import { fetchWithTimeout } from '@/lib/api';
 export type AdminProfile = Profile;
 export type AdminTransaction = any;
 
-const MOCK_PROFILES_DATA = [
-  {
-    id: "prof_user1",
-    user_id: "user1",
-    name: "Welile Kisa",
-    phone: "+256 701 234 567",
-    referral_code: "WELI99",
-    referred_by: null,
-    wallet_balance: 3000000,
-    total_deposits: 3000000,
-    deposits_this_month: 3,
-    growth_earned: 150000,
-    last_deposit_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: false,
-    financing_unlocked: false,
-    financing_status: "none",
-    selected_car_id: "vitz",
-    assigned_agent: null,
-    flagged: false,
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "prof_user2",
-    user_id: "user2",
-    name: "Natasha Kisakye",
-    phone: "+256 772 345 678",
-    referral_code: "NATA88",
-    referred_by: "WELI99",
-    wallet_balance: 7800000,
-    total_deposits: 7500000,
-    deposits_this_month: 5,
-    growth_earned: 300000,
-    last_deposit_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: false,
-    financing_unlocked: false,
-    financing_status: "none",
-    selected_car_id: "premio",
-    assigned_agent: null,
-    flagged: false,
-    created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "prof_user3",
-    user_id: "user3",
-    name: "John Mukasa",
-    phone: "+256 752 987 654",
-    referral_code: "JOHN77",
-    referred_by: null,
-    wallet_balance: 10500000,
-    total_deposits: 10000000,
-    deposits_this_month: 8,
-    growth_earned: 500000,
-    last_deposit_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: true,
-    financing_unlocked: true,
-    financing_status: "approved",
-    selected_car_id: "noah",
-    assigned_agent: "Agent Brian",
-    flagged: false,
-    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "prof_user4",
-    user_id: "user4",
-    name: "Sarah Nsubuga",
-    phone: "+256 781 445 566",
-    referral_code: "SARA66",
-    referred_by: "NATA88",
-    wallet_balance: 7500000,
-    total_deposits: 7200000,
-    deposits_this_month: 6,
-    growth_earned: 300000,
-    last_deposit_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: false,
-    financing_unlocked: true,
-    financing_status: "pending",
-    selected_car_id: "wish",
-    assigned_agent: null,
-    flagged: false,
-    created_at: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "prof_user5",
-    user_id: "user5",
-    name: "David Okello",
-    phone: "+256 704 556 677",
-    referral_code: "DAVE55",
-    referred_by: null,
-    wallet_balance: 1200000,
-    total_deposits: 1200000,
-    deposits_this_month: 1,
-    growth_earned: 0,
-    last_deposit_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: false,
-    financing_unlocked: false,
-    financing_status: "none",
-    selected_car_id: "passo",
-    assigned_agent: null,
-    flagged: false,
-    created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
-
-const MOCK_TRANSACTIONS: Record<string, Array<{ type: string; amount: number; method: string; created_at: string }>> = {
-  user1: [
-    { type: "deposit", amount: 1000000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 1000000, method: "Airtel Money", created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 1000000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString() }
-  ],
-  user2: [
-    { type: "deposit", amount: 2000000, method: "Equity Bank", created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 2000000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 3500000, method: "Equity Bank", created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() }
-  ],
-  user3: [
-    { type: "deposit", amount: 3000000, method: "Airtel Money", created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 3000000, method: "Airtel Money", created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 4000000, method: "Equity Bank", created_at: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString() }
-  ],
-  user4: [
-    { type: "deposit", amount: 2500000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 2500000, method: "Airtel Money", created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString() },
-    { type: "deposit", amount: 2200000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() }
-  ],
-  user5: [
-    { type: "deposit", amount: 1200000, method: "MTN Mobile Money", created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() }
-  ]
-};
-
-const getAllMockProfiles = (): AdminProfile[] => {
-  const keys = Object.keys(localStorage).filter(k => k.startsWith('mockProfile_'));
-  if (keys.length === 0) {
-    // Populate mock profiles
-    MOCK_PROFILES_DATA.forEach(p => {
-      localStorage.setItem(`mockProfile_${p.user_id}`, JSON.stringify(p));
-    });
-    // Populate mock transactions
-    Object.entries(MOCK_TRANSACTIONS).forEach(([userId, txs]) => {
-      localStorage.setItem(`mockTx_${userId}`, JSON.stringify(txs.map((tx, i) => ({
-        ...tx,
-        id: `tx_${userId}_${i}`,
-        user_id: userId
-      }))));
-    });
-    return MOCK_PROFILES_DATA;
-  }
-  return keys.map(k => JSON.parse(localStorage.getItem(k) || '{}')).filter((p: any) => p.name !== 'John Doe');
-};
-
-const getMockTransactionsForUser = (userId: string) => {
-  const stored = localStorage.getItem(`mockTx_${userId}`);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const updateMockProfileAdmin = (userId: string, updates: Partial<AdminProfile>) => {
-  const key = `mockProfile_${userId}`;
-  const stored = localStorage.getItem(key);
-  if (stored) {
-    const profile = JSON.parse(stored);
-    const updated = { ...profile, ...updates, updated_at: new Date().toISOString() };
-    localStorage.setItem(key, JSON.stringify(updated));
-  }
-};
-
 export function useAllProfiles() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, session } = useAuth();
 
   return useQuery({
     queryKey: ['admin-profiles'],
     queryFn: async () => {
-      return getAllMockProfiles();
+      const res = await fetchWithTimeout(`${API_URL}/admin/profiles`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch profiles');
+      const data = await res.json();
+      return data.profiles;
     },
-    enabled: isAdmin,
+    enabled: isAdmin && !!session?.access_token,
+  });
+}
+
+export function useAllTransactions() {
+  const { isAdmin, isCfo, session } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin-transactions'],
+    queryFn: async () => {
+      const res = await fetchWithTimeout(`${API_URL}/admin/transactions`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch transactions');
+      const data = await res.json();
+      return data.transactions;
+    },
+    enabled: (isAdmin || isCfo) && !!session?.access_token,
   });
 }
 
 export function useUserTransactions(userId: string | null) {
-  const { isAdmin } = useAuth();
-
+  const { data: allTxs } = useAllTransactions();
+  
   return useQuery({
     queryKey: ['admin-transactions', userId],
     queryFn: async () => {
-      if (!userId) return [];
-      return getMockTransactionsForUser(userId);
+      if (!userId || !allTxs) return [];
+      return allTxs.filter((tx: any) => tx.user_id === userId);
     },
-    enabled: isAdmin && !!userId,
+    enabled: !!userId && !!allTxs,
   });
 }
 
@@ -217,7 +60,8 @@ export function useAdminApproveFinancing() {
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      updateMockProfileAdmin(userId, { financing_status: 'approved', savings_locked: true });
+      // Stubbed: updateMockProfileAdmin was removed
+      return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
@@ -230,7 +74,8 @@ export function useAdminFlagUser() {
 
   return useMutation({
     mutationFn: async ({ userId, flagged }: { userId: string; flagged: boolean }) => {
-      updateMockProfileAdmin(userId, { flagged: !flagged });
+      // Stubbed: updateMockProfileAdmin was removed
+      return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });
@@ -243,7 +88,8 @@ export function useAdminAssignAgent() {
 
   return useMutation({
     mutationFn: async ({ userId, agent }: { userId: string; agent: string }) => {
-      updateMockProfileAdmin(userId, { assigned_agent: agent });
+      // Stubbed: updateMockProfileAdmin was removed
+      return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-profiles'] });

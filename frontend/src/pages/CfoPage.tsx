@@ -12,6 +12,7 @@ import {
   usePendingWithdrawals,
   useApproveWithdrawal,
   useRejectWithdrawal,
+  useAllTransactions
 } from '@/hooks/useAdmin';
 import { CARS } from '@/hooks/useProfile';
 import { formatUGX } from '@/lib/format';
@@ -24,6 +25,7 @@ const CfoPage = () => {
   const navigate = useNavigate();
   
   const { data: users = [], isLoading: usersLoading } = useAllProfiles();
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: requests = [], isLoading: requestsLoading } = useCfoRequests();
   const resolveRequest = useResolveCfoRequest();
   
@@ -233,21 +235,9 @@ const CfoPage = () => {
   }
 
   // Dashboard calculations
-  const getMockTransactionsForUser = (userId: string) => {
-    const stored = localStorage.getItem(`mockTx_${userId}`);
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  const allPayments = users.flatMap(user => {
-    const txs = getMockTransactionsForUser(user.user_id);
-    return txs
-      .filter((tx: any) => tx.type === 'deposit')
-      .map((tx: any) => ({
-        ...tx,
-        userName: user.name,
-        userPhone: user.phone,
-      }));
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const allPayments = allTransactions
+    .filter((tx: any) => tx.type === 'deposit')
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const filteredPayments = allPayments.filter(payment => {
     const matchesSearch = payment.userName.toLowerCase().includes(paymentSearch.toLowerCase()) ||

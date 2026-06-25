@@ -296,6 +296,79 @@ const rejectWithdrawal = async (req, res) => {
   }
 };
 
+const getAllProfiles = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      include: {
+        savingsAccount: true,
+        loanApplications: true,
+        financings: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    // Map to AdminProfile shape for frontend
+    const profiles = users.map(user => {
+      const balance = user.savingsAccount ? user.savingsAccount.balance : 0;
+      
+      let financingStatus = 'none';
+      if (user.financings.length > 0) financingStatus = 'approved';
+      else if (user.loanApplications.length > 0) financingStatus = user.loanApplications[0].status.toLowerCase();
+
+      return {
+        id: `prof_${user.id}`,
+        user_id: user.id.toString(),
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        wallet_balance: balance,
+        total_deposits: balance,
+        growth_earned: user.savingsAccount ? user.savingsAccount.interestEarned : 0,
+        financing_status: financingStatus,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt
+      };
+    });
+    
+    res.json({ profiles });
+  } catch (error) {
+    console.error('Get All Profiles Error:', error);
+    res.status(500).json({ error: 'Server error retrieving profiles' });
+  }
+};
+
+const getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await prisma.savingsTransaction.findMany({
+      include: {
+        account: {
+          include: {
+            user: { select: { name: true, phone: true } }
+          }
+        }
+      },
+      orderBy: { date: 'desc' }
+    });
+    
+    const formatted = transactions.map(tx => ({
+      id: tx.id,
+      user_id: tx.account.userId.toString(),
+      userName: tx.account.user.name,
+      userPhone: tx.account.user.phone,
+      type: tx.type.toLowerCase(),
+      amount: tx.amount,
+      method: tx.provider || 'unknown',
+      status: tx.status.toLowerCase(),
+      created_at: tx.date
+    }));
+
+    res.json({ transactions: formatted });
+  } catch (error) {
+    console.error('Get All Transactions Error:', error);
+    res.status(500).json({ error: 'Server error retrieving transactions' });
+  }
+};
+
 module.exports = {
   getExecutiveStats,
   getAllLoans,
@@ -306,5 +379,7 @@ module.exports = {
   rejectDeposit,
   getPendingWithdrawals,
   approveWithdrawal,
-  rejectWithdrawal
+  rejectWithdrawal,
+  getAllProfiles,
+  getAllTransactions
 };
