@@ -2,7 +2,8 @@ const express = require('express');
 const { 
   getExecutiveStats, getAllLoans, updateLoanStatus, getRecoveryStats, 
   getPendingDeposits, approveDeposit, rejectDeposit,
-  getPendingWithdrawals, approveWithdrawal, rejectWithdrawal
+  getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
+  getAllProfiles, getAllTransactions
 } = require('./admin.controller');
 const { authenticateToken, requirePermission } = require('../../shared/middleware/auth.middleware');
 
@@ -11,6 +12,9 @@ const router = express.Router();
 // Apply auth and requirePermission to all routes in this router
 router.use(authenticateToken);
 router.use(requirePermission('org:system:manage'));
+
+router.get('/profiles', getAllProfiles);
+router.get('/transactions', getAllTransactions);
 
 router.get('/stats/executive', getExecutiveStats);
 router.get('/stats/recovery', getRecoveryStats);

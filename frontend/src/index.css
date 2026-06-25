@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Chewy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Chewy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@100..700,0..1,-50..200,20..48&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,72 +19,71 @@
     --primary: 268 74% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 252 60% 95%;
-    --secondary-foreground: 268 74% 20%;
+    --secondary: 173 100% 21%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 250 20% 95%;
-    --muted-foreground: 250 10% 50%;
+    --muted: 250 20% 90%;
+    --muted-foreground: 250 10% 40%;
 
-    --accent: 252 60% 92%;
-    --accent-foreground: 268 74% 20%;
+    --accent: 250 20% 90%;
+    --accent-foreground: 250 30% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 250 15% 90%;
-    --input: 250 15% 90%;
+    --border: 250 20% 85%;
+    --input: 250 20% 85%;
     --ring: 268 74% 32%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-
-    --gradient-start: 268 74% 32%;
-    --gradient-end: 280 80% 55%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 250 30% 10%;
     --sidebar-primary: 268 74% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 252 60% 95%;
-    --sidebar-accent-foreground: 268 74% 20%;
-    --sidebar-border: 250 15% 90%;
+    --sidebar-accent: 250 20% 95%;
+    --sidebar-accent-foreground: 250 30% 10%;
+    --sidebar-border: 250 20% 85%;
     --sidebar-ring: 268 74% 32%;
-
-    font-family: 'Inter', sans-serif;
   }
 
   .dark {
-    --background: 250 30% 6%;
-    --foreground: 250 10% 95%;
-    --card: 250 25% 10%;
-    --card-foreground: 250 10% 95%;
-    --popover: 250 25% 10%;
-    --popover-foreground: 250 10% 95%;
-    --primary: 268 74% 32%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 252 40% 15%;
-    --secondary-foreground: 252 60% 80%;
-    --muted: 250 20% 15%;
-    --muted-foreground: 250 10% 60%;
-    --accent: 252 40% 18%;
-    --accent-foreground: 252 60% 80%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 250 20% 18%;
-    --input: 250 20% 18%;
-    --ring: 268 74% 32%;
-    --sidebar-background: 250 30% 8%;
-    --sidebar-foreground: 250 10% 90%;
-    --sidebar-primary: 268 74% 32%;
+    --background: 250 30% 10%;
+    --foreground: 250 20% 98%;
+
+    --card: 250 30% 12%;
+    --card-foreground: 250 20% 98%;
+
+    --popover: 250 30% 12%;
+    --popover-foreground: 250 20% 98%;
+
+    --primary: 268 74% 62%;
+    --primary-foreground: 268 74% 10%;
+
+    --secondary: 173 60% 40%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 20% 20%;
+    --muted-foreground: 250 10% 70%;
+
+    --accent: 250 20% 20%;
+    --accent-foreground: 250 20% 98%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 250 20% 98%;
+
+    --border: 250 20% 20%;
+    --input: 250 20% 20%;
+    --ring: 268 74% 62%;
+
+    --sidebar-background: 250 30% 12%;
+    --sidebar-foreground: 250 20% 98%;
+    --sidebar-primary: 268 74% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 252 40% 15%;
-    --sidebar-accent-foreground: 252 60% 80%;
-    --sidebar-border: 250 20% 18%;
-    --sidebar-ring: 268 74% 32%;
+    --sidebar-accent: 250 20% 20%;
+    --sidebar-accent-foreground: 250 20% 98%;
+    --sidebar-border: 250 20% 20%;
+    --sidebar-ring: 268 74% 62%;
   }
 }
 
@@ -93,9 +93,10 @@
   }
   body {
     @apply bg-background text-on-surface antialiased;
+    font-family: 'Manrope', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
 }
 
@@ -137,9 +138,10 @@
       direction: ltr;
   }
   .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .reveal {
       opacity: 0;
@@ -213,3 +215,7 @@
       transform: scale(1.5);
   }
 }
+
+.glass-panel { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+.amethyst-gradient { background: linear-gradient(135deg, #4f1291 0%, #340068 100%); }
+.premium-shadow { box-shadow: 0px 20px 40px rgba(52, 0, 104, 0.15); }

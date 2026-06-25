@@ -3,13 +3,13 @@ const { logAction } = require('../../shared/utils/audit.util');
 
 const prisma = new PrismaClient();
 
-const getDbUser = async (clerkUserId) => {
-  return await prisma.user.findUnique({ where: { clerkUserId } });
+const getDbUser = async (id) => {
+  return await prisma.user.findUnique({ where: { id: parseInt(id) } });
 };
 
 const submitKyc = async (req, res) => {
   try {
-    const dbUser = await getDbUser(req.auth.userId);
+    const dbUser = await getDbUser(req.user.id);
     if (!dbUser) return res.status(404).json({ error: 'User not found' });
     
     const { nationalId, selfieUrl, address, employmentStatus } = req.body;
@@ -44,7 +44,7 @@ const submitKyc = async (req, res) => {
 const getMyProfile = async (req, res) => {
   try {
     let user = await prisma.user.findUnique({
-      where: { clerkUserId: req.auth.userId },
+      where: { id: parseInt(req.user.id) },
       select: { 
         id: true, email: true, name: true, role: true, 
         status: true, kycStatus: true, nationalId: true, 
@@ -53,20 +53,17 @@ const getMyProfile = async (req, res) => {
     });
 
     if (!user) {
-      // Auto-create missing user to handle cases where DB was reset
-      user = await prisma.user.create({
-        data: {
-          clerkUserId: req.auth.userId,
-          name: 'Restored User',
-          phone: `TEMP_${req.auth.userId}`
-        }
-      });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    const savings = await prisma.savingsAccount.findUnique({
+      where: { userId: user.id }
+    });
+
+    res.json({ ...user, savingsAccount: savings || null });
   } catch (error) {
     console.error('Get Profile Error:', error);
-    res.status(500).json({ error: 'Server error retrieving profile' });
+    res.status(500).json({ error: 'Server error fetching profile' });
   }
 };
 

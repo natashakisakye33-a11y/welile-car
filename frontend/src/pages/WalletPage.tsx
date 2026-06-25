@@ -143,6 +143,43 @@ const WalletPage = () => {
   const walletDeduction = Number(localStorage.getItem('mockWalletDeduction') || 0);
   const availableBalance = dashboardData.savings.totalSaved - walletDeduction;
 
+  const handlePasteMessage = (text: string) => {
+    // Amount parsing
+    const amountMatch = text.match(/UGX\s*([\d,]+)/i) || text.match(/(?:received|deposited)\s*([\d,]+)\s*(?:UGX|Shs)/i) || text.match(/(?:UGX|Shs)\.?\s*([\d,]+)/i);
+    if (amountMatch) {
+      const rawAmount = amountMatch[1].replace(/,/g, '');
+      if (!isNaN(Number(rawAmount))) {
+        setAmount(rawAmount);
+      }
+    }
+
+    // Transaction ID parsing
+    const tidMatch = text.match(/(?:ID|Txn ?ID|Transaction ?ID|TxId|Ref|Receipt)[:\s-]*([A-Z0-9]{8,15})/i) || text.match(/\b([A-Z0-9]{10,12})\b/);
+    if (tidMatch && tidMatch[1]) {
+      setTransactionId(tidMatch[1].toUpperCase());
+    }
+
+    // Date parsing
+    const dateMatch = text.match(/(\d{4}[-/]\d{2}[-/]\d{2})/) || text.match(/(\d{2}[-/]\d{2}[-/]\d{4})/);
+    if (dateMatch) {
+      let d = dateMatch[1];
+      if (d.match(/^\d{2}[-/]\d{2}[-/]\d{4}$/)) {
+        const sep = d.includes('/') ? '/' : '-';
+        const parts = d.split(sep);
+        d = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      } else {
+        d = d.replace(/\//g, '-');
+      }
+      setTransactionDate(d);
+    }
+
+    // Time parsing
+    const timeMatch = text.match(/([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?/);
+    if (timeMatch) {
+      setTransactionTime(`${timeMatch[1]}:${timeMatch[2]}`);
+    }
+  };
+
   const handleDeposit = async () => {
     const val = parseInt(amount);
     if (!val || val < 1000) return;
@@ -229,13 +266,12 @@ const WalletPage = () => {
   const expectedPayment = dashboardData?.vehicle?.priceUgx ? Math.round(dashboardData.vehicle.priceUgx / 36) : 450000;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8 p-4 md:p-0 pt-8 md:pt-0">
-        
-        {/* Header */}
-        <div className="print:hidden">
-          <h1 className="text-2xl font-extrabold text-slate-900">Wallet</h1>
-          <p className="text-slate-500 font-medium">Manage your savings, deposits, and growth.</p>
+    <div className="min-h-screen bg-surface pb-24 md:pb-8 pt-6 md:pt-0">
+      <div className="p-4 md:p-10 max-w-[1200px] mx-auto">
+        {/* Header Section */}
+        <div className="mb-10 print:hidden">
+          <h2 className="font-headline-lg text-headline-lg text-on-surface">Wallet</h2>
+          <p className="text-on-surface-variant mt-2">Manage your savings, deposits, and asset growth in one place.</p>
         </div>
 
         {/* Print-Only Header */}
@@ -248,181 +284,155 @@ const WalletPage = () => {
           </div>
         </div>
 
-        {/* Hero Wallet Card Redesigned */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="print:hidden relative bg-[#4C158D] text-white rounded-[3rem] p-8 min-h-[440px] flex flex-col items-center justify-between shadow-2xl shadow-[#4C158D]/30 overflow-hidden">
-          {/* Background decorations */}
-          <div className="absolute top-[-50%] right-[-20%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[60px] pointer-events-none"></div>
-          <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-fuchsia-500/20 rounded-full blur-[50px] pointer-events-none"></div>
-          
-          {/* Top section */}
-          <div className="relative z-10 flex flex-col items-center w-full mt-4">
-            <button className="text-white/70 hover:text-white font-medium flex items-center gap-1 mb-6 transition-colors">
-              Wallet 1 <ChevronDown size={16} />
-            </button>
-            
-            <AnimatedNumber value={availableBalance} className="text-5xl md:text-6xl font-black drop-shadow-lg text-center tracking-tight" />
-            
-            <p className="text-sm text-white/60 mt-3 font-medium flex items-center gap-2">
-              {profile.savings_locked ? (
-                <><ShieldCheck size={14} /> Savings Locked</>
-              ) : (
-                <>{formatUGX(dashboardData.savings.interestEarned)} Earned <TrendingUp size={14} /></>
-              )}
-            </p>
-          </div>
-          
-          {/* Bottom actions */}
-          <div className="relative z-10 flex flex-col items-center w-full mt-10 space-y-8">
-            <div className="flex items-center justify-center gap-3 w-full max-w-sm">
-              {/* Deposit Button */}
-              <button 
-                onClick={() => { setAmount(''); setShowDeposit(true); }} 
-                disabled={profile.savings_locked}
-                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
-              >
-                <ArrowDownLeft size={16} /> <span className="text-sm">Deposit</span>
-              </button>
-              
-              {/* Center Plus Button */}
-              <button 
-                onClick={() => { setAmount(''); setShowDeposit(true); }} 
-                disabled={profile.savings_locked}
-                className="w-[60px] h-[60px] bg-white/5 border border-white/10 hover:bg-white/10 rounded-full flex items-center justify-center transition-all shrink-0 disabled:opacity-50 backdrop-blur-md text-white"
-              >
-                <Plus size={24} />
-              </button>
-              
-              {/* Withdraw Button */}
-              <button 
-                onClick={() => { setAmount(''); setShowWithdraw(true); }} 
-                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium px-5 py-3.5 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50 flex-1 backdrop-blur-md"
-              >
-                <ArrowUpRight size={16} /> <span className="text-sm">Withdraw</span>
-              </button>
-            </div>
-            
-            {/* Status indicator */}
-            <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full backdrop-blur-md flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
-              <span className="text-xs font-medium text-white/70 tracking-wide">Synchronized</span>
-            </div>
-          </div>
-        </motion.div>
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-12 gap-6 print:hidden">
+          {/* Premium Wallet Card (The Highlight) */}
+          <div className="col-span-12 lg:col-span-8">
+            <div className="amethyst-gradient rounded-[32px] p-6 md:p-10 relative overflow-hidden premium-shadow group flex flex-col justify-between aspect-auto md:aspect-[1.58/1] min-h-[350px] ring-1 ring-white/20 shadow-inner">
+              {/* Abstract Background Decoration */}
+              <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700 pointer-events-none"></div>
+              <div className="absolute -left-10 -bottom-10 w-64 h-64 bg-primary-container/20 rounded-full blur-2xl pointer-events-none"></div>
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 md:gap-6 print:hidden">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4">
-              <ArrowDownLeft size={24} />
-            </div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total Deposits</p>
-            <p className="text-2xl font-black text-slate-900">{formatUGX(availableBalance)}</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 bg-fuchsia-50 text-fuchsia-600 rounded-full flex items-center justify-center mb-4">
-              <TrendingUp size={24} />
-            </div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Growth Earned</p>
-            <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-[#4C158D]">+{formatUGX(dashboardData.savings.interestEarned)}</p>
-          </motion.div>
-        </div>
-
-        {/* Enhanced Interactive Savings Calculator */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="print:hidden bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2 space-y-6">
-            <h2 className="font-extrabold text-xl text-slate-900 flex items-center gap-2">
-              <Calculator size={24} className="text-primary" /> Savings Estimator
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm font-bold text-slate-500 uppercase">Target Amount</span>
-                  <span className="font-black text-primary text-lg">{formatUGX(calcTarget[0])}</span>
-                </div>
-                <Slider
-                  defaultValue={[15000000]}
-                  max={50000000}
-                  min={1000000}
-                  step={500000}
-                  value={calcTarget}
-                  onValueChange={setCalcTarget}
-                  className="w-full"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm font-bold text-slate-500 uppercase">Monthly Deposit</span>
-                  <span className="font-black text-emerald-600 text-lg">{formatUGX(calcMonthly[0])}</span>
-                </div>
-                <Slider
-                  defaultValue={[500000]}
-                  max={5000000}
-                  min={50000}
-                  step={50000}
-                  value={calcMonthly}
-                  onValueChange={setCalcMonthly}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="md:w-1/2 bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-center">
-            {calcResult && (
-              <div className="space-y-6">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">Estimated Time to Target</p>
-                  <p className="text-4xl font-black text-slate-900">{calcResult.estimatedMonths} <span className="text-lg text-slate-500 font-bold">Months</span></p>
-                </div>
-                <div className="h-[1px] bg-slate-200 w-full"></div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">Projected Interest Earned</p>
-                  <p className="text-2xl font-black text-emerald-500">+{formatUGX(calcResult.estimatedInterest)}</p>
-                </div>
-                <div className="bg-primary/10 text-primary p-3 rounded-xl text-xs font-bold flex items-center gap-2">
-                  <Sparkles size={16} /> 5% Annual Growth Rate applied.
-                </div>
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Savings Timeline / History */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm print:shadow-none print:border-none print:p-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="font-extrabold text-xl text-slate-900">Savings History</h2>
-            <button onClick={() => window.print()} className="print:hidden text-sm flex items-center gap-2 text-primary font-bold bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition">
-              <Printer size={16} /> Print Statement
-            </button>
-          </div>
-          {transactions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-              <Wallet size={48} className="mb-4 opacity-20" />
-              <p className="font-medium">No savings history yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-0 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-              {transactions.map((tx, idx) => (
-                <div key={tx.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active py-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-slate-50 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                    {iconForType(tx.type)}
+              {/* Card Header: Logo & Tier */}
+              <div className="relative z-10 flex justify-between items-start">
+                  <div className="flex flex-col">
+                      <span className="text-white font-bold tracking-widest text-sm">Welile Car</span>
+                      <div className="glass-panel px-3 py-1 rounded-full mt-2 flex items-center gap-2 cursor-pointer hover:bg-white/15 transition-colors w-fit border-white/20 bg-white/10">
+                          <span className="text-white/80 font-bold text-[10px] uppercase tracking-[0.2em]">Platinum</span>
+                          <span className="material-symbols-outlined text-white/60 text-xs">expand_more</span>
+                      </div>
                   </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                      <p className="font-bold text-slate-900 capitalize">{tx.type} {tx.method ? `via ${tx.method}` : ''}</p>
-                      <span className={`font-black ${tx.type === 'withdrawal' ? 'text-rose-500' : 'text-emerald-500'}`}>
-                        {tx.type === 'withdrawal' ? '-' : '+'}{formatUGX(tx.amount)}
-                      </span>
+                  <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 bg-white/5 border-white/10">
+                      <span className="w-2 h-2 bg-tertiary-fixed-dim rounded-full animate-pulse"></span>
+                      <span className="text-white/80 font-bold text-body-sm uppercase tracking-widest text-xs">Synchronized</span>
+                  </div>
+              </div>
+
+              {/* Card Body: Chip & Balance */}
+              <div className="relative z-10 flex flex-col mt-8">
+                  <div className="w-14 h-10 bg-gradient-to-br from-yellow-200 via-yellow-500 to-yellow-200 rounded-lg mb-6 relative overflow-hidden opacity-90">
+                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 border border-black/10">
+                          <div className="border-r border-b border-black/10"></div><div className="border-r border-b border-black/10"></div><div className="border-b border-black/10"></div>
+                          <div className="border-r border-black/10"></div><div className="border-r border-black/10"></div><div></div>
+                      </div>
+                  </div>
+                  <div className="text-left">
+                      <p className="text-white/60 font-bold tracking-[0.2em] uppercase text-[10px] mb-1">Total Available Balance</p>
+                      <h3 className="text-white font-headline-lg text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+                          <span className="text-white/70 text-xl md:text-2xl font-bold mr-2">UGX</span>
+                          {availableBalance.toLocaleString()}
+                      </h3>
+                      <div className="flex items-center gap-2 text-tertiary-fixed-dim">
+                          <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
+                          <span className="font-bold text-body-sm text-sm">+ UGX {dashboardData.savings.interestEarned.toLocaleString()} Earned</span>
+                      </div>
+                  </div>
+              </div>
+
+              {/* Card Footer: Number & Name */}
+              <div className="relative z-10 mt-auto pt-8">
+                  <p className="text-white/90 font-bold tracking-[0.3em] text-lg mb-1">4532 •••• •••• 8891</p>
+                  <p className="text-white/70 font-bold tracking-widest text-sm uppercase">{user?.name || 'User'}</p>
+              </div>
+            </div>
+
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                <button 
+                  onClick={() => { setAmount(''); setShowDeposit(true); }}
+                  disabled={profile.savings_locked}
+                  className="w-full sm:flex-1 sm:max-w-[200px] h-14 glass-panel border border-white/20 hover:bg-slate-200 hover:text-on-surface text-on-surface rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
+                  style={{ background: 'rgba(0,0,0,0.05)', borderColor: 'rgba(0,0,0,0.1)' }}
+                >
+                    <span className="material-symbols-outlined">south_west</span>
+                    Deposit
+                </button>
+                <button 
+                  onClick={() => { setAmount(''); setShowDeposit(true); }}
+                  disabled={profile.savings_locked}
+                  className="w-14 h-14 bg-white text-primary rounded-2xl flex items-center justify-center group/btn hover:rotate-90 transition-all duration-300 shadow-xl disabled:opacity-50 shrink-0 hidden sm:flex"
+                >
+                    <span className="material-symbols-outlined text-3xl">add</span>
+                </button>
+                <button 
+                  onClick={() => { setAmount(''); setShowWithdraw(true); }}
+                  className="w-full sm:flex-1 sm:max-w-[200px] h-14 glass-panel border border-white/20 hover:bg-slate-200 hover:text-on-surface text-on-surface rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95"
+                  style={{ background: 'rgba(0,0,0,0.05)', borderColor: 'rgba(0,0,0,0.1)' }}
+                >
+                    Withdraw
+                    <span className="material-symbols-outlined">north_east</span>
+                </button>
+            </div>
+          </div>
+
+          {/* Growth Insights (Side Cards) */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6 md:gap-8">
+            {/* Total Deposits Card */}
+            <div className="bg-surface-container-lowest p-8 rounded-[32px] shadow-sm border border-outline-variant hover:border-primary transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-tertiary-container/10 flex items-center justify-center mb-6 text-on-tertiary-container">
+                <span className="material-symbols-outlined text-2xl">call_received</span>
+              </div>
+              <p className="text-outline-variant font-bold uppercase text-[10px] tracking-widest mb-1">Total Deposits</p>
+              <h4 className="text-on-surface font-headline-md text-2xl font-extrabold">{formatUGX(availableBalance)}</h4>
+              <div className="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+                <span className="text-body-sm text-outline-variant">Current Balance</span>
+                <span className="text-on-tertiary-container font-bold text-body-sm">Active</span>
+              </div>
+            </div>
+
+            {/* Asset Appreciation Card */}
+            <div className="bg-surface-container-lowest p-8 rounded-[32px] shadow-sm border border-outline-variant hover:border-primary transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-primary-container/10 flex items-center justify-center mb-6 text-primary">
+                <span className="material-symbols-outlined text-2xl">insights</span>
+              </div>
+              <p className="text-outline-variant font-bold uppercase text-[10px] tracking-widest mb-1">Growth Earned</p>
+              <h4 className="text-on-surface font-headline-md text-2xl font-extrabold">+{formatUGX(dashboardData.savings.interestEarned)}</h4>
+              <div className="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+                <span className="text-body-sm text-outline-variant">Passive yield</span>
+                <span className="text-primary font-bold text-body-sm">+8.4% APY</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Bento Section: Transaction History */}
+          <div className="col-span-12">
+            <div className="bg-surface-container-lowest rounded-[32px] p-6 md:p-8 shadow-sm border border-outline-variant">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="font-headline-md text-on-surface">Recent Activity</h3>
+                <button onClick={() => window.print()} className="text-primary font-bold text-body-sm hover:underline">Print Statement</button>
+              </div>
+              <div className="space-y-4">
+                {transactions.length === 0 ? (
+                  <div className="text-center py-8 text-outline-variant font-medium flex flex-col items-center">
+                    <span className="material-symbols-outlined text-4xl mb-2 opacity-30">receipt_long</span>
+                    No transactions yet.
+                  </div>
+                ) : (
+                  transactions.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container transition-colors border hover:border-outline-variant/50 border-outline-variant/20">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${tx.type === 'withdrawal' ? 'bg-error-container text-on-error-container' : 'bg-tertiary-container/10 text-on-tertiary-container'}`}>
+                          <span className="material-symbols-outlined">
+                            {tx.type === 'withdrawal' ? 'payments' : 'account_balance'}
+                          </span>
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-on-surface capitalize">{tx.type}</h5>
+                          <p className="text-body-sm text-outline-variant mt-1">{formatDate(tx.date || tx.created_at || new Date().toISOString())} • {tx.method}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold tracking-tight text-lg ${tx.type === 'withdrawal' ? 'text-error' : 'text-on-tertiary-container'}`}>
+                          {tx.type === 'withdrawal' ? '-' : '+'} UGX {tx.amount.toLocaleString()}
+                        </p>
+                        <p className="text-body-sm text-outline-variant mt-1">Ref #{tx.id.substring(0, 8)}</p>
+                      </div>
                     </div>
-                    <time className="text-xs font-medium text-slate-400">{formatDate(tx.date || tx.created_at || new Date().toISOString())}</time>
-                  </div>
-                </div>
-              ))}
+                  ))
+                )}
+              </div>
             </div>
-          )}
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Deposit Modal (Glassmorphism Slide-Up) */}
@@ -477,6 +487,19 @@ const WalletPage = () => {
                         {method === pm.id && <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>}
                       </button>
                     ))}
+                  </div>
+
+                  {/* Auto-fill from SMS */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">content_paste</span>
+                      Auto-fill from SMS
+                    </label>
+                    <textarea 
+                      placeholder="Paste your MTN or Airtel Money message here..."
+                      className="w-full p-3 rounded-xl bg-primary/5 border border-primary/20 text-slate-900 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none min-h-[80px]"
+                      onChange={(e) => handlePasteMessage(e.target.value)}
+                    />
                   </div>
                   
                   <div className="mb-4">

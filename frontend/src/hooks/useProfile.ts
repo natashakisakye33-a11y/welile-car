@@ -10,6 +10,7 @@ export interface Profile {
   user_id: string;
   name: string;
   phone: string;
+  email?: string;
   residence?: string;
   avatar_url?: string;
   referral_code: string;
@@ -248,6 +249,14 @@ export function useDeposit() {
       if (!res.ok) {
         throw new Error('Failed to deposit');
       }
+
+      // Mirror to mock storage so the admin dashboard (which reads local mock data) sees it
+      addMockTransaction(user.id, {
+        type: 'deposit',
+        amount,
+        method: method === 'mtn' ? 'MTN Mobile Money' : method === 'airtel' ? 'Airtel Money' : method,
+        status: 'pending'
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -278,6 +287,14 @@ export function useWithdraw() {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to withdraw');
       }
+
+      // Mirror to mock storage so the admin dashboard sees it
+      addMockTransaction(user.id, {
+        type: 'withdrawal',
+        amount,
+        method: method === 'mtn' ? 'MTN Mobile Money' : method === 'airtel' ? 'Airtel Money' : 'Bank Transfer',
+        status: 'pending'
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });

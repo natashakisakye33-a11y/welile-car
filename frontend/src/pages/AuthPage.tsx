@@ -29,13 +29,13 @@ export const CustomSignIn = () => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number or Email</label>
         <input 
-          type="tel" 
+          type="text" 
           value={phone} 
           onChange={e => setPhone(e.target.value)} 
           required 
-          placeholder="+256 700 000000"
+          placeholder="+256 700 000000 or email@domain.com"
           className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
         />
       </div>

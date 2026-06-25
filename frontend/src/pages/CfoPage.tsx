@@ -12,6 +12,7 @@ import {
   usePendingWithdrawals,
   useApproveWithdrawal,
   useRejectWithdrawal,
+  useAllTransactions
 } from '@/hooks/useAdmin';
 import { CARS } from '@/hooks/useProfile';
 import { formatUGX } from '@/lib/format';
@@ -24,6 +25,7 @@ const CfoPage = () => {
   const navigate = useNavigate();
   
   const { data: users = [], isLoading: usersLoading } = useAllProfiles();
+  const { data: allTransactions = [] } = useAllTransactions();
   const { data: requests = [], isLoading: requestsLoading } = useCfoRequests();
   const resolveRequest = useResolveCfoRequest();
   
@@ -52,12 +54,12 @@ const CfoPage = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) {
-        setLoginError(error);
+        setLoginError('Invalid credentials');
       } else {
         toast.success("Welcome back, Chief Financial Officer!");
       }
     } catch (err) {
-      setLoginError('An error occurred during authentication.');
+      setLoginError('Invalid credentials');
     } finally {
       setLoginLoading(false);
     }
@@ -115,103 +117,127 @@ const CfoPage = () => {
   }
 
   // CFO Gateway Login
+  // CFO Gateway Login
   if (!isCfo) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 px-4 py-12 text-white font-sans selection:bg-primary/20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="w-full max-w-[440px] bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 sm:p-10 rounded-[32px] shadow-2xl relative overflow-hidden"
-        >
-          <div className="absolute top-[-50px] right-[-50px] w-48 h-48 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-[-50px] left-[-50px] w-48 h-48 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
+      <main className="w-full min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans text-slate-900 relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-200/50 blur-3xl opacity-50 mix-blend-multiply"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-200/50 blur-3xl opacity-50 mix-blend-multiply"></div>
+        </div>
 
-          <div className="text-center mb-8 relative z-10">
-            <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
-              <ShieldCheck size={28} className="text-white" />
-            </div>
-            <h1 className="font-chewy text-4xl tracking-wide mb-1.5 text-white">Welile Cars</h1>
-            <p className="text-emerald-300/80 font-bold text-xs uppercase tracking-widest">CFO Dashboard Gateway</p>
-            <p className="text-slate-400 text-sm font-medium mt-3">
-              Restricted financial area. Sign in with Chief Financial Officer credentials to approve lines of credit and inspect audits.
-            </p>
-          </div>
+        <div className="w-full max-w-md relative z-10">
+          <section className="bg-white border border-slate-100/50 rounded-[2rem] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
+            {/* Branding & Header Section */}
+            <header className="flex flex-col items-center text-center mb-8">
+              {/* Secure Shield Icon */}
+              <div className="mb-5 p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-500 shadow-sm">
+                <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round"></path>
+                </svg>
+              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Welile Cars
+              </h1>
+              <p className="text-[11px] font-bold tracking-[0.25em] text-emerald-600 uppercase mb-4">
+                CFO Gateway
+              </p>
+              <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                Enter your credentials to access the secure financial dashboard and approve lines of credit.
+              </p>
+            </header>
+            
+            {/* Authentication Form */}
+            <form className="space-y-5" onSubmit={handleCfoLogin}>
+              {/* Email Input */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold tracking-wider text-slate-500 uppercase ml-1" htmlFor="cfo_email">
+                  CFO Email
+                </label>
+                <input 
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
+                  id="cfo_email" 
+                  placeholder="name@welilecars.com" 
+                  type="email" 
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              {/* Password Input */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold tracking-wider text-slate-500 uppercase ml-1" htmlFor="password">
+                  Password
+                </label>
+                <input 
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-          <form onSubmit={handleCfoLogin} className="space-y-4 relative z-10">
-            <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">CFO Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="cfo@admin.com"
-                className="w-full h-13 px-4 rounded-xl bg-slate-950/60 border border-slate-800 outline-none focus:border-emerald-500 transition text-sm font-semibold text-white placeholder:text-slate-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full h-13 px-4 rounded-xl bg-slate-950/60 border border-slate-800 outline-none focus:border-emerald-500 transition text-sm font-semibold text-white placeholder:text-slate-600"
-              />
-            </div>
-
-            {loginError && (
-              <p className="text-red-400 text-xs font-semibold text-center mt-2">{loginError}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full h-13 mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[14px] rounded-xl transition disabled:opacity-50 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
-            >
-              {loginLoading ? 'Checking ledger...' : 'Unlock CFO Dashboard'}
-            </button>
-          </form>
-
-          <div className="relative z-10 border-t border-slate-800/80 mt-6 pt-6 flex flex-col gap-3">
-            <button
-              onClick={() => handleCfoLogin()}
-              disabled={loginLoading}
-              className="w-full h-11 bg-white/5 border border-white/10 hover:bg-white/10 text-emerald-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
-            >
-              <span>Instant CFO Login</span>
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="w-full h-11 bg-slate-950/40 hover:bg-slate-950 text-slate-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
-            >
-              <span>Return to Home</span>
-            </button>
-          </div>
-        </motion.div>
-      </div>
+              {loginError && (
+                <p className="text-red-500 text-sm font-medium text-center mt-2 animate-in fade-in slide-in-from-top-1">{loginError}</p>
+              )}
+              
+              {/* Primary Action Button */}
+              <div className="pt-2">
+                <button 
+                  disabled={loginLoading}
+                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-[#8b5cf6]/25 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2" 
+                  type="submit"
+                >
+                  {loginLoading ? 'Authenticating...' : 'Unlock CFO Dashboard'}
+                </button>
+              </div>
+              
+              {/* Divider Line */}
+              <div className="relative flex items-center py-4">
+                <div className="flex-grow border-t border-slate-100"></div>
+                <span className="flex-shrink mx-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest">Navigation</span>
+                <div className="flex-grow border-t border-slate-100"></div>
+              </div>
+              
+              {/* Secondary Action Buttons */}
+              <div className="grid grid-cols-1 gap-2.5">
+                <button 
+                  onClick={() => handleCfoLogin()}
+                  disabled={loginLoading}
+                  className="w-full bg-white hover:bg-slate-50 text-slate-700 font-medium py-3 rounded-xl border border-slate-200 shadow-sm transition-all duration-200 disabled:opacity-50" 
+                  type="button"
+                >
+                  Instant CFO Login
+                </button>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="w-full bg-transparent hover:text-slate-900 text-slate-500 font-medium py-2 transition-colors duration-200 text-sm mt-1" 
+                  type="button"
+                >
+                  Return to Home
+                </button>
+              </div>
+            </form>
+          </section>
+          
+          {/* Footer Copyright */}
+          <footer className="mt-8 text-center text-slate-500 text-[11px] font-medium tracking-wide">
+            © 2026 Welile Cars Financial Systems. Secure Session Active.
+          </footer>
+        </div>
+      </main>
     );
   }
 
   // Dashboard calculations
-  const getMockTransactionsForUser = (userId: string) => {
-    const stored = localStorage.getItem(`mockTx_${userId}`);
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  const allPayments = users.flatMap(user => {
-    const txs = getMockTransactionsForUser(user.user_id);
-    return txs
-      .filter((tx: any) => tx.type === 'deposit')
-      .map((tx: any) => ({
-        ...tx,
-        userName: user.name,
-        userPhone: user.phone,
-      }));
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const allPayments = allTransactions
+    .filter((tx: any) => tx.type === 'deposit')
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const filteredPayments = allPayments.filter(payment => {
     const matchesSearch = payment.userName.toLowerCase().includes(paymentSearch.toLowerCase()) ||

@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export interface User {
@@ -7,6 +7,7 @@ export interface User {
   name?: string;
   role?: string;
   savingsAccount?: any;
+  createdAt?: string | number | Date;
 }
 
 interface AuthContextType {

@@ -10,6 +10,7 @@ import {
   useAdminAssignAgent,
   useSubmitCfoRequest,
   useCfoRequests,
+  useAllTransactions,
   type AdminProfile,
 } from '@/hooks/useAdmin';
 import { CARS } from '@/hooks/useProfile';
@@ -20,6 +21,7 @@ const AdminPage = () => {
   const { isAdmin, loading: authLoading, signOut, signIn } = useAuth();
   const navigate = useNavigate();
   const { data: users = [], isLoading } = useAllProfiles();
+  const { data: allTransactions = [] } = useAllTransactions();
   const flagUser = useAdminFlagUser();
   const assignAgent = useAdminAssignAgent();
   const submitCfoRequest = useSubmitCfoRequest();
@@ -90,20 +92,6 @@ const AdminPage = () => {
   };
 
   const usersPending = users.filter(u => u.financing_status === 'pending' || (getUserProgress(u) >= 100 && u.financing_status !== 'approved'));
-
-  const getMockTransactionsForUser = (userId: string) => {
-    const stored = localStorage.getItem(`mockTx_${userId}`);
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  const allTransactions = users.flatMap(user => {
-    const txs = getMockTransactionsForUser(user.user_id);
-    return txs.map((tx: any) => ({
-      ...tx,
-      userName: user.name,
-      userPhone: user.phone,
-    }));
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.phone.includes(searchQuery);
