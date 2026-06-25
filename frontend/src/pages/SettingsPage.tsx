@@ -551,16 +551,6 @@ export default function SettingsPage() {
                   <p className="text-label-caps font-label-caps text-on-surface-variant/40">Welile Car v2.4.0 • Secured by Amethyst Pro</p>
                 </div>
               </div>
-
-              {/* Featured Section: Promo */}
-              <div className="relative rounded-[24px] overflow-hidden bg-primary p-8 flex flex-col md:flex-row items-center justify-between text-on-primary gap-6">
-                <div className="relative z-10 w-full md:max-w-md">
-                  <h3 className="font-headline-md text-headline-md mb-2">Unlock Premium Security</h3>
-                  <p className="font-body-lg text-body-lg text-primary-fixed opacity-90 mb-6">Upgrade to our Advanced Protection plan for 2FA, biometric login, and instant fraudulent activity alerts.</p>
-                  <button className="bg-secondary text-on-secondary px-8 py-3 rounded-full font-bold hover:bg-secondary/90 transition-all active:scale-95">Upgrade Now</button>
-                </div>
-                <span className="material-symbols-outlined text-[120px] absolute md:static right-4 top-1/2 md:translate-y-0 -translate-y-1/2 opacity-10 md:opacity-50">shield</span>
-              </div>
             </motion.div>
           ) : (
             <motion.div
