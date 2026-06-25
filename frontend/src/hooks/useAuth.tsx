@@ -7,6 +7,7 @@ export interface User {
   name?: string;
   role?: string;
   savingsAccount?: any;
+  createdAt?: string | number | Date;
 }
 
 interface AuthContextType {

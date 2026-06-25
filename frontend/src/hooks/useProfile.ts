@@ -10,6 +10,7 @@ export interface Profile {
   user_id: string;
   name: string;
   phone: string;
+  email?: string;
   residence?: string;
   avatar_url?: string;
   referral_code: string;
