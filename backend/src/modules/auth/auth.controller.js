@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 
 const register = async (req, res) => {
   try {
-    const { phone, password, name, email, residence } = req.body;
+    const phone = req.body.phone?.trim();
+    const password = req.body.password?.trim();
+    const name = req.body.name?.trim();
+    const email = req.body.email?.trim();
+    const residence = req.body.residence?.trim();
     
     // Check if user exists by phone
     const existingUser = await prisma.user.findUnique({ where: { phone } });
@@ -54,7 +58,8 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { phone, password } = req.body; // 'phone' could be an email string from the frontend
+    const phone = req.body.phone?.trim();
+    const password = req.body.password?.trim(); // 'phone' could be an email string from the frontend
 
     // Determine if the input is an email or phone number
     const isEmail = phone && phone.includes('@');
