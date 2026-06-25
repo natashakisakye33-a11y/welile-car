@@ -89,7 +89,7 @@ export const CustomSignUp = () => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div>
-        <label className="block text-label-sm font-medium text-on-surface-variant mb-1">Full Name</label>
+        <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
         <input 
           type="text" 
           value={name} 

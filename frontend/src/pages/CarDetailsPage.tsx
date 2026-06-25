@@ -51,9 +51,14 @@ const CarDetailsPage = () => {
       setCar(data);
     })
     .catch(err => {
-      console.error(err);
-      toast.error('Vehicle not found');
-      setError('Vehicle not found or connection error');
+      const mockCar = carsData.find(c => c.id === id || String(c.id) === String(id));
+      if (mockCar) {
+        setCar(mockCar);
+      } else {
+        console.error(err);
+        toast.error('Vehicle not found');
+        setError('Vehicle not found or connection error');
+      }
     });
   }, [id, session, navigate]);
 
