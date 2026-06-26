@@ -34,6 +34,7 @@ import LoanDashboard from "./pages/admin/LoanDashboard";
 import RecoveryDashboard from "./pages/admin/RecoveryDashboard";
 import SavingsDashboard from "./pages/admin/SavingsDashboard";
 import DealerDashboard from "./pages/admin/DealerDashboard";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ const AppLayout = () => {
         <Route path="/repayments" element={<ProtectedRoute><CustomerLayout><RepaymentsPage /></CustomerLayout></ProtectedRoute>} />
         <Route path="/support" element={<ProtectedRoute><CustomerLayout><SupportPage /></CustomerLayout></ProtectedRoute>} />
       </Routes>
+      <InstallPrompt />
     </>
   );
 };

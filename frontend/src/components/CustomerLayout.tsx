@@ -22,7 +22,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
   const SidebarContent = () => (
     <>
       <div className="p-8 pb-4 relative">
-        <h1 className="font-headline-md text-headline-md font-bold text-primary">Welile Car</h1>
+        <img src="/welile_car_logo.png" alt="Welile Car Logo" className="h-10 object-contain mb-1" />
         <p className="text-label-caps font-label-caps text-outline uppercase mt-1">Customer Portal</p>
         
         <button onClick={() => setMobileMenuOpen(false)} className="md:hidden absolute top-6 right-6 p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg">
@@ -92,7 +92,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
           <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg">
             <Menu size={20} />
           </button>
-          <h1 className="font-headline-md font-bold text-primary text-xl">Welile Car</h1>
+          <img src="/welile_car_logo.png" alt="Welile Car Logo" className="h-8 object-contain" />
         </div>
         <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">
           {user?.name?.[0]?.toUpperCase() || 'U'}

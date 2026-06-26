@@ -223,7 +223,7 @@ const AuthPage: React.FC = () => {
             <div className="bg-primary p-1.5 rounded-lg">
               <span className="material-symbols-outlined text-white text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
             </div>
-            <span className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Welile Car</span>
+            <img src="/welile_car_logo.png" alt="Welile Car Logo" className="h-10 object-contain mb-2" />
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <a className="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors" href="#">Buy</a>
@@ -294,7 +294,7 @@ const AuthPage: React.FC = () => {
       <footer className="w-full mt-auto bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="font-headline-sm text-headline-sm font-bold text-on-surface dark:text-inverse-on-surface">Welile Car</span>
+            <img src="/welile_car_logo.png" alt="Welile Car Logo" className="h-8 object-contain mb-2" />
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <a className="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
