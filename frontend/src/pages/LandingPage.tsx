@@ -42,8 +42,8 @@ export default function LandingPage() {
       <main className="relative pb-24 md:pb-12 max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row-reverse md:items-center md:gap-12 md:mt-12">
           {/* Hero Image Section */}
-          <section className="pt-stack-lg md:pt-0 flex-1 w-full">
-            <div className="relative overflow-hidden rounded-2xl h-64 md:h-[500px] mb-stack-sm md:mb-0 shadow-xl group">
+          <section className="pt-10 md:pt-0 flex-1 w-full">
+            <div className="relative overflow-hidden rounded-2xl h-64 md:h-[500px] mb-4 md:mb-0 shadow-xl group">
               <img 
                 alt="Welile Flyer" 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
@@ -59,7 +59,7 @@ export default function LandingPage() {
 
           {/* Text & Journey Section */}
           <div className="flex-1 flex flex-col md:pr-8">
-            <section className="pt-6 md:pt-0 flex flex-col gap-stack-md">
+            <section className="pt-8 md:pt-0 flex flex-col gap-6">
               <div className="flex flex-col gap-base">
                 <h2 className="text-headline-xl md:text-[48px] font-headline-xl text-on-surface leading-tight">Your Journey <br className="hidden md:block" /> <span className="text-primary">Starts Here.</span></h2>
                 <p className="text-body-lg md:text-xl font-body-lg text-primary font-semibold mt-4">
@@ -69,9 +69,9 @@ export default function LandingPage() {
             </section>
 
             {/* Kinetic Journey Track */}
-            <section className="relative py-stack-lg md:py-8 mt-4">
+            <section className="relative py-10 md:py-8 mt-4">
               <div className="absolute left-[11px] md:left-[15px] top-8 bottom-8 w-[4px] bg-gradient-to-b from-primary to-outline-variant z-0 opacity-20 rounded-full"></div>
-              <div className="flex flex-col gap-stack-lg md:gap-8 relative z-10">
+              <div className="flex flex-col gap-10 md:gap-8 relative z-10">
                 {/* Process Card */}
                 <motion.div 
                   whileHover={{ scale: 0.98 }}
@@ -81,7 +81,7 @@ export default function LandingPage() {
                   <div className="flex-none flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary text-on-primary shadow-[0px_4px_12px_rgba(120,0,206,0.3)] mt-2 md:mt-1 transition-transform group-hover:scale-110">
                     <span className="material-symbols-outlined text-[14px] md:text-[18px]">moving</span>
                   </div>
-                  <div className="bg-surface-container-lowest rounded-xl md:rounded-2xl p-stack-md md:p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] border border-outline-variant/30 flex-1 hover:shadow-md transition-shadow">
+                  <div className="bg-surface-container-lowest rounded-xl md:rounded-2xl p-6 md:p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] border border-outline-variant/30 flex-1 hover:shadow-md transition-shadow">
                     <p className="text-body-md md:text-lg text-on-surface-variant leading-relaxed">
                       Save up to <span className="font-bold text-primary">30%</span> through flexible daily or weekly installments. Once you hit the target, we finance the remaining <span className="font-bold text-on-surface">70%</span>. Drive your dream car today.
                     </p>
@@ -106,7 +106,7 @@ export default function LandingPage() {
                   <div className="flex-none flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-secondary-container text-on-secondary-container shadow-sm mt-2 md:mt-1 transition-transform group-hover:scale-110">
                     <span className="material-symbols-outlined text-[14px] md:text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
                   </div>
-                  <div className="bg-primary text-on-primary rounded-xl md:rounded-2xl p-stack-md md:p-6 shadow-[0px_8px_16px_rgba(147,51,234,0.2)] flex-1 relative overflow-hidden group-hover:shadow-[0px_12px_24px_rgba(147,51,234,0.3)] transition-all">
+                  <div className="bg-primary text-on-primary rounded-xl md:rounded-2xl p-6 md:p-6 shadow-[0px_8px_16px_rgba(147,51,234,0.2)] flex-1 relative overflow-hidden group-hover:shadow-[0px_12px_24px_rgba(147,51,234,0.3)] transition-all">
                     {/* Abstract Background Decoration */}
                     <div className="absolute -right-4 -top-4 w-32 h-32 md:w-48 md:h-48 bg-on-primary-container/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-150"></div>
                     <div className="relative z-10">
@@ -125,7 +125,7 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="mt-stack-md md:mt-8">
+            <section className="mt-8 md:mt-8 pb-12">
               <button 
                 onClick={() => navigate('/auth')}
                 className="w-full md:w-auto md:px-12 h-14 md:h-16 bg-primary text-on-primary font-bold text-lg md:text-xl rounded-xl md:rounded-2xl shadow-[0px_8px_16px_rgba(147,51,234,0.2)] active:scale-95 hover:scale-[1.02] transition-all duration-200 hover:brightness-110 flex items-center justify-center gap-3 mx-auto md:mx-0"
@@ -138,26 +138,6 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
-
-      {/* BottomNavBar Shell - Mobile Only */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 backdrop-blur-lg shadow-[0px_-4px_20px_rgba(15,23,42,0.05)] rounded-t-xl z-[100]">
-        <button onClick={() => navigate('/')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-2 scale-95 duration-200 ease-out transition-colors">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
-          <span className="text-label-sm font-label-sm mt-0.5">Home</span>
-        </button>
-        <button onClick={() => navigate('/auth')} className="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all px-5 py-2 rounded-full">
-          <span className="material-symbols-outlined">moving</span>
-          <span className="text-label-sm font-label-sm mt-0.5">Journey</span>
-        </button>
-        <button onClick={() => navigate('/auth')} className="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all px-5 py-2 rounded-full">
-          <span className="material-symbols-outlined">account_balance_wallet</span>
-          <span className="text-label-sm font-label-sm mt-0.5">Bonuses</span>
-        </button>
-        <button onClick={() => navigate('/auth')} className="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all px-5 py-2 rounded-full">
-          <span className="material-symbols-outlined">person</span>
-          <span className="text-label-sm font-label-sm mt-0.5">Profile</span>
-        </button>
-      </nav>
     </div>
   );
 }
