@@ -1,8 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 const { generateToken } = require('../../shared/utils/jwt.util');
 
 const prisma = new PrismaClient();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const register = async (req, res) => {
   try {
@@ -85,7 +87,56 @@ const login = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ error: 'No ID token provided' });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const name = payload.name || 'Google User';
+
+    if (!email) {
+      return res.status(400).json({ error: 'Google account has no email address' });
+    }
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Create user if they don't exist
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          status: 'PENDING_KYC',
+          kycStatus: 'PENDING',
+          savingsAccount: {
+            create: {
+              balance: 0.00,
+              targetAmount: 90000000
+            }
+          }
+        }
+      });
+    }
+
+    const token = generateToken(user);
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+  } catch (error) {
+    console.error('Google Login Error:', error);
+    res.status(500).json({ error: 'Server error during Google login' });
+  }
+};
+
 module.exports = {
   register,
-  login
+  login,
+  googleLogin
 };

@@ -18,6 +18,7 @@ interface AuthContextType {
   isCfo: boolean;
   signUp: (phone: string, password: string, name: string, email: string, residence: string) => Promise<{ error: string | null }>;
   signIn: (phone: string, password: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: (idToken: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -110,6 +111,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signInWithGoogle = async (idToken: string) => {
+    try {
+      const res = await fetchWithTimeout(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || 'Google login failed' };
+      
+      localStorage.setItem('authToken', data.token);
+      setSession({ access_token: data.token });
+      setUser(data.user);
+      setIsAdmin(data.user.role === 'ADMIN');
+      setIsCfo(data.user.role === 'CFO');
+      return { error: null };
+    } catch (err) {
+      return { error: 'Network error' };
+    }
+  };
+
   const signOut = async () => {
     setUser(null);
     setSession(null);
@@ -119,7 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isCfo, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isCfo, signUp, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

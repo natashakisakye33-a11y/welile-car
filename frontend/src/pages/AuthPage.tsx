@@ -1,8 +1,42 @@
- 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { GoogleLogin } from '@react-oauth/google';
+
+const GoogleAuthButton = ({ isLogin }: { isLogin: boolean }) => {
+  const { signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleSuccess = async (credentialResponse: any) => {
+    if (credentialResponse.credential) {
+      const { error } = await signInWithGoogle(credentialResponse.credential);
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success(`Successfully signed ${isLogin ? 'in' : 'up'} with Google!`);
+        const from = (location.state as any)?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      }
+    }
+  };
+
+  return (
+    <div className="w-full flex justify-center mt-2 mb-4">
+      <GoogleLogin
+        onSuccess={handleSuccess}
+        onError={() => {
+          toast.error('Google Sign In failed');
+        }}
+        useOneTap
+        shape="pill"
+        width="100%"
+        text={isLogin ? 'signin_with' : 'signup_with'}
+      />
+    </div>
+  );
+};
 
 export const CustomSignIn = () => {
   const { signIn } = useAuth();
@@ -28,6 +62,17 @@ export const CustomSignIn = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <GoogleAuthButton isLogin={true} />
+      
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white dark:bg-slate-900 text-slate-500">Or continue with</span>
+        </div>
+      </div>
+
       <div>
         <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number or Email</label>
         <input 
@@ -88,6 +133,17 @@ export const CustomSignUp = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <GoogleAuthButton isLogin={false} />
+      
+      <div className="relative mb-2">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white dark:bg-slate-900 text-slate-500">Or register manually</span>
+        </div>
+      </div>
+
       <div>
         <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
         <input 
