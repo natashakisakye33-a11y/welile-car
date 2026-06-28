@@ -28,11 +28,23 @@ import { API_URL } from '@/config';
 import { fetchWithTimeout } from '@/lib/api';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const cached = localStorage.getItem('authUser');
+    try { return cached ? JSON.parse(cached) : null; } catch { return null; }
+  });
+  const [session, setSession] = useState<any | null>(() => {
+    const token = localStorage.getItem('authToken');
+    return token ? { access_token: token } : null;
+  });
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isCfo, setIsCfo] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const cached = localStorage.getItem('authUser');
+    try { return cached ? JSON.parse(cached).role === 'ADMIN' : false; } catch { return false; }
+  });
+  const [isCfo, setIsCfo] = useState(() => {
+    const cached = localStorage.getItem('authUser');
+    try { return cached ? JSON.parse(cached).role === 'CFO' : false; } catch { return false; }
+  });
 
   const fetchUser = async (token: string) => {
     try {
@@ -44,23 +56,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          const localRole = localStorage.getItem('customRoleOverride') || data.role;
-          setUser({ ...data, role: localRole });
+          const userData = data.user || data;
+          const localRole = localStorage.getItem('customRoleOverride') || userData.role;
+          const fullUser = { ...userData, role: localRole };
+          setUser(fullUser);
           setIsAdmin(localRole === 'ADMIN');
           setIsCfo(localRole === 'CFO');
+          localStorage.setItem('authUser', JSON.stringify(fullUser));
           return;
         }
       }
-      setUser(null);
+      // Only clear if we explicitly get unauthorized
+      if (res.status === 401) {
+        setUser(null);
+        setSession(null);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+      }
     } catch (e) {
-      setUser(null);
+      console.warn('Network error fetching user, using cached user if available');
     }
   };
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      setSession({ access_token: token });
+      if (!session) setSession({ access_token: token });
       fetchUser(token).finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -68,6 +89,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
     }
   }, []);
+
+  const persistLogin = (token: string, userData: any) => {
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('authUser', JSON.stringify(userData));
+    setSession({ access_token: token });
+    setUser(userData);
+    setIsAdmin(userData.role === 'ADMIN');
+    setIsCfo(userData.role === 'CFO');
+  };
 
   const signUp = async (phone: string, password: string, name: string, email: string, residence: string) => {
     try {
@@ -79,11 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Signup failed' };
       
-      localStorage.setItem('authToken', data.token);
-      setSession({ access_token: data.token });
-      setUser(data.user);
-      setIsAdmin(data.user.role === 'ADMIN');
-      setIsCfo(data.user.role === 'CFO');
+      persistLogin(data.token, data.user);
       return { error: null };
     } catch (err) {
       return { error: 'Network error' };
@@ -100,11 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Login failed' };
       
-      localStorage.setItem('authToken', data.token);
-      setSession({ access_token: data.token });
-      setUser(data.user);
-      setIsAdmin(data.user.role === 'ADMIN');
-      setIsCfo(data.user.role === 'CFO');
+      persistLogin(data.token, data.user);
       return { error: null };
     } catch (err) {
       return { error: 'Network error' };
@@ -121,11 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Google login failed' };
       
-      localStorage.setItem('authToken', data.token);
-      setSession({ access_token: data.token });
-      setUser(data.user);
-      setIsAdmin(data.user.role === 'ADMIN');
-      setIsCfo(data.user.role === 'CFO');
+      persistLogin(data.token, data.user);
       return { error: null };
     } catch (err) {
       return { error: 'Network error' };
@@ -138,6 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAdmin(false);
     setIsCfo(false);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
   };
 
   return (
