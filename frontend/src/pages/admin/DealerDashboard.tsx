@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Car, Key, Plus, X, Upload } from 'lucide-react';
+import { Car, Key, Plus, X, Upload, CheckCircle2 } from 'lucide-react';
 import { API_URL } from '@/config';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -206,8 +206,8 @@ const DealerDashboard = () => {
                   </div>
                   <h4 className="font-black text-xl text-slate-900 mb-1">Upload from Device Gallery</h4>
                   <p className="font-bold text-[#4C158D]">Tap here to open your photos or camera</p>
-                  <p className="text-sm font-semibold text-slate-500 mt-3 bg-white inline-block px-4 py-1.5 rounded-full shadow-sm">
-                    {files.length > 0 ? `✅ ${files.length} photos selected!` : '0 photos selected'}
+                  <p className="flex items-center justify-center text-sm font-semibold text-slate-500 mt-3 bg-white inline-block px-4 py-1.5 rounded-full shadow-sm">
+                    {files.length > 0 ? <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 className="w-4 h-4" /> {files.length} photos selected!</span> : '0 photos selected'}
                   </p>
                 </div>
               </div>

@@ -10,31 +10,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedNumber from '@/components/AnimatedNumber';
 import BottomNav from '@/components/BottomNav';
 import { formatUGX, formatDate } from '@/lib/format';
-import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Sparkles, X, Check, Wallet, PlusCircle, MinusCircle, TrendingUp, ShieldCheck, Calculator, Printer, ChevronDown, Plus, Smartphone, Landmark, CreditCard } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { PageLoader } from '@/components/ui/spinner';
 import { ErrorState } from '@/components/ui/error-state';
 
 const paymentMethods = [
-  { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: '📱' },
-  { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: '📱' },
+  { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: <Smartphone className="w-6 h-6" /> },
+  { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: <Smartphone className="w-6 h-6" /> },
 ];
 
 const withdrawalMethods = [
-  { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: '📱' },
-  { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: '📱' },
-  { id: 'bank', name: 'Bank Transfer', color: '#4C158D', icon: '🏦' },
+  { id: 'mtn', name: 'MTN MoMo', color: '#FFCC00', icon: <Smartphone className="w-6 h-6" /> },
+  { id: 'airtel', name: 'Airtel Money', color: '#ED1C24', icon: <Smartphone className="w-6 h-6" /> },
+  { id: 'bank', name: 'Bank Transfer', color: '#4C158D', icon: <Landmark className="w-6 h-6" /> },
 ];
 
 const quickAmounts = [50000, 100000, 200000, 500000];
 
 const purchasePaymentMethods = [
-  { id: 'wallet', name: 'Fund from Wallet', icon: '👛' },
-  { id: 'mtn', name: 'MTN MoMo', icon: '📱' },
-  { id: 'airtel', name: 'Airtel Money', icon: '📱' },
-  { id: 'bank', name: 'Bank Transfer', icon: '🏦' },
-  { id: 'card', name: 'Credit Card', icon: '💳' },
+  { id: 'wallet', name: 'Fund from Wallet', icon: <Wallet className="w-6 h-6" /> },
+  { id: 'mtn', name: 'MTN MoMo', icon: <Smartphone className="w-6 h-6" /> },
+  { id: 'airtel', name: 'Airtel Money', icon: <Smartphone className="w-6 h-6" /> },
+  { id: 'bank', name: 'Bank Transfer', icon: <Landmark className="w-6 h-6" /> },
+  { id: 'card', name: 'Credit Card', icon: <CreditCard className="w-6 h-6" /> },
 ];
 
 const WalletPage = () => {
@@ -458,7 +458,7 @@ const WalletPage = () => {
                   <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
                     <div className="absolute inset-0 border-4 border-primary/30 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-3xl">📱</span>
+                    <Smartphone className="w-8 h-8 text-primary" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-xl font-extrabold mb-2 text-slate-900">Submitting Deposit</h3>
                   <p className="text-slate-500 font-medium px-4">Sending your deposit details to the Finance Department for verification...</p>
@@ -585,7 +585,7 @@ const WalletPage = () => {
                   <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
                     <div className="absolute inset-0 border-4 border-rose-500/30 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-3xl">🏦</span>
+                    <Landmark className="w-8 h-8 text-rose-500" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-xl font-extrabold mb-2 text-slate-900">Processing Withdrawal</h3>
                   <p className="text-slate-500 font-medium px-4">Sending <span className="font-bold text-slate-900">{formatUGX(parseInt(amount) || 0)}</span> to your selected account. This may take a moment.</p>
