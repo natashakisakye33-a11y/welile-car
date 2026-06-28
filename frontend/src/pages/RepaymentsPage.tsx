@@ -9,11 +9,6 @@ import { toast } from 'sonner';
 const RepaymentsPage = () => {
   const { data: profile, isLoading } = useProfile();
   const [isProcessing, setIsProcessing] = useState(false);
-
-  if (isLoading) {
-    return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Repayment Data...</div>;
-  }
-
   const [car, setCar] = useState<any>(null);
   const [carLoading, setCarLoading] = useState(false);
 
@@ -32,6 +27,10 @@ const RepaymentsPage = () => {
         });
     }
   }, [profile?.selected_car_id]);
+
+  if (isLoading) {
+    return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Repayment Data...</div>;
+  }
 
   if (carLoading) {
     return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Vehicle...</div>;
