@@ -26,7 +26,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile, useUpdateProfile, CARS } from '@/hooks/useProfile';
+import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { 
   Dialog, 
   DialogContent, 

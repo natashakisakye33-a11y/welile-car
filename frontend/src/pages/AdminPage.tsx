@@ -13,7 +13,6 @@ import {
   useAllTransactions,
   type AdminProfile,
 } from '@/hooks/useAdmin';
-import { CARS } from '@/hooks/useProfile';
 import { formatUGX } from '@/lib/format';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -87,10 +86,8 @@ const AdminPage = () => {
   const totalGrowth = users.reduce((s, u) => s + u.growth_earned, 0);
   
   const getUserProgress = (user: AdminProfile) => {
-    if (!user.selected_car_id) return 0;
-    const car = CARS.find(c => c.id === user.selected_car_id);
-    if (!car) return 0;
-    const target = (user.selected_car_price || car.price) * 0.3;
+    if (!user.selected_car_id || !user.selected_car_price) return 0;
+    const target = user.selected_car_price * 0.3;
     return Math.min(100, Math.round((user.wallet_balance / target) * 100));
   };
 
