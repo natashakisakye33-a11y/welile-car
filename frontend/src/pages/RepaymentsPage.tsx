@@ -14,9 +14,32 @@ const RepaymentsPage = () => {
     return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Repayment Data...</div>;
   }
 
-  const car = profile?.selected_car_id 
-    ? carsData.find(c => c.id === profile.selected_car_id) || carsData[0] 
-    : carsData[0];
+  const [car, setCar] = useState<any>(null);
+  const [carLoading, setCarLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (profile?.selected_car_id) {
+      setCarLoading(true);
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${profile.selected_car_id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) setCar(data);
+          setCarLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setCarLoading(false);
+        });
+    }
+  }, [profile?.selected_car_id]);
+
+  if (carLoading) {
+    return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">Loading Vehicle...</div>;
+  }
+
+  if (!car) {
+    return <div className="p-8 flex justify-center items-center min-h-[400px] text-slate-400 font-medium">No vehicle selected.</div>;
+  }
 
   // Mock Repayment Data
   const totalLoan = (car.priceUgx * 0.7) * 1.3; // 70% financed + 30% interest

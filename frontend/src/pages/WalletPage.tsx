@@ -82,11 +82,17 @@ const WalletPage = () => {
 
   useEffect(() => {
     if (purchaseCarId) {
-      const car = carsData.find(c => c.id === purchaseCarId);
-      if (car) {
-        setPurchaseCar(car);
-        setShowPurchaseModal(true);
-      }
+      fetch(`${API_URL}/vehicles/${purchaseCarId}`)
+        .then(res => res.json())
+        .then(car => {
+          if (car && car.id) {
+            setPurchaseCar(car);
+            setShowPurchaseModal(true);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch purchase car:', err);
+        });
     }
   }, [purchaseCarId]);
 

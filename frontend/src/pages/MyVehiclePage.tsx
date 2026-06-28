@@ -29,17 +29,32 @@ const MyVehiclePage = () => {
   const [isMileageOpen, setIsMileageOpen] = useState(false);
   const [mileageInput, setMileageInput] = useState('65240');
 
-  if (isLoading) {
+  const [car, setCar] = useState<any>(null);
+  const [carLoading, setCarLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (profile?.selected_car_id) {
+      setCarLoading(true);
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${profile.selected_car_id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) setCar(data);
+          setCarLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setCarLoading(false);
+        });
+    }
+  }, [profile?.selected_car_id]);
+
+  if (isLoading || carLoading) {
     return <PageLoader message="Loading Vehicle Data..." />;
   }
 
-  if (error || !profile) {
+  if (error || !profile || !car) {
     return <ErrorState message="Could not load your vehicle data." />;
   }
-
-  const car = profile?.selected_car_id 
-    ? carsData.find(c => c.id === profile.selected_car_id) || carsData[0] 
-    : carsData[0];
 
   const progressPercent = 35; // Mock progress
 

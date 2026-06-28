@@ -13,13 +13,13 @@ const RecoveryDashboard = () => {
           <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 shadow-sm">
             <AlertTriangle size={24} className="text-rose-500 mb-4" />
             <p className="text-xs text-rose-400 font-bold uppercase tracking-wider mb-1">Overdue Accounts</p>
-            <p className="text-2xl font-black text-rose-700">12 Accounts</p>
-            <p className="text-sm font-semibold text-rose-500 mt-2">Total Value: {formatUGX(18500000)}</p>
+            <p className="text-2xl font-black text-rose-700">0 Accounts</p>
+            <p className="text-sm font-semibold text-rose-500 mt-2">Total Value: {formatUGX(0)}</p>
           </div>
           <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100 shadow-sm">
             <Clock size={24} className="text-amber-500 mb-4" />
             <p className="text-xs text-amber-400 font-bold uppercase tracking-wider mb-1">Active Recovery Cases</p>
-            <p className="text-2xl font-black text-amber-700">3 Cases</p>
+            <p className="text-2xl font-black text-amber-700">0 Cases</p>
             <p className="text-sm font-semibold text-amber-500 mt-2">Assigned to Recovery Officers</p>
           </div>
         </div>

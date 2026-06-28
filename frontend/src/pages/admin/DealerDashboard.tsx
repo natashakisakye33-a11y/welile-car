@@ -105,7 +105,7 @@ const DealerDashboard = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <Key size={24} className="text-emerald-500 mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Vehicles Financed & Delivered</p>
-            <p className="text-2xl font-black text-slate-800">18</p>
+            <p className="text-2xl font-black text-slate-800">0</p>
           </div>
         </div>
 

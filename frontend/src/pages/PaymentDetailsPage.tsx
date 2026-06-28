@@ -40,15 +40,19 @@ const PaymentDetailsPage = () => {
 
   useEffect(() => {
     if (carId) {
-      const foundCar = carsData.find((c) => c.id === carId);
-      if (foundCar) {
-        setCar(foundCar);
-        if (amountParam) {
-          setAmountToPay(amountParam);
-        } else {
-          setAmountToPay(foundCar.priceUgx.toString());
-        }
-      }
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${carId}`)
+        .then(res => res.json())
+        .then(foundCar => {
+          if (foundCar && foundCar.id) {
+            setCar(foundCar);
+            if (amountParam) {
+              setAmountToPay(amountParam);
+            } else {
+              setAmountToPay(foundCar.priceUgx.toString());
+            }
+          }
+        })
+        .catch(err => console.error('Failed to load car details for payment:', err));
     }
   }, [carId, amountParam]);
 

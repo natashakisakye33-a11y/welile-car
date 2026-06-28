@@ -1,10 +1,8 @@
- 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { API_URL } from '@/config';
 import { fetchWithTimeout } from '@/lib/api';
 
-// Mock Profile type
 export interface Profile {
   id: string;
   user_id: string;
@@ -34,82 +32,6 @@ export interface Profile {
   updated_at: string;
 }
 
-export const CARS = [
-  { id: 'wish', name: 'Toyota Wish', price: 10000000, image: '/cars/wish.jpg' },
-  { id: 'premio', name: 'Toyota Premio', price: 12000000, image: '/cars/premio.jpg' },
-  { id: 'vitz', name: 'Toyota Vitz', price: 8000000, image: '/cars/vitz.jpg' },
-];
-
-const getMockProfile = (userId: string): Profile => {
-  const stored = localStorage.getItem(`mockProfile_${userId}`);
-  if (stored) return JSON.parse(stored);
-  
-  let name = 'John Doe';
-  let phone = '+256 700 123 456';
-  let residence = 'Ntinda, Kampala';
-  let avatar_url = '';
-  const storedUser = localStorage.getItem('mockUser');
-  if (storedUser) {
-    try {
-      const u = JSON.parse(storedUser);
-      if (u.user_metadata?.name) name = u.user_metadata.name;
-      if (u.user_metadata?.phone) phone = u.user_metadata.phone;
-      if (u.user_metadata?.residence) residence = u.user_metadata.residence;
-      if (u.user_metadata?.avatar_url) avatar_url = u.user_metadata.avatar_url;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  
-  const initial: Profile = {
-    id: `prof_${userId}`,
-    user_id: userId,
-    name,
-    phone,
-    avatar_url,
-    referral_code: 'ref123',
-    referred_by: null,
-    wallet_balance: 0,
-    total_deposits: 0,
-    deposits_this_month: 0,
-    growth_earned: 0,
-    last_deposit_date: null,
-    last_growth_date: null,
-    has_withdrawn_this_month: false,
-    savings_locked: false,
-    financing_unlocked: false,
-    financing_status: 'none',
-    selected_car_id: null,
-    selected_car_condition: null,
-    selected_car_price: null,
-    assigned_agent: null,
-    flagged: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  localStorage.setItem(`mockProfile_${userId}`, JSON.stringify(initial));
-  return initial;
-};
-
-const updateMockProfile = (userId: string, updates: Partial<Profile>) => {
-  const profile = getMockProfile(userId);
-  const updated = { ...profile, ...updates, updated_at: new Date().toISOString() };
-  localStorage.setItem(`mockProfile_${userId}`, JSON.stringify(updated));
-  return updated;
-};
-
-const getMockTransactions = (userId: string) => {
-  const stored = localStorage.getItem(`mockTx_${userId}`);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const addMockTransaction = (userId: string, tx: any) => {
-  const txs = getMockTransactions(userId);
-  const newTx = { ...tx, id: `tx_${Date.now()}`, user_id: userId, created_at: new Date().toISOString() };
-  localStorage.setItem(`mockTx_${userId}`, JSON.stringify([newTx, ...txs]));
-  return newTx;
-};
-
 export function useProfile() {
   const { user, session } = useAuth();
   const token = session?.access_token;
@@ -130,29 +52,26 @@ export function useProfile() {
         const me = await meRes.json();
         const summary = await summaryRes.json();
         
-        const mockP = getMockProfile(me.id.toString());
-        const localCarId = localStorage.getItem('mockPurchasedCarId') || mockP.selected_car_id || localStorage.getItem('selectedCarId');
-        
         const profile: Profile = {
           id: me.id.toString(),
           user_id: me.id.toString(),
-          name: mockP.name !== 'John Doe' ? mockP.name : me.name,
-          phone: mockP.phone !== '+256 700 123 456' ? mockP.phone : (me.phone || ''),
-          residence: mockP.residence || '',
-          avatar_url: mockP.avatar_url || '',
+          name: me.name || '',
+          phone: me.phone || '',
+          residence: me.residence || '',
+          avatar_url: me.avatar_url || '',
           referral_code: '',
           referred_by: null,
-          wallet_balance: summary.savings.totalSaved,
-          total_deposits: summary.savings.totalSaved,
+          wallet_balance: summary?.savings?.totalSaved || 0,
+          total_deposits: summary?.savings?.totalSaved || 0,
           deposits_this_month: 0,
-          growth_earned: summary.savings.interestEarned,
+          growth_earned: summary?.savings?.interestEarned || 0,
           last_deposit_date: null,
           last_growth_date: null,
           has_withdrawn_this_month: false,
           savings_locked: false,
-          financing_unlocked: summary.journey.currentStep !== 'Saving',
-          financing_status: summary.vehicle ? 'active' : 'none',
-          selected_car_id: summary.vehicle ? summary.vehicle.id.toString() : localCarId,
+          financing_unlocked: summary?.journey?.currentStep !== 'Saving',
+          financing_status: summary?.vehicle ? 'active' : 'none',
+          selected_car_id: summary?.vehicle ? summary.vehicle.id.toString() : null,
           assigned_agent: null,
           flagged: false,
           created_at: new Date().toISOString(),
@@ -161,12 +80,11 @@ export function useProfile() {
         
         return profile;
       } catch (err) {
-        // console.error(err);
         return null;
       }
     },
     enabled: !!user && !!token,
-    refetchInterval: 3000, // Refetch every 3 seconds to catch deposit webhook updates
+    refetchInterval: 3000,
   });
 }
 
@@ -177,25 +95,8 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: async (updates: Partial<Profile & { avatar_url?: string }>) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const updated = updateMockProfile(user.id, updates);
-      
-      // Update mockUser storage to keep user_metadata sync
-      const storedUser = localStorage.getItem('mockUser');
-      if (storedUser) {
-        try {
-          const parsed = JSON.parse(storedUser);
-          parsed.user_metadata = {
-            ...parsed.user_metadata,
-            ...updates
-          };
-          localStorage.setItem('mockUser', JSON.stringify(parsed));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      
-      return updated;
+      console.warn('Profile update API not implemented yet. Mock update removed.');
+      return updates;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -215,7 +116,6 @@ export function useTransactions() {
       if (!res.ok) throw new Error('Failed to fetch transactions');
       const data = await res.json();
       
-      // Map DB transactions to UI transactions
       return data.transactions.map((tx: any) => ({
         id: tx.id.toString(),
         user_id: user.id.toString(),
@@ -249,14 +149,6 @@ export function useDeposit() {
       if (!res.ok) {
         throw new Error('Failed to deposit');
       }
-
-      // Mirror to mock storage so the admin dashboard (which reads local mock data) sees it
-      addMockTransaction(user.id, {
-        type: 'deposit',
-        amount,
-        method: method === 'mtn' ? 'MTN Mobile Money' : method === 'airtel' ? 'Airtel Money' : method,
-        status: 'pending'
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -287,14 +179,6 @@ export function useWithdraw() {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to withdraw');
       }
-
-      // Mirror to mock storage so the admin dashboard sees it
-      addMockTransaction(user.id, {
-        type: 'withdrawal',
-        amount,
-        method: method === 'mtn' ? 'MTN Mobile Money' : method === 'airtel' ? 'Airtel Money' : 'Bank Transfer',
-        status: 'pending'
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -335,12 +219,12 @@ export function usePayFromWallet() {
 }
 
 export function useSelectCar() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (carId: string) => {
-      localStorage.setItem('selectedCarId', carId);
+      // Just mock UI state for now since there's no backend route 
+      // but without storing mock profile data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -355,11 +239,7 @@ export function useSelectCarDetails() {
   return useMutation({
     mutationFn: async ({ carId, condition, price }: { carId: string; condition: 'used' | 'new'; price: number }) => {
       if (!user) throw new Error('Not authenticated');
-      updateMockProfile(user.id, { 
-        selected_car_id: carId,
-        selected_car_condition: condition,
-        selected_car_price: price
-      });
+      console.warn('API for useSelectCarDetails not implemented');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -374,24 +254,7 @@ export function useApplyGrowth() {
   return useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Not authenticated');
-
-      const profile = getMockProfile(user.id);
-      if (profile.wallet_balance === 0 || profile.savings_locked) return;
-
-      const baseRate = 0.02;
-      const bonusRate = (!profile.has_withdrawn_this_month && profile.deposits_this_month >= 4) ? 0.03 : 0;
-      const rate = baseRate + bonusRate;
-      const growth = Math.round(profile.wallet_balance * rate);
-
-      addMockTransaction(user.id, { type: 'growth', amount: growth, method: 'system' });
-
-      updateMockProfile(user.id, {
-        wallet_balance: profile.wallet_balance + growth,
-        growth_earned: profile.growth_earned + growth,
-        last_growth_date: new Date().toISOString(),
-        deposits_this_month: 0,
-        has_withdrawn_this_month: false,
-      });
+      console.warn('Apply growth logic must run on backend. Mock logic removed.');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -432,9 +295,7 @@ export function useRequestFinancing() {
 
 export function useGetProgress(profile: Profile | null | undefined) {
   if (!profile || !profile.selected_car_id) return null;
-  const car = CARS.find(c => c.id === profile.selected_car_id);
-  if (!car) return null;
-  const target = (profile.selected_car_price || car.price) * 0.3;
+  const target = (profile.selected_car_price || 15000000) * 0.3;
   const percentage = Math.min(100, Math.round((profile.wallet_balance / target) * 100));
   return {
     target,

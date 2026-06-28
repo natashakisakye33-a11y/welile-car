@@ -113,38 +113,14 @@ export interface CfoRequest {
   resolved_at?: string;
 }
 
-const getMockCfoRequests = (): CfoRequest[] => {
-  const stored = localStorage.getItem('mockCfoRequests');
-  if (!stored) {
-    const initial: CfoRequest[] = [
-      {
-        id: "req_1",
-        user_id: "user4",
-        user_name: "Sarah Nsubuga",
-        user_phone: "+256 781 445 566",
-        type: "financing_approval",
-        status: "pending",
-        details: "User has completed 30% of Toyota Wish savings target (7.5M UGX / 10M UGX car price). Admin requesting credit line approval.",
-        requested_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-    localStorage.setItem('mockCfoRequests', JSON.stringify(initial));
-    return initial;
-  }
-  return JSON.parse(stored);
-};
-
-const saveMockCfoRequests = (requests: CfoRequest[]) => {
-  localStorage.setItem('mockCfoRequests', JSON.stringify(requests));
-};
-
 export function useCfoRequests() {
   const { isCfo, isAdmin } = useAuth();
 
   return useQuery({
     queryKey: ['cfo-requests'],
     queryFn: async () => {
-      return getMockCfoRequests();
+      console.warn('CFO requests API not implemented yet. Mock logic removed.');
+      return [] as CfoRequest[];
     },
     enabled: isCfo || isAdmin,
   });
@@ -155,28 +131,7 @@ export function useSubmitCfoRequest() {
 
   return useMutation({
     mutationFn: async ({ userId, userName, userPhone, type, details }: { userId: string; userName: string; userPhone: string; type: 'financing_approval' | 'unflag_request'; details: string }) => {
-      const requests = getMockCfoRequests();
-      
-      const alreadyPending = requests.find(r => r.user_id === userId && r.type === type && r.status === 'pending');
-      if (alreadyPending) throw new Error("A request of this type is already pending CFO review.");
-
-      const newRequest: CfoRequest = {
-        id: `req_${Date.now()}`,
-        user_id: userId,
-        user_name: userName,
-        user_phone: userPhone,
-        type,
-        status: 'pending',
-        details,
-        requested_at: new Date().toISOString()
-      };
-      
-      requests.unshift(newRequest);
-      saveMockCfoRequests(requests);
-
-      if (type === 'financing_approval') {
-        updateMockProfileAdmin(userId, { financing_status: 'pending' });
-      }
+      console.warn('Submit CFO request API not implemented yet.');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cfo-requests'] });
@@ -190,27 +145,7 @@ export function useResolveCfoRequest() {
 
   return useMutation({
     mutationFn: async ({ requestId, status }: { requestId: string; status: 'approved' | 'rejected' }) => {
-      const requests = getMockCfoRequests();
-      const reqIdx = requests.findIndex(r => r.id === requestId);
-      if (reqIdx === -1) throw new Error("Request not found");
-
-      const req = requests[reqIdx];
-      req.status = status;
-      req.resolved_at = new Date().toISOString();
-
-      saveMockCfoRequests(requests);
-
-      if (req.type === 'financing_approval') {
-        if (status === 'approved') {
-          updateMockProfileAdmin(req.user_id, { financing_status: 'approved', savings_locked: true });
-        } else {
-          updateMockProfileAdmin(req.user_id, { financing_status: 'rejected' });
-        }
-      } else if (req.type === 'unflag_request') {
-        if (status === 'approved') {
-          updateMockProfileAdmin(req.user_id, { flagged: false });
-        }
-      }
+      console.warn('Resolve CFO request API not implemented yet.');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cfo-requests'] });

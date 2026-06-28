@@ -12,17 +12,17 @@ const LoanDashboard = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <FileText size={24} className="text-amber-500 mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Pending Applications</p>
-            <p className="text-2xl font-black text-slate-800">45</p>
+            <p className="text-2xl font-black text-slate-800">0</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <CheckCircle size={24} className="text-emerald-500 mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Loans Approved</p>
-            <p className="text-2xl font-black text-slate-800">312</p>
+            <p className="text-2xl font-black text-slate-800">0</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <XCircle size={24} className="text-rose-500 mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Loans Rejected</p>
-            <p className="text-2xl font-black text-slate-800">18</p>
+            <p className="text-2xl font-black text-slate-800">0</p>
           </div>
         </div>
 

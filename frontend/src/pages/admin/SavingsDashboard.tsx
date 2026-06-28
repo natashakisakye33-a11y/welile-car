@@ -13,12 +13,12 @@ const SavingsDashboard = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <PiggyBank size={24} className="text-[#4C158D] mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total Savings Held</p>
-            <p className="text-2xl font-black text-slate-800">{formatUGX(450000000)}</p>
+            <p className="text-2xl font-black text-slate-800">{formatUGX(0)}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <TrendingUp size={24} className="text-emerald-500 mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Interest Liabilities (5% APR)</p>
-            <p className="text-2xl font-black text-slate-800">{formatUGX(22500000)}</p>
+            <p className="text-2xl font-black text-slate-800">{formatUGX(0)}</p>
           </div>
         </div>
 

@@ -90,8 +90,27 @@ const FinancingPage = () => {
     fetchData();
   }, [user, session]);
 
+  const [car, setCar] = useState<any>(null);
+  const [carLoading, setCarLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile?.selected_car_id) {
+      setCarLoading(true);
+      fetch(`${API_URL}/vehicles/${profile.selected_car_id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) setCar(data);
+          setCarLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setCarLoading(false);
+        });
+    }
+  }, [profile?.selected_car_id]);
+
   if (!authLoading && !user) { navigate('/'); return null; }
-  if (isLoading || loadingDashboard) {
+  if (isLoading || loadingDashboard || carLoading) {
     return <PageLoader message="Loading Application..." />;
   }
 
@@ -99,8 +118,7 @@ const FinancingPage = () => {
     return <ErrorState message={dashboardError || "Application data is unavailable."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
-  const car = carsData.find(c => c.id === profile.selected_car_id) || carsData[0];
-  if (!car) { navigate('/vehicles'); return null; }
+  if (!car) { return <ErrorState message="Could not load your vehicle data." />; }
 
   if (showSuccess) {
     return (
