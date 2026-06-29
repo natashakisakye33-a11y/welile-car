@@ -95,6 +95,20 @@ const CarDetailsPage = () => {
     }
   };
 
+  const handleChooseCar = async (method: string) => {
+    try {
+      await selectCar.mutateAsync({
+        carId: (car?.id || id).toString(),
+        condition: 'used', // Default condition
+        price: car?.priceUgx || 0
+      });
+      navigate(`/payment-details?method=${method}&carId=${car?.id || id}&amount=${savingsAmount}`);
+    } catch (err) {
+      console.error('Failed to select car:', err);
+      toast.error('Failed to select vehicle.');
+    }
+  };
+
 
   if (loading) {
     return <PageLoader message="Loading Vehicle Details..." />;
@@ -538,19 +552,19 @@ const CarDetailsPage = () => {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <button onClick={() => navigate(`/payment-details?method=wallet&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handleChooseCar('wallet')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Welile Wallet</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=mobile_money&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handleChooseCar('mobile_money')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Mobile Money</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=card&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handleChooseCar('card')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Card</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>
-                  <button onClick={() => navigate(`/payment-details?method=bank&carId=${car.id}&amount=${savingsAmount}`)} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => handleChooseCar('bank')} className="w-full flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all">
                     <span className="font-bold text-slate-700">Bank Transfer</span>
                     <ChevronRight size={18} className="text-slate-400" />
                   </button>

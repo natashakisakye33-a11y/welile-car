@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PageLoader } from '@/components/ui/spinner';
 import { ErrorState } from '@/components/ui/error-state';
+import { API_URL } from '@/config';
 import {
   Dialog,
   DialogContent,
@@ -35,7 +36,7 @@ const MyVehiclePage = () => {
   React.useEffect(() => {
     if (profile?.selected_car_id) {
       setCarLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${profile.selected_car_id}`)
+      fetch(`${API_URL}/vehicles/${profile.selected_car_id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.id) setCar(data);
@@ -52,8 +53,27 @@ const MyVehiclePage = () => {
     return <PageLoader message="Loading Vehicle Data..." />;
   }
 
-  if (error || !profile || !car) {
+  if (error || !profile) {
     return <ErrorState message="Could not load your vehicle data." />;
+  }
+
+  if (!profile.selected_car_id || !car) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px] space-y-5 max-w-md mx-auto">
+        <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center shadow-inner border border-slate-100">
+          <Car size={36} />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">No Vehicle Selected</h2>
+          <p className="text-sm font-medium text-slate-500 mt-2 leading-relaxed">
+            You haven't selected a vehicle to save towards or finance yet. Go to the marketplace to choose your dream vehicle!
+          </p>
+        </div>
+        <Button onClick={() => navigate('/vehicles')} className="mt-4 px-6 py-5 rounded-2xl font-bold bg-primary hover:bg-purple-800 text-white">
+          Go to Vehicle Marketplace
+        </Button>
+      </div>
+    );
   }
 
   const progressPercent = 35; // Mock progress
@@ -99,18 +119,28 @@ const MyVehiclePage = () => {
             <img src={car.image} alt={car.name} className="max-h-[250px] object-contain drop-shadow-xl relative z-10 mix-blend-multiply" />
           </div>
           <div className="md:w-1/2 p-8 flex flex-col justify-center">
-            <p className="text-primary font-black uppercase tracking-wider text-xs mb-1">{car.year} • {car.make}</p>
+            <p className="text-primary font-black uppercase tracking-wider text-xs mb-1">
+              {car.year} • {car.make} • <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-[10px] font-black">{profile.selected_car_condition === 'new' ? 'Brand New' : 'Used'}</span>
+            </p>
             <h2 className="text-3xl font-black text-slate-900 mb-2">{car.model}</h2>
             <p className="text-slate-500 text-sm font-medium mb-6">License Plate: <span className="text-slate-900 font-bold bg-slate-100 px-2 py-1 rounded">UBN 123A</span></p>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Color</p>
-                <p className="font-bold text-slate-700">{car.specs.color}</p>
+                <p className="font-bold text-slate-700">{car.specs.color || 'N/A'}</p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Engine</p>
-                <p className="font-bold text-slate-700">{car.specs.engine}</p>
+                <p className="font-bold text-slate-700">{car.specs.engine || 'N/A'}</p>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-4">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Condition</p>
+                <p className="font-bold text-slate-700 capitalize">{profile.selected_car_condition || 'Used'}</p>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-4">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Target Price</p>
+                <p className="font-bold text-slate-700">{formatUGX(profile.selected_car_price || car.priceUgx)}</p>
               </div>
             </div>
           </div>

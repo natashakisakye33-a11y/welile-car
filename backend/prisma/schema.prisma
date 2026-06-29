@@ -27,6 +27,10 @@ model User {
   financings       FinancingAgreement[]
   loanApplications LoanApplication[]
   savingsAccount   SavingsAccount?
+  selectedVehicleId        Int?
+  selectedVehicleCondition String?
+  selectedVehiclePrice     Float?
+  selectedVehicle          Vehicle?             @relation("UserSelectedVehicle", fields: [selectedVehicleId], references: [id])
 }
 
 model AuditLog {
@@ -63,6 +67,7 @@ model Vehicle {
   updatedAt        DateTime             @updatedAt
   financings       FinancingAgreement[]
   loanApplications LoanApplication[]
+  selectedBy       User[]               @relation("UserSelectedVehicle")
 }
 
 model SavingsAccount {

@@ -6,6 +6,7 @@ import { ChevronLeft, CheckCircle2, Sparkles, Upload } from 'lucide-react';
 import { carsData, Car } from '@/data/cars';
 import { formatUGX } from '@/lib/format';
 import { useDeposit, usePayFromWallet, useProfile } from '@/hooks/useProfile';
+import { API_URL } from '@/config';
 
 const PaymentDetailsPage = () => {
   const location = useLocation();
@@ -40,7 +41,7 @@ const PaymentDetailsPage = () => {
 
   useEffect(() => {
     if (carId) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${carId}`)
+      fetch(`${API_URL}/vehicles/${carId}`)
         .then(res => res.json())
         .then(foundCar => {
           if (foundCar && foundCar.id) {

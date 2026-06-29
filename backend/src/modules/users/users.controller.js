@@ -129,9 +129,33 @@ const updateMyRole = async (req, res) => {
   }
 };
 
+const selectVehicle = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { vehicleId, condition, price } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        selectedVehicleId: vehicleId ? parseInt(vehicleId) : null,
+        selectedVehicleCondition: condition || 'used',
+        selectedVehiclePrice: price ? parseFloat(price) : null
+      }
+    });
+
+    await logAction(userId, 'VEHICLE_SELECTED', `Selected vehicle ${vehicleId} as target.`, req.ip);
+
+    res.json({ message: 'Vehicle selected successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Select Vehicle Error:', error);
+    res.status(500).json({ error: 'Server error selecting vehicle' });
+  }
+};
+
 module.exports = {
   submitKyc,
   getMyProfile,
   approveKyc,
-  updateMyRole
+  updateMyRole,
+  selectVehicle
 };

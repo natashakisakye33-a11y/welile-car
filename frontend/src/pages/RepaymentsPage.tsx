@@ -5,6 +5,7 @@ import { formatUGX } from '@/lib/format';
 import { useProfile } from '@/hooks/useProfile';
 import { carsData } from '@/data/cars';
 import { toast } from 'sonner';
+import { API_URL } from '@/config';
 
 const RepaymentsPage = () => {
   const { data: profile, isLoading } = useProfile();
@@ -15,7 +16,7 @@ const RepaymentsPage = () => {
   React.useEffect(() => {
     if (profile?.selected_car_id) {
       setCarLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${profile.selected_car_id}`)
+      fetch(`${API_URL}/vehicles/${profile.selected_car_id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.id) setCar(data);
