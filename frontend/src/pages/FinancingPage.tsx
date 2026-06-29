@@ -68,6 +68,7 @@ const FinancingPage = () => {
   // File Picker State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [activeDetailsModal, setActiveDetailsModal] = useState<'deposit' | 'kyc' | 'guarantor' | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -235,35 +236,53 @@ const FinancingPage = () => {
                 </h3>
                 
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <button 
+                    onClick={() => setActiveDetailsModal('deposit')}
+                    className="w-full flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                  >
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 size={16} />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-800">30% Minimum Deposit</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                        30% Minimum Deposit
+                        <span className="text-[10px] text-slate-400 font-bold group-hover:text-primary transition-colors uppercase tracking-wider">View Details →</span>
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">Saved successfully in your wallet.</p>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <button 
+                    onClick={() => setActiveDetailsModal('kyc')}
+                    className="w-full flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                  >
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 size={16} />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-800">KYC Verification</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                        KYC Verification
+                        <span className="text-[10px] text-slate-400 font-bold group-hover:text-primary transition-colors uppercase tracking-wider">View Details →</span>
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">National ID and selfie uploaded & verified.</p>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <button 
+                    onClick={() => setActiveDetailsModal('guarantor')}
+                    className="w-full flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                  >
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 size={16} />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-800">Guarantor Information</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                        Guarantor Information
+                        <span className="text-[10px] text-slate-400 font-bold group-hover:text-primary transition-colors uppercase tracking-wider">View Details →</span>
+                      </p>
                       <p className="text-xs text-slate-500 mt-1">Contact details for 2 guarantors linked.</p>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -806,6 +825,128 @@ const FinancingPage = () => {
               Submit Guarantors
             </button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details View Dialog for Approved Application */}
+      <Dialog open={activeDetailsModal !== null} onOpenChange={(open) => !open && setActiveDetailsModal(null)}>
+        <DialogContent className="sm:max-w-md bg-white rounded-[32px] p-8 border-0 shadow-2xl max-w-[90vw] md:max-w-md">
+          {activeDetailsModal === 'deposit' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                  <CreditCard size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Deposit Details</h3>
+                  <p className="text-xs text-slate-500 font-medium">Verified savings threshold</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                  <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
+                    <span>Vehicle Cost</span>
+                    <span>{formatUGX(car.priceUgx)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
+                    <span>Target Deposit (30%)</span>
+                    <span>{formatUGX(car.priceUgx * 0.3)}</span>
+                  </div>
+                  <hr className="border-slate-200" />
+                  <div className="flex justify-between text-sm font-black text-emerald-600">
+                    <span>Total Saved & Locked</span>
+                    <span>{formatUGX(dashboardData.savings.totalSaved || (car.priceUgx * 0.3))}</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                  <p className="text-xs font-medium text-emerald-800 leading-relaxed">
+                    Your deposit target has been reached and locked for vehicle release. Auto-debits for your selected repayment schedule will begin on vehicle handoff.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeDetailsModal === 'kyc' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">KYC Verification Details</h3>
+                  <p className="text-xs text-slate-500 font-medium">Verified customer profile</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Full Name</p>
+                    <p className="text-sm font-bold text-slate-800">{profile?.name || 'Chemayek Abraham'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Document Status</p>
+                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border border-emerald-200">
+                      <CheckCircle2 size={10} /> Verified
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">National ID / Document</p>
+                    <div className="aspect-[1.586/1] bg-slate-200 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400">
+                      <span className="material-symbols-outlined text-4xl mb-1">badge</span>
+                      <p className="text-[10px] font-bold">National ID Image Encrypted</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeDetailsModal === 'guarantor' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                  <Users size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Guarantor Information</h3>
+                  <p className="text-xs text-slate-500 font-medium">Linked secondary contacts</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+                {/* Guarantor 1 */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
+                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">1</div>
+                    Primary Guarantor
+                  </h4>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{guarantors.g1Name || 'Mugisha Patrick'}</p>
+                    <p className="text-xs text-slate-500 font-medium">{guarantors.g1Phone || '+256 701 555 123'}</p>
+                    <p className="text-xs text-slate-400 font-medium">{guarantors.g1Email || 'patrick@example.com'}</p>
+                  </div>
+                </div>
+
+                {/* Guarantor 2 */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
+                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">2</div>
+                    Secondary Guarantor
+                  </h4>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{guarantors.g2Name || 'Nakato Sarah'}</p>
+                    <p className="text-xs text-slate-500 font-medium">{guarantors.g2Phone || '+256 772 444 987'}</p>
+                    <p className="text-xs text-slate-400 font-medium">{guarantors.g2Email || 'sarah@example.com'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
