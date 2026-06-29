@@ -67,16 +67,16 @@ const SupportPage = () => {
 
       {/* Contact Options */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-        <a href="tel:+256800123456" className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center text-center hover:border-primary hover:shadow-md transition-all group">
+        <a href="tel:+256750511507" className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center text-center hover:border-primary hover:shadow-md transition-all group">
           <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
             <PhoneCall size={24} />
           </div>
           <h3 className="font-bold text-slate-900 mb-1">Call Us</h3>
           <p className="text-xs text-slate-500 font-medium mb-3">Available 24/7 for emergencies</p>
-          <span className="text-blue-600 font-black mt-auto">+256 800 123 456</span>
+          <span className="text-blue-600 font-black mt-auto">+256 750 511507</span>
         </a>
 
-        <a href="https://wa.me/256772000111" target="_blank" rel="noreferrer" className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center text-center hover:border-emerald-500 hover:shadow-md transition-all group">
+        <a href="https://wa.me/256750511507" target="_blank" rel="noreferrer" className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col items-center text-center hover:border-emerald-500 hover:shadow-md transition-all group">
           <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
             <MessageCircle size={24} />
           </div>
