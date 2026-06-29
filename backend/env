@@ -1,5 +1,5 @@
 DATABASE_URL="postgresql://welile_car_db_user:wl2RquCT6mWnBrjf9rOPAoPSWNfGx7tG@dpg-d8p96n1kh4rs73913f00-a.oregon-postgres.render.com/welile_car_db?sslmode=require"
-PORT=3005
+PORT=3000
 CLERK_SECRET_KEY=sk_test_QN8qOHBzwGePImGmRnkeepVMqgJN7sp1DN8rTvE0HQ
 CLERK_WEBHOOK_SECRET=whsec_SKZbHi+Cw+MUXa/wlK2usnBDAonDOa1H
 GOOGLE_CLIENT_ID=457625873153-32l3et5md474ab5ifukdde7c29ucnbqe.apps.googleusercontent.com

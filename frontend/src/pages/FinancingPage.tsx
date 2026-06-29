@@ -213,17 +213,101 @@ const FinancingPage = () => {
         </div>
 
         {hasApplied ? (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-2 border-emerald-500 rounded-[32px] p-10 text-center shadow-2xl shadow-emerald-500/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 blur-[80px] rounded-full"></div>
-            <div className="w-24 h-24 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg shadow-emerald-500/30">
-              <CheckCircle2 size={48} strokeWidth={3} />
+          <div className="space-y-8">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-2 border-emerald-500 rounded-[32px] p-10 text-center shadow-2xl shadow-emerald-500/20 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 blur-[80px] rounded-full"></div>
+              <div className="w-24 h-24 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg shadow-emerald-500/30">
+                <CheckCircle2 size={48} strokeWidth={3} />
+              </div>
+              <h2 className="text-4xl font-black text-emerald-900 mb-3 relative z-10 tracking-tight">Application Approved</h2>
+              <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {car.name} is active and ready.</p>
+              <button onClick={() => navigate('/my-vehicle')} className="bg-emerald-600 text-white font-bold py-4 px-10 rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:-translate-y-1 relative z-10 text-lg">
+                Go to My Vehicle Dashboard
+              </button>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Completed Requirements */}
+              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm space-y-6">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <span className="material-symbols-outlined text-emerald-500">check_circle</span>
+                  Completed Requirements
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">30% Minimum Deposit</p>
+                      <p className="text-xs text-slate-500 mt-1">Saved successfully in your wallet.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">KYC Verification</p>
+                      <p className="text-xs text-slate-500 mt-1">National ID and selfie uploaded & verified.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">Guarantor Information</p>
+                      <p className="text-xs text-slate-500 mt-1">Contact details for 2 guarantors linked.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Steps to Process */}
+              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm space-y-6">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">pending_actions</span>
+                  Next Steps to Process
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      1
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">Sign Financing Agreement</p>
+                      <p className="text-xs text-slate-500 mt-1">Review and sign the physical agreement at our office or via your registered email.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">Vehicle Physical Inspection</p>
+                      <p className="text-xs text-slate-500 mt-1">Schedule a date to inspect the vehicle at our Entebbe yard.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      3
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-800">Final Release & Key Handoff</p>
+                      <p className="text-xs text-slate-500 mt-1">Complete handover process and obtain physical keys and logbook copy.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h2 className="text-4xl font-black text-emerald-900 mb-3 relative z-10 tracking-tight">Application Approved</h2>
-            <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {car.name} is active and ready.</p>
-            <button onClick={() => navigate('/my-vehicle')} className="bg-emerald-600 text-white font-bold py-4 px-10 rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:-translate-y-1 relative z-10 text-lg">
-              Go to My Vehicle Dashboard
-            </button>
-          </motion.div>
+          </div>
         ) : (
           <>
             {/* Premium Hero Card */}
