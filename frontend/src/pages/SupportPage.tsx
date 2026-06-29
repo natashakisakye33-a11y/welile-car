@@ -15,14 +15,16 @@ const SupportPage = () => {
     if (!ticketSubject || !ticketMessage) return;
     
     setIsSubmittingTicket(true);
-    // Simulate network request
-    setTimeout(() => {
-      setIsSubmittingTicket(false);
-      setIsTicketDialogOpen(false);
-      setTicketSubject('');
-      setTicketMessage('');
-      alert('Support Ticket successfully submitted! Our team will get back to you shortly.');
-    }, 1500);
+    
+    const text = `*Support Ticket*\n*Subject:* ${ticketSubject}\n\n*Message:*\n${ticketMessage}`;
+    const whatsappUrl = `https://wa.me/256750511507?text=${encodeURIComponent(text)}`;
+    
+    window.open(whatsappUrl, '_blank');
+    
+    setIsSubmittingTicket(false);
+    setIsTicketDialogOpen(false);
+    setTicketSubject('');
+    setTicketMessage('');
   };
 
   const faqs = [
