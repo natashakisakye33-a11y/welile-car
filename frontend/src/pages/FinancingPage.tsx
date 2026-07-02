@@ -24,7 +24,8 @@ import {
   Image as ImageIcon,
   Loader2,
   Users,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
 import {
   Dialog,
@@ -55,6 +56,10 @@ const FinancingPage = () => {
   const [uploadTarget, setUploadTarget] = useState<'income' | 'kyc' | null>(null);
   const [isIncomeUploaded, setIsIncomeUploaded] = useState(false);
   const [isKycUploaded, setIsKycUploaded] = useState(false);
+  const [isIncomePending, setIsIncomePending] = useState(false);
+  const [isKycPending, setIsKycPending] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   const [isGuarantorSubmitted, setIsGuarantorSubmitted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   
@@ -78,11 +83,12 @@ const FinancingPage = () => {
         if (res.ok) {
           setDashboardData(await res.json());
         } else {
-          setDashboardError("Failed to fetch financing details.");
+          console.warn("Failed to fetch dashboard, using preview data");
+          setDashboardData({ savings: { totalSaved: 0 }, vehicle: null });
         }
       } catch (e) {
-        console.error(e);
-        setDashboardError("Network error occurred while fetching details.");
+        console.error("Network error fetching dashboard, using preview data", e);
+        setDashboardData({ savings: { totalSaved: 0 }, vehicle: null });
       } finally {
         setLoadingDashboard(false);
       }
@@ -118,7 +124,11 @@ const FinancingPage = () => {
     return <ErrorState message={dashboardError || "Application data is unavailable."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
-  if (!car) { return <ErrorState message="Could not load your vehicle data." />; }
+  const safeCar = car || {
+    id: 'preview',
+    name: 'Sample Vehicle (Preview)',
+    priceUgx: 15000000
+  };
 
   if (showSuccess) {
     return (
@@ -136,7 +146,7 @@ const FinancingPage = () => {
               <Sparkles size={48} />
             </div>
             <h2 className="text-3xl font-bold font-heading">Application Successful!</h2>
-            <p className="text-muted-foreground text-lg max-w-sm">Your application for the <strong>{car.name}</strong> has been finalized and approved.</p>
+            <p className="text-muted-foreground text-lg max-w-sm">Your application for the <strong>{safeCar.name}</strong> has been finalized and approved.</p>
             <p className="text-sm mt-4 text-primary font-medium animate-pulse">Redirecting to My Vehicle...</p>
           </motion.div>
         </div>
@@ -144,8 +154,8 @@ const FinancingPage = () => {
     );
   }
 
-  const saved = dashboardData.savings.totalSaved;
-  const minDepositTarget = car.priceUgx * 0.3;
+  const saved = dashboardData.savings?.totalSaved || 0;
+  const minDepositTarget = safeCar.priceUgx * 0.3;
   
   // Initialize custom deposit once loaded
   if (customDeposit === 0 && minDepositTarget > 0) {
@@ -156,7 +166,7 @@ const FinancingPage = () => {
   
   // Dynamic financing math
   const actualDeposit = Math.max(customDeposit, minDepositTarget);
-  const remaining = car.priceUgx - actualDeposit;
+  const remaining = safeCar.priceUgx - actualDeposit;
   const monthlyInstallment = (remaining * 1.28) / 36;
   
   const plans = [
@@ -170,9 +180,9 @@ const FinancingPage = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
       await requestFinancing.mutateAsync({
-        carId: car.id,
-        carName: car.name,
-        carPrice: car.priceUgx,
+        carId: safeCar.id,
+        carName: safeCar.name,
+        carPrice: safeCar.priceUgx,
         requestedAmount: remaining
       });
       setIsSubmitting(false);
@@ -193,7 +203,7 @@ const FinancingPage = () => {
     }
   };
 
-  const hasApplied = dashboardData.vehicle !== null;
+  const hasApplied = !!dashboardData?.vehicle;
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 md:p-8 font-sans selection:bg-primary/20 selection:text-primary">
@@ -212,6 +222,121 @@ const FinancingPage = () => {
           )}
         </div>
 
+        {/* Status Timeline */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center justify-between text-sm font-bold relative overflow-hidden">
+          <div className="absolute top-1/2 left-8 right-8 h-1 bg-slate-100 -translate-y-1/2 z-0 rounded-full"></div>
+          <div className="absolute top-1/2 left-8 h-1 bg-emerald-500 -translate-y-1/2 z-0 rounded-full transition-all duration-1000" style={{ width: hasApplied ? '100%' : (isUnlocked ? '50%' : '25%') }}></div>
+          
+          <div className="flex flex-col items-center gap-2 z-10 w-24">
+            <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <CheckCircle2 size={16} />
+            </div>
+            <span className="text-emerald-700 text-xs text-center">Vehicle Selected</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 z-10 w-24">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-primary text-white shadow-lg shadow-primary/30'}`}>
+              {isUnlocked ? <CheckCircle2 size={16} /> : <span className="text-xs">2</span>}
+            </div>
+            <span className={`text-xs text-center ${isUnlocked ? "text-emerald-700" : "text-primary"}`}>Deposit Target</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 z-10 w-24">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${((isKycPending || isKycUploaded) && (isIncomePending || isIncomeUploaded) && isGuarantorSubmitted) ? (hasApplied ? 'bg-emerald-500 text-white' : 'bg-primary text-white shadow-lg shadow-primary/30') : 'bg-slate-100 text-slate-400'}`}>
+              {((isKycPending || isKycUploaded) && (isIncomePending || isIncomeUploaded) && isGuarantorSubmitted) ? (hasApplied ? <CheckCircle2 size={16} /> : <span className="text-xs">3</span>) : <span className="text-xs">3</span>}
+            </div>
+            <span className={`text-xs text-center ${((isKycPending || isKycUploaded) && (isIncomePending || isIncomeUploaded) && isGuarantorSubmitted) ? "text-primary" : "text-slate-400"}`}>Verification</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 z-10 w-24">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${hasApplied ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-100 text-slate-400'}`}>
+              {hasApplied ? <CheckCircle2 size={16} /> : <span className="text-xs">4</span>}
+            </div>
+            <span className={`text-xs text-center ${hasApplied ? "text-emerald-700" : "text-slate-400"}`}>Final Approval</span>
+          </div>
+        </div>
+
+
+        {/* Pre-requisites / Eligibility (Always Visible) */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-indigo-50/50 rounded-[32px] p-8 border border-indigo-100 shadow-sm">
+          <h3 className="text-xl font-black text-indigo-950 mb-6 flex items-center gap-2 tracking-tight">
+            <CheckCircle2 size={22} className="text-indigo-600" /> Eligibility Criteria
+          </h3>
+          <p className="text-sm text-indigo-900/70 font-medium mb-6">
+            {hasApplied 
+              ? "You have successfully met the following prerequisites for your vehicle financing:" 
+              : "Before you can finalize your vehicle financing, please ensure you meet the following prerequisites:"}
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex items-start gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${hasApplied ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                {hasApplied ? <CheckCircle2 size={16} /> : <Wallet size={16} />}
+              </div>
+              <div>
+                <p className="font-bold text-indigo-950 text-sm">30% Minimum Deposit</p>
+                <p className="text-xs text-indigo-900/60 font-medium">Saved at least 30% of the vehicle's total value.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${hasApplied ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                {hasApplied ? <CheckCircle2 size={16} /> : <FileText size={16} />}
+              </div>
+              <div>
+                <p className="font-bold text-indigo-950 text-sm">Valid National ID</p>
+                <p className="text-xs text-indigo-900/60 font-medium">A clear copy of your National ID for KYC.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${hasApplied ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                {hasApplied ? <CheckCircle2 size={16} /> : <Users size={16} />}
+              </div>
+              <div>
+                <p className="font-bold text-indigo-950 text-sm">Two Guarantors</p>
+                <p className="text-xs text-indigo-900/60 font-medium">Contact details for two trusted individuals.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${hasApplied ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                {hasApplied ? <CheckCircle2 size={16} /> : <Briefcase size={16} />}
+              </div>
+              <div>
+                <p className="font-bold text-indigo-950 text-sm">Income Proof</p>
+                <p className="text-xs text-indigo-900/60 font-medium">Bank or mobile money statements.</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Company Rules to Follow (Always Visible) */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm mt-8">
+          <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
+            <ShieldCheck size={22} className="text-primary" /> Welile Cars Rules & Commitments
+          </h3>
+          <p className="text-sm text-slate-500 font-medium mb-6">
+            Please be aware of the following terms you must abide by while financing your vehicle with us:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+              <FileText size={20} className="text-primary mb-3" />
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Logbook Retention</h4>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">Welile Cars holds the original vehicle logbook until 100% of the financing is cleared.</p>
+            </div>
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+              <ShieldCheck size={20} className="text-primary mb-3" />
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Active Insurance</h4>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">Comprehensive insurance must be maintained active on the vehicle at all times.</p>
+            </div>
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+              <AlertCircle size={20} className="text-amber-500 mb-3" />
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Certified Maintenance</h4>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">Major vehicle servicing must be done exclusively at our verified partner garages.</p>
+            </div>
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
+              <AlertCircle size={20} className="text-red-500 mb-3" />
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Payment Defaults</h4>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">Missing your scheduled payments for 30 consecutive days may result in vehicle repossession.</p>
+            </div>
+          </div>
+        </motion.div>
+
         {hasApplied ? (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-2 border-emerald-500 rounded-[32px] p-10 text-center shadow-2xl shadow-emerald-500/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/20 blur-[80px] rounded-full"></div>
@@ -219,7 +344,7 @@ const FinancingPage = () => {
               <CheckCircle2 size={48} strokeWidth={3} />
             </div>
             <h2 className="text-4xl font-black text-emerald-900 mb-3 relative z-10 tracking-tight">Application Approved</h2>
-            <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {car.name} is active and ready.</p>
+            <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {safeCar.name} is active and ready.</p>
             <button onClick={() => navigate('/my-vehicle')} className="bg-emerald-600 text-white font-bold py-4 px-10 rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:-translate-y-1 relative z-10 text-lg">
               Go to My Vehicle Dashboard
             </button>
@@ -231,18 +356,18 @@ const FinancingPage = () => {
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/2 bg-gradient-to-br from-slate-100 to-white flex items-center justify-center p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60"></div>
-                  <img src={car.image} alt={car.name} className="max-h-[300px] object-contain drop-shadow-2xl relative z-10 mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
+                  <img src={safeCar.image} alt={safeCar.name} className="max-h-[300px] object-contain drop-shadow-2xl relative z-10 mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                   <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full w-max mb-6">
                     <FileText size={14} /> Application Draft
                   </div>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-2">{car.year} • {car.make}</p>
-                  <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight leading-none">{car.model}</h2>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-2">{safeCar.year} • {safeCar.make}</p>
+                  <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight leading-none">{safeCar.model}</h2>
                   
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Vehicle Value</p>
-                    <p className="text-3xl font-black text-slate-900">{formatUGX(car.priceUgx)}</p>
+                    <p className="text-3xl font-black text-slate-900">{formatUGX(safeCar.priceUgx)}</p>
                   </div>
                 </div>
               </div>
@@ -286,7 +411,7 @@ const FinancingPage = () => {
                     <input 
                       type="range" 
                       min={minDepositTarget} 
-                      max={car.priceUgx * 0.9} 
+                      max={safeCar.priceUgx * 0.9} 
                       step={500000}
                       value={customDeposit}
                       onChange={(e) => setCustomDeposit(Number(e.target.value))}
@@ -299,22 +424,30 @@ const FinancingPage = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-6 relative z-10">
-                    <div>
-                      <p className="text-primary-fixed-dim text-xs uppercase tracking-widest font-bold mb-1">Welile Finances</p>
-                      <p className="font-black text-4xl tracking-tight">{formatUGX(remaining)}</p>
-                    </div>
+                  <div className="space-y-4 relative z-10 bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-sm">
+                    <h4 className="text-white font-bold mb-2 flex items-center justify-between">Financing Summary <span className="bg-white/10 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">36 Months</span></h4>
                     
-                    <div className="w-full h-[2px] bg-white/10"></div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-primary-fixed-dim text-xs uppercase tracking-widest font-bold mb-1">Estimated Monthly</p>
-                        <p className="font-bold text-emerald-300 text-xl">{formatUGX(monthlyInstallment)}</p>
-                      </div>
-                      <div className="bg-white/10 px-4 py-2 rounded-xl border border-white/5 text-xs font-bold">
-                        36 Months
-                      </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/70">Vehicle Price</span>
+                      <span className="text-white font-bold">{formatUGX(safeCar.priceUgx)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/70">Deposit Paid</span>
+                      <span className="text-emerald-300 font-bold">-{formatUGX(actualDeposit)}</span>
+                    </div>
+                    <div className="w-full h-[1px] bg-white/10 my-2"></div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/70">Principal Financed</span>
+                      <span className="text-white font-bold">{formatUGX(remaining)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/70">Total Interest (28%)</span>
+                      <span className="text-white font-bold">{formatUGX(remaining * 0.28)}</span>
+                    </div>
+                    <div className="w-full h-[1px] bg-white/10 my-2"></div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white font-bold">Total Payable</span>
+                      <span className="font-black text-2xl text-white tracking-tight">{formatUGX(remaining * 1.28)}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -337,7 +470,7 @@ const FinancingPage = () => {
                       </div>
                     </div>
 
-                    {!isKycUploaded ? (
+                    {!isKycUploaded && !isKycPending ? (
                       <div className="flex flex-col gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50/50 group hover:border-amber-300 transition-colors cursor-pointer" onClick={() => { setUploadTarget('kyc'); setShowUploadOptions(true); }}>
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-amber-100 text-amber-600">
@@ -363,6 +496,16 @@ const FinancingPage = () => {
                           </button>
                         </div>
                       </div>
+                    ) : isKycPending ? (
+                      <div className="flex items-start gap-4 p-4 rounded-2xl border bg-blue-50 border-blue-100 transition-all">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-500 text-white shadow-lg shadow-blue-500/30">
+                          <Clock size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-black text-sm text-blue-900">Identity Verification</p>
+                          <p className="text-xs text-blue-700/80 mt-1 font-medium">Pending Admin Review.</p>
+                        </div>
+                      </div>
                     ) : (
                       <div className="flex items-start gap-4 p-4 rounded-2xl border bg-emerald-50 border-emerald-100 transition-all">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
@@ -375,7 +518,7 @@ const FinancingPage = () => {
                       </div>
                     )}
 
-                    {!isIncomeUploaded ? (
+                    {!isIncomeUploaded && !isIncomePending ? (
                       <div className="flex flex-col gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50/50 group hover:border-amber-300 transition-colors cursor-pointer" onClick={() => { setUploadTarget('income'); setShowUploadOptions(true); }}>
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-amber-100 text-amber-600">
@@ -402,6 +545,16 @@ const FinancingPage = () => {
                           >
                             Upload Document
                           </button>
+                        </div>
+                      </div>
+                    ) : isIncomePending ? (
+                      <div className="flex items-start gap-4 p-4 rounded-2xl border bg-blue-50 border-blue-100 transition-all">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-500 text-white shadow-lg shadow-blue-500/30">
+                          <Clock size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-black text-sm text-blue-900">Income Verification</p>
+                          <p className="text-xs text-blue-700/80 mt-1 font-medium">Pending Admin Review.</p>
                         </div>
                       </div>
                     ) : (
@@ -460,34 +613,7 @@ const FinancingPage = () => {
               {/* Right Column: Requirements & Payment Selection */}
               <div className="lg:col-span-5 space-y-8">
                 
-                {/* Commitments */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}  className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
-                  <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
-                    <ShieldCheck size={22} className="text-primary" /> Your Commitments
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <FileText size={20} className="text-primary mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Logbook Retention</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Welile Car holds the original logbook until 100% of the financing is cleared.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <ShieldCheck size={20} className="text-primary mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Active Insurance</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Comprehensive insurance must be maintained active at all times.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <AlertCircle size={20} className="text-amber-500 mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Certified Maintenance</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Major servicing must be done at verified partner garages.</p>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors">
-                      <AlertCircle size={20} className="text-red-500 mb-3" />
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">Payment Defaults</h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">Missing payments for 30 consecutive days may result in repossession.</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Commitments moved to top */}
 
                 {/* Payment Plan Selection */}
                 {isUnlocked && (
@@ -520,10 +646,23 @@ const FinancingPage = () => {
                       })}
                     </div>
 
+                    <div className="mt-8 flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                      <input 
+                        type="checkbox" 
+                        id="terms"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="mt-1 w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary accent-primary" 
+                      />
+                      <label htmlFor="terms" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
+                        I have read and agree to the <span className="font-bold text-primary">Welile Cars Rules & Commitments</span> and understand that my deposit is subject to verification.
+                      </label>
+                    </div>
+
                     <button 
                       onClick={handleProceed}
-                      disabled={isSubmitting}
-                      className="mt-8 w-full py-5 bg-primary text-white font-black rounded-2xl transition-all shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 text-lg flex items-center justify-center disabled:opacity-50 disabled:hover:translate-y-0"
+                      disabled={isSubmitting || !termsAccepted || !car}
+                      className="mt-4 w-full py-5 bg-primary text-white font-black rounded-2xl transition-all shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 text-lg flex items-center justify-center disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-3">
@@ -590,8 +729,8 @@ const FinancingPage = () => {
                     setIsUploading(true);
                     setTimeout(() => { 
                       setIsUploading(false); 
-                      if (uploadTarget === 'income') setIsIncomeUploaded(true);
-                      if (uploadTarget === 'kyc') setIsKycUploaded(true);
+                      if (uploadTarget === 'income') setIsIncomePending(true);
+                      if (uploadTarget === 'kyc') setIsKycPending(true);
                       setShowUploadOptions(false); 
                       setUploadTarget(null);
                       setPermissionRequest(null);
@@ -704,6 +843,11 @@ const FinancingPage = () => {
                 <input type="tel" placeholder="Phone Number" value={guarantors.g2Phone} onChange={e => setGuarantors({...guarantors, g2Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="email" placeholder="Email Address (Optional)" value={guarantors.g2Email} onChange={e => setGuarantors({...guarantors, g2Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
               </div>
+            </div>
+
+            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex gap-3 text-amber-800 text-sm font-medium">
+              <Clock className="shrink-0 mt-0.5" size={18} />
+              <p>An SMS will be sent to your guarantors to confirm their consent before final approval.</p>
             </div>
 
             <button 

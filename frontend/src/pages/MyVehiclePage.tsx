@@ -35,7 +35,7 @@ const MyVehiclePage = () => {
   React.useEffect(() => {
     if (profile?.selected_car_id) {
       setCarLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/vehicles/${profile.selected_car_id}`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3005/api'}/vehicles/${profile.selected_car_id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.id) setCar(data);
@@ -52,9 +52,22 @@ const MyVehiclePage = () => {
     return <PageLoader message="Loading Vehicle Data..." />;
   }
 
-  if (error || !profile || !car) {
-    return <ErrorState message="Could not load your vehicle data." />;
+  if (error || !profile) {
+    return <ErrorState message="Could not load your profile data." />;
   }
+
+  const safeCar = car || {
+    id: 'preview',
+    name: 'Sample Vehicle (Preview)',
+    priceUgx: 15000000,
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800',
+    year: '2023',
+    make: 'Toyota',
+    model: 'Vitz',
+    specs: {
+      engine: '1.5L Hybrid'
+    }
+  };
 
   const progressPercent = 35; // Mock progress
 
@@ -96,21 +109,21 @@ const MyVehiclePage = () => {
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/2 bg-slate-50 flex items-center justify-center p-8 relative">
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent"></div>
-            <img src={car.image} alt={car.name} className="max-h-[250px] object-contain drop-shadow-xl relative z-10 mix-blend-multiply" />
+            <img src={safeCar.} alt={safeCar.} className="max-h-[250px] object-contain drop-shadow-xl relative z-10 mix-blend-multiply" />
           </div>
           <div className="md:w-1/2 p-8 flex flex-col justify-center">
-            <p className="text-primary font-black uppercase tracking-wider text-xs mb-1">{car.year} • {car.make}</p>
-            <h2 className="text-3xl font-black text-slate-900 mb-2">{car.model}</h2>
+            <p className="text-primary font-black uppercase tracking-wider text-xs mb-1">{safeCar.} • {safeCar.}</p>
+            <h2 className="text-3xl font-black text-slate-900 mb-2">{safeCar.}</h2>
             <p className="text-slate-500 text-sm font-medium mb-6">License Plate: <span className="text-slate-900 font-bold bg-slate-100 px-2 py-1 rounded">UBN 123A</span></p>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Color</p>
-                <p className="font-bold text-slate-700">{car.specs.color}</p>
+                <p className="font-bold text-slate-700">{safeCar..color}</p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Engine</p>
-                <p className="font-bold text-slate-700">{car.specs.engine}</p>
+                <p className="font-bold text-slate-700">{safeCar..engine}</p>
               </div>
             </div>
           </div>
@@ -137,12 +150,12 @@ const MyVehiclePage = () => {
             <div className="space-y-3 w-full">
               <div>
                 <p className="text-primary-fixed-dim text-[10px] uppercase font-bold">Total Value</p>
-                <p className="font-bold">{formatUGX(car.priceUgx)}</p>
+                <p className="font-bold">{formatUGX(safeCar.)}</p>
               </div>
               <div className="w-full h-[1px] bg-white/10"></div>
               <div>
                 <p className="text-primary-fixed-dim text-[10px] uppercase font-bold">Paid So Far</p>
-                <p className="font-bold text-emerald-300">{formatUGX(car.priceUgx * (progressPercent/100))}</p>
+                <p className="font-bold text-emerald-300">{formatUGX(safeCar. * (progressPercent/100))}</p>
               </div>
             </div>
           </div>

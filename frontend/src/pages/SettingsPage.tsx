@@ -48,6 +48,7 @@ export default function SettingsPage() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => localStorage.getItem('2fa_enabled') === 'true');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [helpMessage, setHelpMessage] = useState('');
   const [helpSearchQuery, setHelpSearchQuery] = useState('');
@@ -317,27 +318,60 @@ export default function SettingsPage() {
           </div>
           
           <div className="space-y-3">
-            <input 
-              type="password" 
-              placeholder="Current Password" 
-              value={passwordData.current}
-              onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
-            <input 
-              type="password" 
-              placeholder="New Password" 
-              value={passwordData.new}
-              onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
-            <input 
-              type="password" 
-              placeholder="Confirm New Password" 
-              value={passwordData.confirm}
-              onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="Current Password" 
+                value={passwordData.current}
+                onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="New Password" 
+                value={passwordData.new}
+                onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="Confirm New Password" 
+                value={passwordData.confirm}
+                onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
             <button 
               onClick={() => {
                 if (!passwordData.current || !passwordData.new || !passwordData.confirm) {

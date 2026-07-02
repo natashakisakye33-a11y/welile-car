@@ -46,6 +46,7 @@ const CfoPage = () => {
   const [password, setPassword] = useState('cfo123');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCfoLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -171,15 +172,26 @@ const CfoPage = () => {
                 <label className="block text-[11px] font-bold tracking-wider text-slate-500 uppercase ml-1" htmlFor="password">
                   Password
                 </label>
-                <input 
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
-                  id="password" 
-                  type="password" 
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input 
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] transition-all duration-200 shadow-sm" 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {loginError && (

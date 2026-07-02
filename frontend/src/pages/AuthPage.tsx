@@ -31,7 +31,6 @@ const GoogleAuthButton = ({ isLogin }: { isLogin: boolean }) => {
         }}
         useOneTap
         shape="pill"
-        width="100%"
         text={isLogin ? 'signin_with' : 'signup_with'}
       />
     </div>
@@ -45,6 +44,7 @@ export const CustomSignIn = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,14 +86,25 @@ export const CustomSignIn = () => {
       </div>
       <div>
         <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-        <input 
-          type="password" 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          required 
-          placeholder="••••••••"
-          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
-        />
+        <div className="relative">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            placeholder="••••••••"
+            className="w-full h-12 px-4 pr-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex items-center justify-center"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {showPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </div>
       </div>
       <button 
         type="submit" 
@@ -116,6 +127,7 @@ export const CustomSignUp = () => {
   const [residence, setResidence] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,14 +202,25 @@ export const CustomSignUp = () => {
       </div>
       <div>
         <label className="block text-label-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-        <input 
-          type="password" 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          required 
-          placeholder="••••••••"
-          className="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
-        />
+        <div className="relative">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            placeholder="••••••••"
+            className="w-full h-12 px-4 pr-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-body-md text-slate-900 dark:text-slate-100 transition-all shadow-sm"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex items-center justify-center"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {showPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </div>
       </div>
       <button 
         type="submit" 
