@@ -21,6 +21,14 @@ export async function fetchWithTimeout(resource: string | URL | Request, options
       headers,
       signal: controller.signal
     });
+
+    if (response.status === 401 || response.status === 403) {
+      if (localStorage.getItem('authToken')) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/';
+      }
+    }
+
     return response;
   } catch (error: any) {
     if (error.name === 'AbortError') {
