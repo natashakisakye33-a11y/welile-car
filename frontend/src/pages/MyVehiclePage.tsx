@@ -33,8 +33,10 @@ const MyVehiclePage = () => {
   const [car, setCar] = useState<any>(null);
   const [carLoading, setCarLoading] = useState(false);
 
+  const activeProfile = profile || { selected_car_id: null, has_withdrawn_this_month: false };
+
   React.useEffect(() => {
-    if (profile?.selected_car_id) {
+    if (activeProfile?.selected_car_id) {
       setCarLoading(true);
       fetch(`${API_URL}/vehicles/${activeProfile.selected_car_id}`)
         .then(res => res.json())
@@ -53,7 +55,7 @@ const MyVehiclePage = () => {
     return <PageLoader message="Loading Vehicle Data..." />;
   }
 
-  if (error || !profile) {
+  if (error && !profile) {
     return <ErrorState message="Could not load your vehicle data." />;
   }
 
