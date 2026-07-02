@@ -75,7 +75,7 @@ const FinancingPage = () => {
     const fetchData = async () => {
       try {
         setDashboardError(null);
-        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
+        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`, { timeout: 3000 });
         if (res.ok) {
           setDashboardData(await res.json());
         } else {
