@@ -72,6 +72,8 @@ export function useProfile() {
           financing_unlocked: summary?.journey?.currentStep !== 'Saving',
           financing_status: summary?.vehicle ? 'active' : 'none',
           selected_car_id: summary?.vehicle ? summary.vehicle.id.toString() : null,
+          selected_car_condition: summary?.vehicle?.selectedCondition || null,
+          selected_car_price: summary?.vehicle?.selectedPrice || null,
           assigned_agent: null,
           flagged: false,
           created_at: new Date().toISOString(),
@@ -233,16 +235,29 @@ export function useSelectCar() {
 }
 
 export function useSelectCarDetails() {
-  const { user } = useAuth();
+  const { session } = useAuth();
+  const token = session?.access_token;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ carId, condition, price }: { carId: string; condition: 'used' | 'new'; price: number }) => {
-      if (!user) throw new Error('Not authenticated');
-      console.warn('API for useSelectCarDetails not implemented');
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetchWithTimeout(`${API_URL}/users/select-vehicle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ vehicleId: carId, condition, price })
+      });
+
+      if (!res.ok) throw new Error('Failed to select vehicle');
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
     },
   });
 }

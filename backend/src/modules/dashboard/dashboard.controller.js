@@ -7,11 +7,11 @@ const getDashboardSummary = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Fetch user and savings account
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
         savingsAccount: true,
+        selectedVehicle: true,
         financings: {
           include: {
             vehicle: true,
@@ -76,7 +76,13 @@ const getDashboardSummary = async (req, res) => {
           ? ['Registered', 'Saving', 'Qualified', 'Financing', 'Released'] 
           : (progressPercent >= 100 ? ['Registered', 'Saving'] : ['Registered'])
       },
-      vehicle: activeFinancing ? activeFinancing.vehicle : null,
+      vehicle: activeFinancing 
+        ? activeFinancing.vehicle 
+        : (user.selectedVehicle ? { 
+            ...user.selectedVehicle, 
+            selectedCondition: user.selectedVehicleCondition, 
+            selectedPrice: user.selectedVehiclePrice 
+          } : null),
       repayment: nextRepayment ? {
         nextAmount: Number(nextRepayment.amount),
         dueDate: nextRepayment.dueDate.toISOString().split('T')[0]

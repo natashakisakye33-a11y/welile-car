@@ -189,13 +189,16 @@ const DashboardPage = () => {
                   <p className="text-body-sm text-on-surface-variant">Sat: 10:00 AM - 2:00 PM</p>
                 </div>
               </div>
-              <div className="mt-4 flex gap-2">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-on-background/20 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWskRhi16uJNyzdB-FB0v0vZX4QIc8b1HY5oxgz4daC3zjNWCg3HUyKQa5mubY6kmD45N7vYoIkFM4NBodq7l8nd0suBWXvwU6_e781fhqG453KreKwn0BkY_5IsD9SrzypdGB5pcAgwh4t0oxE93DobdwSa_V4BZOYgJpLDtTE5jlDSwQF97Cs_xz4DE0UoB_ym2Pmz9ng32AWCNwYXagi4qaDB6vyAcNWR-kAZyu6AfavT7-b6dbGEAOQIFjgrOxXQqf6db4TBgk')"}}></div>
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-on-background/20 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXZrlRGLVX8bF8FygjKfEsRjLaldPqkD345Z0NZBifj3btBSjfPU5cvNocjeS98AJxgtthPSGdId3WLYJgvY4-D8eiiuc5Pvx7HwClbxHZw7qoErUop1PZS8ykavwKiIFI2NrS28abo9wpdarLzLCMZgZOnFzeD6puGO-hCCba3whiZfSKsk899ja0OtneNKRHPLA5ErO02DpN6pIcVR76Iip5Kg4Y8Euqfi15m0ijKR905pqkQkO26zVYMi_Rp6uVe0XoCwkOUnJI')"}}></div>
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-on-background/20 bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuACA4yJ4fxqQZOpcsjbcFQTisyslVdT5HN26Et_N2Er3ypNfMOMU7pjlTMyuYTN0Vt1deZAzs00k90_f-Cc3fMT5gw7OBL1hCwUxNJ_cM0hn5pn7fEisFsx1ZQdtT_ZUERtYGmhevaun9911Dg1aFnDtzM7OnTJpyi-sUOnFS-fTLiqRuQOhKrq5Y6MQIKRscu4axxzLRblQboEa3jYwM8_ov2KhuLMcjgzWRtqt5oq2bUfb0ke_cTVTW6-hVn870_b7WEPE6WdhdM_')"}}></div>
-                </div>
-                <p className="text-body-sm text-outline flex items-center ml-2">Our team is ready to help you.</p>
+              <div className="mt-4">
+                <a 
+                  href="https://wa.me/256750511507" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span className="material-symbols-outlined text-sm">chat</span>
+                  Chat on WhatsApp
+                </a>
               </div>
             </div>
           </div>
