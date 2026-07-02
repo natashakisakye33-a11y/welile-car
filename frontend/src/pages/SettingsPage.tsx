@@ -651,7 +651,7 @@ export default function SettingsPage() {
               {/* Settings Container */}
               <div className="glass-card rounded-[24px] p-6 md:p-10 overflow-hidden relative">
                 <div className="mb-12 text-center">
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">Settings Menu</h2>
+                  <h2 className="text-3xl font-bold text-on-surface mb-2">Settings Menu</h2>
                   <p className="text-on-surface-variant font-body-lg">Manage your account preferences and app experience</p>
                 </div>
                 
@@ -674,7 +674,7 @@ export default function SettingsPage() {
                         <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
                           <span className="material-symbols-outlined">{item.icon}</span>
                         </div>
-                        <span className="font-headline-md text-headline-md text-on-surface">{item.label}</span>
+                        <span className="font-semibold text-lg text-on-surface">{item.label}</span>
                       </div>
                       <span className="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
@@ -694,7 +694,7 @@ export default function SettingsPage() {
                       <div className="w-12 h-12 rounded-xl bg-error-container/20 flex items-center justify-center text-error group-hover:bg-error group-hover:text-on-error transition-all">
                         <span className="material-symbols-outlined">logout</span>
                       </div>
-                      <span className="font-headline-md text-headline-md text-error">Logout</span>
+                      <span className="font-semibold text-lg text-error">Logout</span>
                     </div>
                     <span className="material-symbols-outlined text-error/40 group-hover:text-error group-hover:translate-x-1 transition-all">chevron_right</span>
                   </div>
