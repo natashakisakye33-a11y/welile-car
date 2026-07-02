@@ -115,7 +115,7 @@ const FinancingPage = () => {
     return <PageLoader message="Loading Application..." />;
   }
 
-  if (dashboardError || !profile || !dashboardData) {
+  if (dashboardError || !dashboardData) {
     return <ErrorState message={dashboardError || "Application data is unavailable."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
