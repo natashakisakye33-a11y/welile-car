@@ -44,7 +44,31 @@ export default function SettingsPage() {
   // Toggles state
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setDarkMode(localStorage.getItem('theme') === 'dark');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    if (darkMode !== isDark) {
+      const newTheme = darkMode ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      window.dispatchEvent(new Event('storage'));
+    }
+  }, [darkMode]);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => localStorage.getItem('2fa_enabled') === 'true');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -50,6 +51,15 @@ const AppLayout = () => {
   const location = useLocation();
   const hideNavbar = location.pathname === '/' || location.pathname === '/auth' || location.pathname.startsWith('/admin') || location.pathname.startsWith('/cfo') || CUSTOMER_ROUTES.some(r => location.pathname.startsWith(r));
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   return (
     <>
       {!hideNavbar && (
@@ -63,6 +73,8 @@ const AppLayout = () => {
         <Route path="/benefits" element={<BenefitsPage />} />
         <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/cars" element={<Navigate to="/vehicles" replace />} />
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminPage />} />

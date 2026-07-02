@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
+import { API_URL } from '@/config';
 import { 
   Dialog, 
   DialogContent, 
@@ -42,9 +43,10 @@ export default function ProfilePage() {
   const updateProfileMutation = useUpdateProfile();
   const navigate = useNavigate();
 
+  const [photoType, setPhotoType] = useState<'avatar' | 'passport'>('avatar');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', phone: '', residence: '' });
+  const [editForm, setEditForm] = useState({ name: '', phone: '', residence: '', nationalId: '', employmentStatus: '' });
   
   const [cameraMode, setCameraMode] = useState<'options' | 'webcam' | 'preview'>('options');
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -61,16 +63,25 @@ export default function ProfilePage() {
     email: customUser?.email || "N/A",
     phone: profile?.phone || (customUser as any)?.phone || "N/A",
     residence: profile?.residence || "N/A",
-    kycStatus: "Verified",
+    nationalId: profile?.national_id || "Not Provided",
+    employmentStatus: profile?.employment_status || "Not Provided",
+    kycStatus: profile?.kycStatus || "PENDING",
     joinDate: customUser?.createdAt 
       ? new Date(customUser.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
       : "May 15, 2026",
     activeLoan: profile?.selected_car_id 
-      ? (CARS.find(c => c.id === profile.selected_car_id)?.name || "Toyota Vitz (UBM 492X)") 
-      : "Toyota Vitz (UBM 492X)"
+      ? {
+          id: profile.selected_car_id,
+          name: profile.selected_car_name || "Selected Vehicle",
+          image: profile.selected_car_image || null,
+          price: profile.selected_car_price ? `${profile.selected_car_price.toLocaleString()} UGX` : "N/A",
+          condition: profile.selected_car_condition || 'used'
+        }
+      : null
   };
 
   const currentAvatarUrl = profile?.avatar_url || undefined;
+  const currentPassportUrl = profile?.passport_url || undefined;
 
   // Compress/resize image helper to fit in localStorage limits
   const compressImage = (base64Str: string, maxWidth = 256, maxHeight = 256): Promise<string> => {
@@ -118,15 +129,17 @@ export default function ProfilePage() {
         try {
           const compressed = await compressImage(base64);
           updateProfileMutation.mutate(
-            { avatar_url: compressed },
+            photoType === 'avatar'
+              ? { avatar_url: compressed }
+              : { passport_url: compressed },
             {
               onSuccess: () => {
-                toast.success("Profile picture updated successfully!");
+                toast.success(`${photoType === 'avatar' ? 'Profile picture' : 'Passport photo'} updated successfully!`);
                 setIsModalOpen(false);
                 setIsLoading(false);
               },
-              onError: () => {
-                toast.error("Failed to save profile picture.");
+              onError: (err: any) => {
+                toast.error(err.message || `Failed to save ${photoType === 'avatar' ? 'profile picture' : 'passport photo'}.`);
                 setIsLoading(false);
               }
             }
@@ -200,16 +213,18 @@ export default function ProfilePage() {
       try {
         const compressed = await compressImage(capturedPhoto);
         updateProfileMutation.mutate(
-          { avatar_url: compressed },
+          photoType === 'avatar'
+            ? { avatar_url: compressed }
+            : { passport_url: compressed },
           {
             onSuccess: () => {
-              toast.success("Profile picture updated successfully!");
+              toast.success(`${photoType === 'avatar' ? 'Profile picture' : 'Passport photo'} updated successfully!`);
               setIsModalOpen(false);
               setIsLoading(false);
               setCameraMode('options');
             },
-            onError: () => {
-              toast.error("Failed to save profile picture.");
+            onError: (err: any) => {
+              toast.error(err.message || `Failed to save ${photoType === 'avatar' ? 'profile picture' : 'passport photo'}.`);
               setIsLoading(false);
             }
           }
@@ -225,15 +240,17 @@ export default function ProfilePage() {
   const removePhoto = () => {
     setIsLoading(true);
     updateProfileMutation.mutate(
-      { avatar_url: '' },
+      photoType === 'avatar'
+        ? { avatar_url: '' }
+        : { passport_url: '' },
       {
         onSuccess: () => {
-          toast.success("Profile picture removed.");
+          toast.success(`${photoType === 'avatar' ? 'Profile picture' : 'Passport photo'} removed.`);
           setIsModalOpen(false);
           setIsLoading(false);
         },
-        onError: () => {
-          toast.error("Failed to remove profile picture.");
+        onError: (err: any) => {
+          toast.error(err.message || `Failed to remove ${photoType === 'avatar' ? 'profile picture' : 'passport photo'}.`);
           setIsLoading(false);
         }
       }
@@ -251,7 +268,9 @@ export default function ProfilePage() {
     setEditForm({
       name: customer.name,
       phone: customer.phone,
-      residence: customer.residence
+      residence: customer.residence,
+      nationalId: customer.nationalId === 'Not Provided' ? '' : customer.nationalId,
+      employmentStatus: customer.employmentStatus === 'Not Provided' ? '' : customer.employmentStatus
     });
     setIsEditModalOpen(true);
   };
@@ -260,15 +279,21 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsLoading(true);
     updateProfileMutation.mutate(
-      { name: editForm.name, phone: editForm.phone, residence: editForm.residence },
+      { 
+        name: editForm.name, 
+        phone: editForm.phone, 
+        residence: editForm.residence,
+        national_id: editForm.nationalId,
+        employment_status: editForm.employmentStatus
+      },
       {
         onSuccess: () => {
           toast.success("Profile details updated successfully!");
           setIsEditModalOpen(false);
           setIsLoading(false);
         },
-        onError: () => {
-          toast.error("Failed to update profile details.");
+        onError: (err: any) => {
+          toast.error(err.message || "Failed to update profile details.");
           setIsLoading(false);
         }
       }
@@ -417,12 +442,141 @@ export default function ProfilePage() {
 
               <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
+                  <FileText size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">National ID / Passport No.</p>
+                  <p className="font-bold text-slate-800">{customer.nationalId}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Employment Status</p>
+                  <p className="font-bold text-slate-800">{customer.employmentStatus}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
                   <User size={20} />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Member Since</p>
                   <p className="font-bold text-slate-800">{customer.joinDate}</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Split Grid for Passport and Purchasing Item */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              
+              {/* Passport Photo Sized Standard */}
+              <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <Globe size={20} className="text-[#4C158D]" />
+                    Official Passport Photo
+                  </h3>
+                  <p className="text-xs font-medium text-slate-500 mb-4">
+                    Required for processing vehicle logbooks and final financing release. Sized at standard 2" x 2" (1:1 aspect ratio).
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center gap-4 my-2">
+                  <div className="w-[160px] h-[160px] bg-white border-8 border-white rounded-lg shadow-md overflow-hidden relative group">
+                    {currentPassportUrl ? (
+                      <img 
+                        src={currentPassportUrl.startsWith('/') ? `${API_URL}${currentPassportUrl}` : currentPassportUrl} 
+                        alt="Passport Photo" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300 p-4 border border-dashed border-slate-200">
+                        <User size={40} className="stroke-[1.5]" />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-2">No Photo</span>
+                      </div>
+                    )}
+                    
+                    {currentPassportUrl && (
+                      <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full shadow-sm">
+                        Standard 2x2
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 w-full max-w-[200px]">
+                    <button 
+                      onClick={() => { setPhotoType('passport'); setIsModalOpen(true); }}
+                      className="flex-1 text-center bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      <Upload size={14} className="text-[#4C158D]" />
+                      Upload Photo
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Item am purchasing */}
+              <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <Car size={20} className="text-[#4C158D]" />
+                    Item I'm Purchasing
+                  </h3>
+                  <p className="text-xs font-medium text-slate-500 mb-4">
+                    Your currently selected vehicle. Keep saving to reach the 30% deposit target to unlock financing.
+                  </p>
+                </div>
+                
+                {customer.activeLoan ? (
+                  <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <div className="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100">
+                      {customer.activeLoan.image ? (
+                        <img 
+                          src={customer.activeLoan.image} 
+                          alt={customer.activeLoan.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                          <Car size={24} />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <h4 className="font-extrabold text-slate-800 text-sm leading-snug">{customer.activeLoan.name}</h4>
+                      <p className="text-xs font-semibold text-slate-400 mt-0.5 capitalize">{customer.activeLoan.condition} Condition</p>
+                      <p className="text-sm font-black text-[#4C158D] mt-1">{customer.activeLoan.price}</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => navigate('/cars')}
+                      className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl transition-colors"
+                      title="Change Car"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-100 border-dashed text-center">
+                    <AlertCircle size={28} className="text-amber-500 mb-2" />
+                    <h4 className="font-bold text-slate-800 text-xs">No Vehicle Selected</h4>
+                    <p className="text-[10px] text-slate-400 mt-1 max-w-[200px]">
+                      Choose your dream car now to start saving and build your repayment plan.
+                    </p>
+                    <button 
+                      onClick={() => navigate('/cars')}
+                      className="mt-3 bg-[#4C158D] text-white hover:bg-[#3f2bc2] font-bold text-xs py-2 px-4 rounded-xl transition-all shadow-sm shadow-[#4C158D]/20"
+                    >
+                      Browse Available Cars
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -480,13 +634,16 @@ export default function ProfilePage() {
         </div>
       </main>
 
-      {/* Profile Photo Upload and Camera Capture Modal */}
+      {/* Profile Photo / Passport Photo Upload and Camera Capture Modal */}
       <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) handleCloseModal(); }}>
         <DialogContent className="sm:max-w-md rounded-[28px] overflow-hidden border border-slate-100 p-6 bg-white shadow-2xl">
           <DialogHeader className="pb-4 border-b border-slate-100 text-center sm:text-left">
-            <DialogTitle className="text-xl font-extrabold text-slate-800">Update Profile Picture</DialogTitle>
+            <DialogTitle className="text-xl font-extrabold text-slate-800">
+              Update {photoType === 'avatar' ? 'Profile Picture' : 'Official Passport Photo'}
+            </DialogTitle>
             <DialogDescription className="text-slate-500 text-sm mt-1">
               Select a photo from your device or use your webcam to capture a live snapshot.
+              {photoType === 'passport' && " Please ensure your head is centered inside the guide overlay."}
             </DialogDescription>
           </DialogHeader>
 
@@ -496,12 +653,24 @@ export default function ProfilePage() {
               <div className="w-full space-y-6">
                 {/* Current Photo Preview inside Modal */}
                 <div className="flex justify-center">
-                  <div className="w-32 h-32 rounded-full border-4 border-[#4C158D]/10 p-1 bg-white shadow-lg shadow-slate-100">
-                    <div className="w-full h-full rounded-full bg-slate-50 flex items-center justify-center overflow-hidden">
-                      {currentAvatarUrl ? (
-                        <img src={currentAvatarUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className={`w-32 h-32 border-4 border-[#4C158D]/10 p-1 bg-white shadow-lg shadow-slate-100 ${photoType === 'passport' ? 'rounded-[24px]' : 'rounded-full'}`}>
+                    <div className={`w-full h-full bg-slate-50 flex items-center justify-center overflow-hidden ${photoType === 'passport' ? 'rounded-[18px]' : 'rounded-full'}`}>
+                      {photoType === 'avatar' ? (
+                        currentAvatarUrl ? (
+                          <img src={currentAvatarUrl} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="text-slate-300 w-14 h-14" />
+                        )
                       ) : (
-                        <User className="text-slate-300 w-14 h-14" />
+                        currentPassportUrl ? (
+                          <img 
+                            src={currentPassportUrl.startsWith('/') ? `${API_URL}${currentPassportUrl}` : currentPassportUrl} 
+                            alt="Passport Preview" 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <User className="text-slate-300 w-14 h-14" />
+                        )
                       )}
                     </div>
                   </div>
@@ -533,7 +702,7 @@ export default function ProfilePage() {
                     Take Photo with Camera
                   </button>
 
-                  {currentAvatarUrl && (
+                  {((photoType === 'avatar' && currentAvatarUrl) || (photoType === 'passport' && currentPassportUrl)) && (
                     <button 
                       onClick={removePhoto}
                       disabled={isLoading}
@@ -561,8 +730,8 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <>
-                    {/* Square cropped mirrored webcam feed */}
-                    <div className="relative w-full aspect-square max-w-[280px] mx-auto rounded-full overflow-hidden bg-slate-900 border-4 border-slate-100 shadow-xl flex items-center justify-center">
+                    {/* Mirrored webcam feed */}
+                    <div className={`relative w-full aspect-square max-w-[280px] mx-auto overflow-hidden bg-slate-900 border-4 border-slate-100 shadow-xl flex items-center justify-center ${photoType === 'passport' ? 'rounded-[24px]' : 'rounded-full'}`}>
                       <video 
                         ref={videoRef} 
                         autoPlay 
@@ -570,8 +739,20 @@ export default function ProfilePage() {
                         muted 
                         className="w-full h-full object-cover scale-x-[-1]"
                       />
-                      {/* Guides to capture a nice centered selfie */}
-                      <div className="absolute inset-6 rounded-full border-2 border-white/20 border-dashed pointer-events-none"></div>
+                      
+                      {/* Standard passport head outline or generic outline */}
+                      {photoType === 'passport' ? (
+                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-75">
+                          <svg className="w-full h-full text-white/60" viewBox="0 0 100 100" fill="none">
+                            <ellipse cx="50" cy="40" rx="18" ry="24" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <path d="M25 85 C25 65, 30 60, 50 60 C70 60, 75 65, 75 85" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+                            <line x1="50" y1="10" x2="50" y2="90" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.3" />
+                            <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.3" />
+                          </svg>
+                        </div>
+                      ) : (
+                        <div className="absolute inset-6 rounded-full border-2 border-white/20 border-dashed pointer-events-none"></div>
+                      )}
                     </div>
 
                     <div className="flex gap-3 w-full">
@@ -596,8 +777,8 @@ export default function ProfilePage() {
 
             {cameraMode === 'preview' && capturedPhoto && (
               <div className="w-full flex flex-col items-center gap-6">
-                {/* Square preview of captured photo */}
-                <div className="w-full aspect-square max-w-[280px] mx-auto rounded-full overflow-hidden bg-slate-100 border-4 border-slate-100 shadow-xl relative">
+                {/* Preview of captured photo */}
+                <div className={`w-full aspect-square max-w-[280px] mx-auto overflow-hidden bg-slate-100 border-4 border-slate-100 shadow-xl relative ${photoType === 'passport' ? 'rounded-[24px]' : 'rounded-full'}`}>
                   <img src={capturedPhoto} alt="Captured preview" className="w-full h-full object-cover" />
                 </div>
 
@@ -629,6 +810,7 @@ export default function ProfilePage() {
           </div>
         </DialogContent>
       </Dialog>
+
       {/* Edit Profile Details Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-md rounded-[28px] overflow-hidden border border-slate-100 p-6 bg-white shadow-2xl">
@@ -671,6 +853,33 @@ export default function ProfilePage() {
                 required
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all"
               />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">National ID / Passport No.</label>
+              <input 
+                type="text" 
+                value={editForm.nationalId}
+                onChange={(e) => setEditForm(prev => ({ ...prev, nationalId: e.target.value }))}
+                placeholder="Enter national ID or passport number"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Employment Status</label>
+              <select
+                value={editForm.employmentStatus}
+                onChange={(e) => setEditForm(prev => ({ ...prev, employmentStatus: e.target.value }))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#4C158D]/30 transition-all animate-none"
+              >
+                <option value="">Select Status</option>
+                <option value="Employed">Employed</option>
+                <option value="Self-Employed">Self-Employed</option>
+                <option value="Unemployed">Unemployed</option>
+                <option value="Student">Student</option>
+                <option value="Retired">Retired</option>
+              </select>
             </div>
 
             <div className="flex gap-3 mt-4">

@@ -2,8 +2,8 @@ import { Home, Car, Wallet, User } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const tabs = [
-  { to: '/dashboard', icon: Home, label: 'Home' },
-  { to: '/vehicles', icon: Car, label: 'Cars' },
+  { to: '/dashboard', icon: Home, label: 'Dashboard' },
+  { to: '/vehicles', icon: Car, label: 'Marketplace' },
   { to: '/wallet', icon: Wallet, label: 'Wallet' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];

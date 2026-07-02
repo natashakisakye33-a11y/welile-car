@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const { logAction } = require('../../shared/utils/audit.util');
+const fs = require('fs');
+const path = require('path');
 
 const prisma = new PrismaClient();
 
@@ -46,9 +48,9 @@ const getMyProfile = async (req, res) => {
     let user = await prisma.user.findUnique({
       where: { id: parseInt(req.user.id) },
       select: { 
-        id: true, email: true, name: true, role: true, 
+        id: true, email: true, name: true, phone: true, role: true, 
         status: true, kycStatus: true, nationalId: true, 
-        address: true, employmentStatus: true 
+        address: true, employmentStatus: true, avatarUrl: true, passportUrl: true 
       }
     });
 
@@ -152,10 +154,103 @@ const selectVehicle = async (req, res) => {
   }
 };
 
+const saveBase64Image = (base64Str, prefix) => {
+  if (!base64Str || !base64Str.startsWith('data:')) return base64Str;
+  
+  try {
+    const matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) return base64Str;
+    
+    const ext = matches[1].split('/')[1] || 'jpg';
+    const buffer = Buffer.from(matches[2], 'base64');
+    
+    const uploadsDir = path.join(__dirname, '../../../public/uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    const filename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+    const filePath = path.join(uploadsDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    
+    return `/uploads/${filename}`;
+  } catch (err) {
+    console.error('Failed to save base64 image:', err);
+    return base64Str;
+  }
+};
+
+const updateMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone, residence, address, nationalId, national_id, employmentStatus, employment_status, avatar_url, passport_url, avatarUrl, passportUrl } = req.body;
+
+    const dataToUpdate = {};
+    if (name !== undefined) dataToUpdate.name = name;
+    if (phone !== undefined) dataToUpdate.phone = phone;
+    if (residence !== undefined) dataToUpdate.address = residence;
+    if (address !== undefined) dataToUpdate.address = address;
+    
+    const rawNationalId = nationalId !== undefined ? nationalId : national_id;
+    if (rawNationalId !== undefined) dataToUpdate.nationalId = rawNationalId;
+
+    const rawEmploymentStatus = employmentStatus !== undefined ? employmentStatus : employment_status;
+    if (rawEmploymentStatus !== undefined) dataToUpdate.employmentStatus = rawEmploymentStatus;
+
+    const rawAvatar = avatar_url !== undefined ? avatar_url : avatarUrl;
+    if (rawAvatar !== undefined) {
+      if (rawAvatar === '' || rawAvatar === null) {
+        dataToUpdate.avatarUrl = null;
+      } else {
+        dataToUpdate.avatarUrl = saveBase64Image(rawAvatar, 'avatar');
+      }
+    }
+
+    const rawPassport = passport_url !== undefined ? passport_url : passportUrl;
+    if (rawPassport !== undefined) {
+      if (rawPassport === '' || rawPassport === null) {
+        dataToUpdate.passportUrl = null;
+      } else {
+        dataToUpdate.passportUrl = saveBase64Image(rawPassport, 'passport');
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        status: true,
+        kycStatus: true,
+        nationalId: true,
+        address: true,
+        employmentStatus: true,
+        avatarUrl: true,
+        passportUrl: true
+      }
+    });
+
+    await logAction(userId, 'PROFILE_UPDATED', 'Updated profile details.', req.ip);
+
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Update Profile Error:', error);
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Phone number or National ID is already registered to another user' });
+    }
+    res.status(500).json({ error: 'Server error updating profile' });
+  }
+};
+
 module.exports = {
   submitKyc,
   getMyProfile,
   approveKyc,
   updateMyRole,
-  selectVehicle
+  selectVehicle,
+  updateMyProfile
 };

@@ -90,6 +90,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const cached = localStorage.getItem('authUser');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setUser(parsed);
+          setIsAdmin(parsed.role === 'ADMIN');
+          setIsCfo(parsed.role === 'CFO');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const persistLogin = (token: string, userData: any) => {
     localStorage.setItem('authToken', token);
     localStorage.setItem('authUser', JSON.stringify(userData));

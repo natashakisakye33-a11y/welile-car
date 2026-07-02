@@ -48,14 +48,44 @@ export default function VehiclesPage() {
     });
   };
 
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [sortBy, setSortBy] = useState<'none' | 'price-asc' | 'price-desc' | 'rating'>('none');
+  const [filterCondition, setFilterCondition] = useState<'all' | 'new' | 'used'>('all');
+
   const categories = ['All', ...Array.from(new Set(carsData.map(c => c.category)))];
 
-  const filteredCars = carsData.filter(car => {
+  let filteredCars = carsData.filter(car => {
     const matchesSearch = car.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (car.tagline && car.tagline.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === 'All' || car.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesFavorites = !showFavoritesOnly || likedCars.includes(car.id);
+    const matchesCondition = filterCondition === 'all' || 
+                             (filterCondition === 'new' && car.newPriceRange) ||
+                             (filterCondition === 'used' && car.oldPriceRange);
+
+    return matchesSearch && matchesCategory && matchesFavorites && matchesCondition;
   });
+
+  if (sortBy === 'price-asc') {
+    filteredCars = [...filteredCars].sort((a, b) => {
+      const priceA = a.priceUgx || 0;
+      const priceB = b.priceUgx || 0;
+      return priceA - priceB;
+    });
+  } else if (sortBy === 'price-desc') {
+    filteredCars = [...filteredCars].sort((a, b) => {
+      const priceA = a.priceUgx || 0;
+      const priceB = b.priceUgx || 0;
+      return priceB - priceA;
+    });
+  } else if (sortBy === 'rating') {
+    filteredCars = [...filteredCars].sort((a, b) => {
+      const ratingA = parseFloat(a.rating) || 0;
+      const ratingB = parseFloat(b.rating) || 0;
+      return ratingB - ratingA;
+    });
+  }
 
   return (
     <div className="bg-[#f8f9fa] min-h-screen pb-24 font-sans text-slate-900 selection:bg-[#4C158D]/20 selection:text-[#4C158D]">
@@ -68,8 +98,16 @@ export default function VehiclesPage() {
           <div className="flex items-center justify-between mb-4">
             <h1 className="font-extrabold text-2xl tracking-tight text-slate-900">Vehicle Marketplace</h1>
             <div className="flex gap-2">
-              <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
-                <Heart size={18} className={likedCars.length > 0 ? "fill-red-500 text-red-500" : ""} />
+              <button 
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                title={showFavoritesOnly ? "Show All Cars" : "Show Liked Cars"}
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors shadow-sm ${
+                  showFavoritesOnly 
+                    ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100" 
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <Heart size={18} className={showFavoritesOnly || likedCars.length > 0 ? "fill-red-500 text-red-500" : ""} />
               </button>
             </div>
           </div>
@@ -85,10 +123,105 @@ export default function VehiclesPage() {
                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold placeholder:text-slate-400 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20 focus:border-[#4C158D] transition-all shadow-inner"
               />
             </div>
-            <button className="bg-[#4C158D] text-white p-3.5 rounded-2xl flex items-center justify-center hover:bg-[#3f2bc2] hover:shadow-lg hover:shadow-[#4C158D]/20 transition-all">
+            <button 
+              onClick={() => setShowFilterPanel(!showFilterPanel)}
+              title="Show Filters"
+              className={`p-3.5 rounded-2xl flex items-center justify-center transition-all ${
+                showFilterPanel 
+                  ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' 
+                  : 'bg-[#4C158D] text-white hover:bg-[#3f2bc2] hover:shadow-lg hover:shadow-[#4C158D]/20'
+              }`}
+            >
               <SlidersHorizontal size={18} />
             </button>
           </div>
+
+          {/* Sliders Filter Panel */}
+          {showFilterPanel && (
+            <div className="mt-4 p-5 bg-white border border-slate-100 rounded-3xl shadow-xl flex flex-col sm:flex-row gap-5 animate-in slide-in-from-top-4 duration-200">
+              <div className="flex-grow space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sort By</label>
+                <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={() => setSortBy('none')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      sortBy === 'none' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Default
+                  </button>
+                  <button 
+                    onClick={() => setSortBy('price-asc')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      sortBy === 'price-asc' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Price: Low to High
+                  </button>
+                  <button 
+                    onClick={() => setSortBy('price-desc')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      sortBy === 'price-desc' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Price: High to Low
+                  </button>
+                  <button 
+                    onClick={() => setSortBy('rating')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      sortBy === 'rating' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Top Rated
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-grow space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Vehicle Condition</label>
+                <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={() => setFilterCondition('all')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      filterCondition === 'all' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    All Conditions
+                  </button>
+                  <button 
+                    onClick={() => setFilterCondition('new')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      filterCondition === 'new' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    New Cars Only
+                  </button>
+                  <button 
+                    onClick={() => setFilterCondition('used')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      filterCondition === 'used' 
+                        ? 'bg-[#4C158D] text-white border-[#4C158D]' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Used Cars Only
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
