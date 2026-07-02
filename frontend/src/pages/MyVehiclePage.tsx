@@ -36,7 +36,7 @@ const MyVehiclePage = () => {
   React.useEffect(() => {
     if (profile?.selected_car_id) {
       setCarLoading(true);
-      fetch(`${API_URL}/vehicles/${profile.selected_car_id}`)
+      fetch(`${API_URL}/vehicles/${activeProfile.selected_car_id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.id) setCar(data);
@@ -57,7 +57,7 @@ const MyVehiclePage = () => {
     return <ErrorState message="Could not load your vehicle data." />;
   }
 
-  if (!profile.selected_car_id || !car) {
+  if (!activeProfile.selected_car_id || !car) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px] space-y-5 max-w-md mx-auto">
         <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center shadow-inner border border-slate-100">
@@ -120,7 +120,7 @@ const MyVehiclePage = () => {
           </div>
           <div className="md:w-1/2 p-8 flex flex-col justify-center">
             <p className="text-primary font-black uppercase tracking-wider text-xs mb-1">
-              {activeCar.year} • {activeCar.make} • <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-[10px] font-black">{profile.selected_car_condition === 'new' ? 'Brand New' : 'Used'}</span>
+              {activeCar.year} • {activeCar.make} • <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-[10px] font-black">{activeProfile.selected_car_condition === 'new' ? 'Brand New' : 'Used'}</span>
             </p>
             <h2 className="text-3xl font-black text-slate-900 mb-2">{activeCar.model}</h2>
             <p className="text-slate-500 text-sm font-medium mb-6">License Plate: <span className="text-slate-900 font-bold bg-slate-100 px-2 py-1 rounded">UBN 123A</span></p>
@@ -136,11 +136,11 @@ const MyVehiclePage = () => {
               </div>
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Condition</p>
-                <p className="font-bold text-slate-700 capitalize">{profile.selected_car_condition || 'Used'}</p>
+                <p className="font-bold text-slate-700 capitalize">{activeProfile.selected_car_condition || 'Used'}</p>
               </div>
               <div className="bg-slate-50 rounded-2xl p-4">
                 <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Target Price</p>
-                <p className="font-bold text-slate-700">{formatUGX(profile.selected_car_price || activeCar.priceUgx)}</p>
+                <p className="font-bold text-slate-700">{formatUGX(activeProfile.selected_car_price || activeCar.priceUgx)}</p>
               </div>
             </div>
           </div>
