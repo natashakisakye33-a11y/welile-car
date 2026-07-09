@@ -66,8 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
       }
-      // Only clear if we explicitly get unauthorized
-      if (res.status === 401) {
+      // Only clear if we explicitly get unauthorized or forbidden
+      if (res.status === 401 || res.status === 403) {
         setUser(null);
         setSession(null);
         localStorage.removeItem('authToken');

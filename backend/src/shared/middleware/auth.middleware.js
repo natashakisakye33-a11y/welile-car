@@ -11,7 +11,7 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: 'Forbidden: Invalid token' });
+      return res.status(401).json({ error: 'Unauthenticated: Invalid token' });
     }
     
     // Attach decoded user info to request (e.g. { id, role, email, phone })
