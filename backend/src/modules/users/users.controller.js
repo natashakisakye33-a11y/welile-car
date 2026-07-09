@@ -183,13 +183,33 @@ const saveBase64Image = (base64Str, prefix) => {
 const updateMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, phone, residence, address, nationalId, national_id, employmentStatus, employment_status, avatar_url, passport_url, avatarUrl, passportUrl } = req.body;
+    const { 
+      name, phone, residence, address, nationalId, national_id, employmentStatus, employment_status, avatar_url, passport_url, avatarUrl, passportUrl,
+      guarantor1Name, guarantor1Phone, guarantor1Email, guarantor1Id_url,
+      guarantor2Name, guarantor2Phone, guarantor2Email, guarantor2Id_url
+    } = req.body;
 
     const dataToUpdate = {};
     if (name !== undefined) dataToUpdate.name = name;
     if (phone !== undefined) dataToUpdate.phone = phone;
     if (residence !== undefined) dataToUpdate.address = residence;
     if (address !== undefined) dataToUpdate.address = address;
+    
+    if (guarantor1Name !== undefined) dataToUpdate.guarantor1Name = guarantor1Name;
+    if (guarantor1Phone !== undefined) dataToUpdate.guarantor1Phone = guarantor1Phone;
+    if (guarantor1Email !== undefined) dataToUpdate.guarantor1Email = guarantor1Email;
+    if (guarantor2Name !== undefined) dataToUpdate.guarantor2Name = guarantor2Name;
+    if (guarantor2Phone !== undefined) dataToUpdate.guarantor2Phone = guarantor2Phone;
+    if (guarantor2Email !== undefined) dataToUpdate.guarantor2Email = guarantor2Email;
+    
+    if (guarantor1Id_url !== undefined) {
+      if (guarantor1Id_url === '' || guarantor1Id_url === null) dataToUpdate.guarantor1IdUrl = null;
+      else dataToUpdate.guarantor1IdUrl = saveBase64Image(guarantor1Id_url, 'g1_id');
+    }
+    if (guarantor2Id_url !== undefined) {
+      if (guarantor2Id_url === '' || guarantor2Id_url === null) dataToUpdate.guarantor2IdUrl = null;
+      else dataToUpdate.guarantor2IdUrl = saveBase64Image(guarantor2Id_url, 'g2_id');
+    }
     
     const rawNationalId = nationalId !== undefined ? nationalId : national_id;
     if (rawNationalId !== undefined) dataToUpdate.nationalId = rawNationalId;
@@ -230,7 +250,15 @@ const updateMyProfile = async (req, res) => {
         address: true,
         employmentStatus: true,
         avatarUrl: true,
-        passportUrl: true
+        passportUrl: true,
+        guarantor1Name: true,
+        guarantor1Phone: true,
+        guarantor1Email: true,
+        guarantor1IdUrl: true,
+        guarantor2Name: true,
+        guarantor2Phone: true,
+        guarantor2Email: true,
+        guarantor2IdUrl: true
       }
     });
 

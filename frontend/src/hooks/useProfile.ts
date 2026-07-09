@@ -35,6 +35,14 @@ export interface Profile {
   flagged: boolean;
   created_at: string;
   updated_at: string;
+  guarantor1Name?: string | null;
+  guarantor1Phone?: string | null;
+  guarantor1Email?: string | null;
+  guarantor1IdUrl?: string | null;
+  guarantor2Name?: string | null;
+  guarantor2Phone?: string | null;
+  guarantor2Email?: string | null;
+  guarantor2IdUrl?: string | null;
 }
 
 export function useProfile() {
@@ -87,7 +95,15 @@ export function useProfile() {
           assigned_agent: null,
           flagged: false,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          guarantor1Name: me.guarantor1Name,
+          guarantor1Phone: me.guarantor1Phone,
+          guarantor1Email: me.guarantor1Email,
+          guarantor1IdUrl: me.guarantor1IdUrl,
+          guarantor2Name: me.guarantor2Name,
+          guarantor2Phone: me.guarantor2Phone,
+          guarantor2Email: me.guarantor2Email,
+          guarantor2IdUrl: me.guarantor2IdUrl
         };
         
         return profile;
@@ -106,7 +122,7 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updates: Partial<Profile & { avatar_url?: string; passport_url?: string; national_id?: string; employment_status?: string }>) => {
+    mutationFn: async (updates: Partial<Profile & { avatar_url?: string; passport_url?: string; national_id?: string; employment_status?: string; guarantor1Id_url?: string; guarantor2Id_url?: string }>) => {
       if (!token) throw new Error('Not authenticated');
 
       const res = await fetch(`${API_URL}/users/me`, {

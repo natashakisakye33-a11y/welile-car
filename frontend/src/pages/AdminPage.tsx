@@ -45,8 +45,13 @@ const AdminPage = () => {
     setLoginError('');
     setLoginLoading(true);
     try {
-      const { error } = await signIn(email, password);
-      if (error) setLoginError(error);
+      const { error, user } = await signIn(email, password);
+      if (error) {
+        setLoginError(error);
+      } else if (user && user.role !== 'ADMIN' && user.role !== 'CFO') {
+        setLoginError('You do not have administrative privileges to access this panel.');
+        await signOut();
+      }
     } catch (err) {
       setLoginError('An error occurred during authentication.');
     } finally {

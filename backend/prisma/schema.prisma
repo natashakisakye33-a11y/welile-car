@@ -33,6 +33,14 @@ model User {
   selectedVehicleCondition String?
   selectedVehiclePrice     Float?
   selectedVehicle          Vehicle?             @relation("UserSelectedVehicle", fields: [selectedVehicleId], references: [id])
+  guarantor1Name           String?
+  guarantor1Phone          String?
+  guarantor1Email          String?
+  guarantor1IdUrl          String?
+  guarantor2Name           String?
+  guarantor2Phone          String?
+  guarantor2Email          String?
+  guarantor2IdUrl          String?
 }
 
 model AuditLog {
