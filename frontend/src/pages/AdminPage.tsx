@@ -38,14 +38,20 @@ const AdminPage = () => {
   const [password, setPassword] = useState('admin123');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAdminLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoginError('');
     setLoginLoading(true);
     try {
-      const { error } = await signIn(email, password);
-      if (error) setLoginError(error);
+      const { error, user } = await signIn(email, password);
+      if (error) {
+        setLoginError(error);
+      } else if (user && user.role !== 'ADMIN' && user.role !== 'CFO') {
+        setLoginError('You do not have administrative privileges to access this panel.');
+        await signOut();
+      }
     } catch (err) {
       setLoginError('An error occurred during authentication.');
     } finally {
@@ -70,7 +76,18 @@ const AdminPage = () => {
             </div>
             <div>
               <label className="block text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Password</label>
-              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full h-12 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface" />
+              <div className="relative">
+                <input type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full h-12 px-4 pr-12 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
             </div>
             {loginError && <p className="text-error text-label-sm text-center mt-2">{loginError}</p>}
             <button type="submit" disabled={loginLoading} className="w-full h-12 mt-6 bg-primary hover:bg-primary-container text-on-primary font-label-md rounded-lg flex items-center justify-center">

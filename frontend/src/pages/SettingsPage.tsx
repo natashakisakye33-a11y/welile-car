@@ -44,10 +44,35 @@ export default function SettingsPage() {
   // Toggles state
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setDarkMode(localStorage.getItem('theme') === 'dark');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    if (darkMode !== isDark) {
+      const newTheme = darkMode ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      window.dispatchEvent(new Event('storage'));
+    }
+  }, [darkMode]);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => localStorage.getItem('2fa_enabled') === 'true');
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [helpMessage, setHelpMessage] = useState('');
   const [helpSearchQuery, setHelpSearchQuery] = useState('');
@@ -317,27 +342,60 @@ export default function SettingsPage() {
           </div>
           
           <div className="space-y-3">
-            <input 
-              type="password" 
-              placeholder="Current Password" 
-              value={passwordData.current}
-              onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
-            <input 
-              type="password" 
-              placeholder="New Password" 
-              value={passwordData.new}
-              onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
-            <input 
-              type="password" 
-              placeholder="Confirm New Password" 
-              value={passwordData.confirm}
-              onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
-            />
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="Current Password" 
+                value={passwordData.current}
+                onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="New Password" 
+                value={passwordData.new}
+                onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+            <div className="relative">
+              <input 
+                type={showPasswords ? "text" : "password"} 
+                placeholder="Confirm New Password" 
+                value={passwordData.confirm}
+                onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#4C158D]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasswords ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
             <button 
               onClick={() => {
                 if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
@@ -617,8 +675,8 @@ export default function SettingsPage() {
               {/* Settings Container */}
               <div className="glass-card rounded-[24px] p-6 md:p-10 overflow-hidden relative">
                 <div className="mb-12 text-center">
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">Settings Menu</h2>
-                  <p className="text-on-surface-variant font-body-lg">Manage your account preferences and app experience</p>
+                  <h2 className="text-2xl font-bold text-on-surface mb-2">Settings Menu</h2>
+                  <p className="text-on-surface-variant text-sm">Manage your account preferences and app experience</p>
                 </div>
                 
                 {/* Category List */}
@@ -640,7 +698,7 @@ export default function SettingsPage() {
                         <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
                           <span className="material-symbols-outlined">{item.icon}</span>
                         </div>
-                        <span className="font-headline-md text-headline-md text-on-surface">{item.label}</span>
+                        <span className="font-medium text-base text-on-surface">{item.label}</span>
                       </div>
                       <span className="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
@@ -660,7 +718,7 @@ export default function SettingsPage() {
                       <div className="w-12 h-12 rounded-xl bg-error-container/20 flex items-center justify-center text-error group-hover:bg-error group-hover:text-on-error transition-all">
                         <span className="material-symbols-outlined">logout</span>
                       </div>
-                      <span className="font-headline-md text-headline-md text-error">Logout</span>
+                      <span className="font-semibold text-lg text-error">Logout</span>
                     </div>
                     <span className="material-symbols-outlined text-error/40 group-hover:text-error group-hover:translate-x-1 transition-all">chevron_right</span>
                   </div>

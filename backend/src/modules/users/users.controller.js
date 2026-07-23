@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const { logAction } = require('../../shared/utils/audit.util');
+const fs = require('fs');
+const path = require('path');
 
 const prisma = new PrismaClient();
 
@@ -46,9 +48,9 @@ const getMyProfile = async (req, res) => {
     let user = await prisma.user.findUnique({
       where: { id: parseInt(req.user.id) },
       select: { 
-        id: true, email: true, name: true, role: true, 
+        id: true, email: true, name: true, phone: true, role: true, 
         status: true, kycStatus: true, nationalId: true, 
-        address: true, employmentStatus: true 
+        address: true, employmentStatus: true, avatarUrl: true, passportUrl: true 
       }
     });
 
@@ -152,10 +154,131 @@ const selectVehicle = async (req, res) => {
   }
 };
 
+const saveBase64Image = (base64Str, prefix) => {
+  if (!base64Str || !base64Str.startsWith('data:')) return base64Str;
+  
+  try {
+    const matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) return base64Str;
+    
+    const ext = matches[1].split('/')[1] || 'jpg';
+    const buffer = Buffer.from(matches[2], 'base64');
+    
+    const uploadsDir = path.join(__dirname, '../../../public/uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    const filename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+    const filePath = path.join(uploadsDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    
+    return `/uploads/${filename}`;
+  } catch (err) {
+    console.error('Failed to save base64 image:', err);
+    return base64Str;
+  }
+};
+
+const updateMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { 
+      name, phone, residence, address, nationalId, national_id, employmentStatus, employment_status, avatar_url, passport_url, avatarUrl, passportUrl,
+      guarantor1Name, guarantor1Phone, guarantor1Email, guarantor1Id_url,
+      guarantor2Name, guarantor2Phone, guarantor2Email, guarantor2Id_url
+    } = req.body;
+
+    const dataToUpdate = {};
+    if (name !== undefined) dataToUpdate.name = name;
+    if (phone !== undefined) dataToUpdate.phone = phone;
+    if (residence !== undefined) dataToUpdate.address = residence;
+    if (address !== undefined) dataToUpdate.address = address;
+    
+    if (guarantor1Name !== undefined) dataToUpdate.guarantor1Name = guarantor1Name;
+    if (guarantor1Phone !== undefined) dataToUpdate.guarantor1Phone = guarantor1Phone;
+    if (guarantor1Email !== undefined) dataToUpdate.guarantor1Email = guarantor1Email;
+    if (guarantor2Name !== undefined) dataToUpdate.guarantor2Name = guarantor2Name;
+    if (guarantor2Phone !== undefined) dataToUpdate.guarantor2Phone = guarantor2Phone;
+    if (guarantor2Email !== undefined) dataToUpdate.guarantor2Email = guarantor2Email;
+    
+    if (guarantor1Id_url !== undefined) {
+      if (guarantor1Id_url === '' || guarantor1Id_url === null) dataToUpdate.guarantor1IdUrl = null;
+      else dataToUpdate.guarantor1IdUrl = saveBase64Image(guarantor1Id_url, 'g1_id');
+    }
+    if (guarantor2Id_url !== undefined) {
+      if (guarantor2Id_url === '' || guarantor2Id_url === null) dataToUpdate.guarantor2IdUrl = null;
+      else dataToUpdate.guarantor2IdUrl = saveBase64Image(guarantor2Id_url, 'g2_id');
+    }
+    
+    const rawNationalId = nationalId !== undefined ? nationalId : national_id;
+    if (rawNationalId !== undefined) dataToUpdate.nationalId = rawNationalId;
+
+    const rawEmploymentStatus = employmentStatus !== undefined ? employmentStatus : employment_status;
+    if (rawEmploymentStatus !== undefined) dataToUpdate.employmentStatus = rawEmploymentStatus;
+
+    const rawAvatar = avatar_url !== undefined ? avatar_url : avatarUrl;
+    if (rawAvatar !== undefined) {
+      if (rawAvatar === '' || rawAvatar === null) {
+        dataToUpdate.avatarUrl = null;
+      } else {
+        dataToUpdate.avatarUrl = saveBase64Image(rawAvatar, 'avatar');
+      }
+    }
+
+    const rawPassport = passport_url !== undefined ? passport_url : passportUrl;
+    if (rawPassport !== undefined) {
+      if (rawPassport === '' || rawPassport === null) {
+        dataToUpdate.passportUrl = null;
+      } else {
+        dataToUpdate.passportUrl = saveBase64Image(rawPassport, 'passport');
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        status: true,
+        kycStatus: true,
+        nationalId: true,
+        address: true,
+        employmentStatus: true,
+        avatarUrl: true,
+        passportUrl: true,
+        guarantor1Name: true,
+        guarantor1Phone: true,
+        guarantor1Email: true,
+        guarantor1IdUrl: true,
+        guarantor2Name: true,
+        guarantor2Phone: true,
+        guarantor2Email: true,
+        guarantor2IdUrl: true
+      }
+    });
+
+    await logAction(userId, 'PROFILE_UPDATED', 'Updated profile details.', req.ip);
+
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Update Profile Error:', error);
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Phone number or National ID is already registered to another user' });
+    }
+    res.status(500).json({ error: 'Server error updating profile' });
+  }
+};
+
 module.exports = {
   submitKyc,
   getMyProfile,
   approveKyc,
   updateMyRole,
-  selectVehicle
+  selectVehicle,
+  updateMyProfile
 };

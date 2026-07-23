@@ -17,8 +17,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isCfo: boolean;
   signUp: (phone: string, password: string, name: string, email: string, residence: string) => Promise<{ error: string | null }>;
-  signIn: (phone: string, password: string) => Promise<{ error: string | null }>;
-  signInWithGoogle: (idToken: string) => Promise<{ error: string | null }>;
+  signIn: (phone: string, password: string) => Promise<{ error: string | null, user?: User }>;
+  signInWithGoogle: (idToken: string) => Promise<{ error: string | null, user?: User }>;
   signOut: () => Promise<void>;
 }
 
@@ -57,17 +57,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const data = await res.json();
         if (data) {
           const userData = data.user || data;
-          const localRole = localStorage.getItem('customRoleOverride') || userData.role;
-          const fullUser = { ...userData, role: localRole };
+          const fullUser = { ...userData };
           setUser(fullUser);
-          setIsAdmin(localRole === 'ADMIN');
-          setIsCfo(localRole === 'CFO');
+          setIsAdmin(fullUser.role === 'ADMIN');
+          setIsCfo(fullUser.role === 'CFO');
           localStorage.setItem('authUser', JSON.stringify(fullUser));
           return;
         }
       }
-      // Only clear if we explicitly get unauthorized
-      if (res.status === 401) {
+      // Only clear if we explicitly get unauthorized or forbidden
+      if (res.status === 401 || res.status === 403) {
         setUser(null);
         setSession(null);
         localStorage.removeItem('authToken');
@@ -88,6 +87,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setSession(null);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const cached = localStorage.getItem('authUser');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setUser(parsed);
+          setIsAdmin(parsed.role === 'ADMIN');
+          setIsCfo(parsed.role === 'CFO');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const persistLogin = (token: string, userData: any) => {
@@ -127,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) return { error: data.error || 'Login failed' };
       
       persistLogin(data.token, data.user);
-      return { error: null };
+      return { error: null, user: data.user };
     } catch (err) {
       return { error: 'Network error' };
     }

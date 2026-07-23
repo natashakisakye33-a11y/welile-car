@@ -11,6 +11,11 @@ export interface Profile {
   email?: string;
   residence?: string;
   avatar_url?: string;
+  passport_url?: string;
+  national_id?: string;
+  employment_status?: string;
+  selected_car_name?: string | null;
+  selected_car_image?: string | null;
   referral_code: string;
   referred_by: string | null;
   wallet_balance: number;
@@ -30,6 +35,14 @@ export interface Profile {
   flagged: boolean;
   created_at: string;
   updated_at: string;
+  guarantor1Name?: string | null;
+  guarantor1Phone?: string | null;
+  guarantor1Email?: string | null;
+  guarantor1IdUrl?: string | null;
+  guarantor2Name?: string | null;
+  guarantor2Phone?: string | null;
+  guarantor2Email?: string | null;
+  guarantor2IdUrl?: string | null;
 }
 
 export function useProfile() {
@@ -57,8 +70,11 @@ export function useProfile() {
           user_id: me.id.toString(),
           name: me.name || '',
           phone: me.phone || '',
-          residence: me.residence || '',
-          avatar_url: me.avatar_url || '',
+          residence: me.address || me.residence || '',
+          avatar_url: me.avatarUrl || me.avatar_url || '',
+          passport_url: me.passportUrl || me.passport_url || '',
+          national_id: me.nationalId || me.national_id || '',
+          employment_status: me.employmentStatus || me.employment_status || '',
           referral_code: '',
           referred_by: null,
           wallet_balance: summary?.savings?.totalSaved || 0,
@@ -74,10 +90,20 @@ export function useProfile() {
           selected_car_id: summary?.vehicle ? summary.vehicle.id.toString() : null,
           selected_car_condition: summary?.vehicle?.selectedCondition || null,
           selected_car_price: summary?.vehicle?.selectedPrice || null,
+          selected_car_name: summary?.vehicle ? `${summary.vehicle.make} ${summary.vehicle.model} (${summary.vehicle.year})` : null,
+          selected_car_image: summary?.vehicle?.image || null,
           assigned_agent: null,
           flagged: false,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          guarantor1Name: me.guarantor1Name,
+          guarantor1Phone: me.guarantor1Phone,
+          guarantor1Email: me.guarantor1Email,
+          guarantor1IdUrl: me.guarantor1IdUrl,
+          guarantor2Name: me.guarantor2Name,
+          guarantor2Phone: me.guarantor2Phone,
+          guarantor2Email: me.guarantor2Email,
+          guarantor2IdUrl: me.guarantor2IdUrl
         };
         
         return profile;
@@ -91,14 +117,29 @@ export function useProfile() {
 }
 
 export function useUpdateProfile() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+  const token = session?.access_token;
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updates: Partial<Profile & { avatar_url?: string }>) => {
-      if (!user) throw new Error('Not authenticated');
-      console.warn('Profile update API not implemented yet. Mock update removed.');
-      return updates;
+    mutationFn: async (updates: Partial<Profile & { avatar_url?: string; passport_url?: string; national_id?: string; employment_status?: string; guarantor1Id_url?: string; guarantor2Id_url?: string }>) => {
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/users/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates)
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update profile');
+      }
+
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });

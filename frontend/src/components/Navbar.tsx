@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { API_URL } from '@/config';
 
 export default function Navbar() {
   const location = useLocation();
@@ -44,9 +45,9 @@ export default function Navbar() {
           to="/profile"
           className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center text-[#4C158D] shadow-sm hover:opacity-80 transition-opacity overflow-hidden"
         >
-          {user?.user_metadata?.avatar_url ? (
+          {user?.avatarUrl || user?.avatar_url ? (
             <img
-              src={user.user_metadata.avatar_url}
+              src={(user.avatarUrl || user.avatar_url).startsWith('/') ? `${API_URL}${user.avatarUrl || user.avatar_url}` : (user.avatarUrl || user.avatar_url)}
               alt="Profile"
               className="w-full h-full object-cover"
             />

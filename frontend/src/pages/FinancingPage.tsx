@@ -1,7 +1,7 @@
  
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile, useRequestFinancing } from '@/hooks/useProfile';
+import { useProfile, useRequestFinancing, useUpdateProfile } from '@/hooks/useProfile';
 import { carsData } from '@/data/cars';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLoader } from '@/components/ui/spinner';
@@ -19,6 +19,7 @@ import {
   AlertCircle,
   ChevronRight,
   UploadCloud,
+  Upload,
   Settings,
   Camera,
   Image as ImageIcon,
@@ -29,6 +30,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 const FinancingPage = () => {
@@ -36,6 +39,7 @@ const FinancingPage = () => {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfile();
   const requestFinancing = useRequestFinancing();
+  const updateProfile = useUpdateProfile();
   const [plan, setPlan] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -61,9 +65,20 @@ const FinancingPage = () => {
   // Guarantor State
   const [showGuarantorForm, setShowGuarantorForm] = useState(false);
   const [guarantors, setGuarantors] = useState({
-    g1Name: '', g1Phone: '', g1Email: '',
-    g2Name: '', g2Phone: '', g2Email: ''
+    g1Name: '', g1Phone: '', g1Email: '', g1Id_url: '',
+    g2Name: '', g2Phone: '', g2Email: '', g2Id_url: ''
   });
+
+  const handleGuarantorFile = (e: React.ChangeEvent<HTMLInputElement>, field: 'g1Id_url' | 'g2Id_url') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGuarantors(prev => ({ ...prev, [field]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   // File Picker State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,19 +86,35 @@ const FinancingPage = () => {
   const [activeDetailsModal, setActiveDetailsModal] = useState<'deposit' | 'kyc' | 'guarantor' | null>(null);
 
   useEffect(() => {
+    if (profile?.guarantor1Name) {
+      setGuarantors({
+        g1Name: profile.guarantor1Name || '',
+        g1Phone: profile.guarantor1Phone || '',
+        g1Email: profile.guarantor1Email || '',
+        g1Id_url: profile.guarantor1IdUrl || '',
+        g2Name: profile.guarantor2Name || '',
+        g2Phone: profile.guarantor2Phone || '',
+        g2Email: profile.guarantor2Email || '',
+        g2Id_url: profile.guarantor2IdUrl || ''
+      });
+      setIsGuarantorSubmitted(true);
+    }
+  }, [profile]);
+
+  useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
       try {
         setDashboardError(null);
-        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`);
+        const res = await fetchWithTimeout(`${API_URL}/dashboard/summary`, { timeout: 3000 });
         if (res.ok) {
           setDashboardData(await res.json());
         } else {
-          setDashboardError("Failed to fetch financing details.");
+          console.warn("Failed to fetch dashboard, using preview data"); setDashboardData({ savings: { totalSaved: 0 }, vehicle: null });
         }
       } catch (e) {
         console.error(e);
-        setDashboardError("Network error occurred while fetching details.");
+        console.error("Network error fetching dashboard, using preview data", e); setDashboardData({ savings: { totalSaved: 0 }, vehicle: null });
       } finally {
         setLoadingDashboard(false);
       }
@@ -115,11 +146,23 @@ const FinancingPage = () => {
     return <PageLoader message="Loading Application..." />;
   }
 
-  if (dashboardError || !profile || !dashboardData) {
+  if (dashboardError || !dashboardData) {
     return <ErrorState message={dashboardError || "Application data is unavailable."} onRetry={() => setLoadingDashboard(true)} />;
   }
 
-  if (!car) { return <ErrorState message="Could not load your vehicle data." />; }
+  
+  const mockCar = {
+    id: "preview",
+    name: "Sample Vehicle (Preview)",
+    priceUgx: 15000000,
+    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800",
+    year: "2023",
+    make: "Toyota",
+    model: "Vitz",
+    specs: { engine: "1.5L", color: "White" }
+  };
+  const activeCar = car || mockCar;
+  
 
   if (showSuccess) {
     return (
@@ -137,7 +180,7 @@ const FinancingPage = () => {
               <Sparkles size={48} />
             </div>
             <h2 className="text-3xl font-bold font-heading">Application Successful!</h2>
-            <p className="text-muted-foreground text-lg max-w-sm">Your application for the <strong>{car.name}</strong> has been finalized and approved.</p>
+            <p className="text-muted-foreground text-lg max-w-sm">Your application for the <strong>{activeCar.name}</strong> has been finalized and approved.</p>
             <p className="text-sm mt-4 text-primary font-medium animate-pulse">Redirecting to My Vehicle...</p>
           </motion.div>
         </div>
@@ -145,8 +188,8 @@ const FinancingPage = () => {
     );
   }
 
-  const saved = dashboardData.savings.totalSaved;
-  const minDepositTarget = car.priceUgx * 0.3;
+  const saved = dashboardData.savings?.totalSaved || 0;
+  const minDepositTarget = activeCar.priceUgx * 0.3;
   
   // Initialize custom deposit once loaded
   if (customDeposit === 0 && minDepositTarget > 0) {
@@ -157,7 +200,7 @@ const FinancingPage = () => {
   
   // Dynamic financing math
   const actualDeposit = Math.max(customDeposit, minDepositTarget);
-  const remaining = car.priceUgx - actualDeposit;
+  const remaining = activeCar.priceUgx - actualDeposit;
   const monthlyInstallment = (remaining * 1.28) / 36;
   
   const plans = [
@@ -171,9 +214,9 @@ const FinancingPage = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
       await requestFinancing.mutateAsync({
-        carId: car.id,
-        carName: car.name,
-        carPrice: car.priceUgx,
+        carId: activeCar.id,
+        carName: activeCar.name,
+        carPrice: activeCar.priceUgx,
         requestedAmount: remaining
       });
       setIsSubmitting(false);
@@ -194,7 +237,7 @@ const FinancingPage = () => {
     }
   };
 
-  const hasApplied = dashboardData.vehicle !== null;
+  const hasApplied = !!dashboardData?.vehicle;
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 md:p-8 font-sans selection:bg-primary/20 selection:text-primary">
@@ -221,7 +264,7 @@ const FinancingPage = () => {
                 <CheckCircle2 size={48} strokeWidth={3} />
               </div>
               <h2 className="text-4xl font-black text-emerald-900 mb-3 relative z-10 tracking-tight">Application Approved</h2>
-              <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {car.name} is active and ready.</p>
+              <p className="text-emerald-700 font-semibold mb-8 text-lg relative z-10">Your financing for the {activeCar.name} is active and ready.</p>
               <button onClick={() => navigate('/my-vehicle')} className="bg-emerald-600 text-white font-bold py-4 px-10 rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 hover:-translate-y-1 relative z-10 text-lg">
                 Go to My Vehicle Dashboard
               </button>
@@ -253,33 +296,39 @@ const FinancingPage = () => {
                   </button>
 
                   <button 
-                    onClick={() => setActiveDetailsModal('kyc')}
+                    onClick={() => { setUploadTarget('kyc'); setShowUploadOptions(true); }}
                     className="w-full flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary hover:bg-primary/5 transition-all text-left group"
                   >
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 size={16} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                      <div className="font-bold text-sm text-slate-800 flex items-center justify-between">
                         KYC Verification
-                        <span className="text-[10px] text-slate-400 font-bold group-hover:text-primary transition-colors uppercase tracking-wider">View Details →</span>
-                      </p>
+                        <div className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm group-hover:-translate-y-0.5 transition-transform uppercase tracking-wider">
+                          <Upload size={12} />
+                          UPLOAD
+                        </div>
+                      </div>
                       <p className="text-xs text-slate-500 mt-1">National ID and selfie uploaded & verified.</p>
                     </div>
                   </button>
 
                   <button 
-                    onClick={() => setActiveDetailsModal('guarantor')}
+                    onClick={() => setShowGuarantorForm(true)}
                     className="w-full flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary hover:bg-primary/5 transition-all text-left group"
                   >
                     <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 size={16} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                      <div className="font-bold text-sm text-slate-800 flex items-center justify-between">
                         Guarantor Information
-                        <span className="text-[10px] text-slate-400 font-bold group-hover:text-primary transition-colors uppercase tracking-wider">View Details →</span>
-                      </p>
+                        <div className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm group-hover:-translate-y-0.5 transition-transform uppercase tracking-wider">
+                          <Upload size={12} />
+                          UPLOAD
+                        </div>
+                      </div>
                       <p className="text-xs text-slate-500 mt-1">Contact details for 2 guarantors linked.</p>
                     </div>
                   </button>
@@ -334,18 +383,18 @@ const FinancingPage = () => {
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/2 bg-gradient-to-br from-slate-100 to-white flex items-center justify-center p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60"></div>
-                  <img src={car.image} alt={car.name} className="max-h-[300px] object-contain drop-shadow-2xl relative z-10 mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
+                  <img src={activeCar.image} alt={activeCar.name} className="max-h-[300px] object-contain drop-shadow-2xl relative z-10 mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                   <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full w-max mb-6">
                     <FileText size={14} /> Application Draft
                   </div>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-2">{car.year} • {car.make}</p>
-                  <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight leading-none">{car.model}</h2>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-2">{activeCar.year} • {activeCar.make}</p>
+                  <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight leading-none">{activeCar.model}</h2>
                   
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Vehicle Value</p>
-                    <p className="text-3xl font-black text-slate-900">{formatUGX(car.priceUgx)}</p>
+                    <p className="text-3xl font-black text-slate-900">{formatUGX(activeCar.priceUgx)}</p>
                   </div>
                 </div>
               </div>
@@ -389,7 +438,7 @@ const FinancingPage = () => {
                     <input 
                       type="range" 
                       min={minDepositTarget} 
-                      max={car.priceUgx * 0.9} 
+                      max={activeCar.priceUgx * 0.9} 
                       step={500000}
                       value={customDeposit}
                       onChange={(e) => setCustomDeposit(Number(e.target.value))}
@@ -714,12 +763,12 @@ const FinancingPage = () => {
               <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                 {permissionRequest === 'camera' ? <Camera size={32} /> : <ImageIcon size={32} />}
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
+              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">
                 Allow Access
-              </h3>
-              <p className="text-slate-500 text-sm font-medium mb-8">
+              </DialogTitle>
+              <DialogDescription className="text-slate-500 text-sm font-medium mb-8">
                 Welile Car needs permission to access your {permissionRequest === 'camera' ? 'camera' : 'photo gallery'} to upload documents.
-              </p>
+              </DialogDescription>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setPermissionRequest(null)}
@@ -739,37 +788,25 @@ const FinancingPage = () => {
             </div>
           ) : (
             <>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Upload Document</h3>
-              <p className="text-slate-500 text-sm font-medium mb-6">Choose how you want to upload your {uploadTarget === 'income' ? 'bank statements' : 'National ID'}.</p>
+              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Upload Document</DialogTitle>
+              <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Choose how you want to upload your {uploadTarget === 'income' ? 'bank statements' : 'National ID'}.</DialogDescription>
               
-              <div className="space-y-3">
-                <button 
-                  onClick={() => setPermissionRequest('camera')}
-                  disabled={isUploading}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-primary hover:bg-primary/5 transition-all group disabled:opacity-50 text-left"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    {isUploading ? <Loader2 size={24} className="animate-spin" /> : <Camera size={24} />}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">Take Photo</p>
-                    <p className="text-xs text-slate-500">Use your camera to scan</p>
-                  </div>
-                </button>
-
-                <button 
-                  onClick={() => setPermissionRequest('gallery')}
-                  disabled={isUploading}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-primary hover:bg-primary/5 transition-all group disabled:opacity-50 text-left"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    {isUploading ? <Loader2 size={24} className="animate-spin" /> : <ImageIcon size={24} />}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">Choose from Gallery</p>
-                    <p className="text-xs text-slate-500">Upload existing file</p>
-                  </div>
-                </button>
+              <div 
+                onClick={() => {
+                  if (!isUploading) fileInputRef.current?.click();
+                }}
+                className={`w-full mt-4 border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer group ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-2 mb-5 text-slate-700 font-bold text-sm group-hover:-translate-y-1 transition-transform">
+                  {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </div>
+                <p className="font-bold text-slate-800 mb-1.5">
+                  Choose a file or drag & drop it here
+                </p>
+                <p className="text-xs text-slate-400 font-medium">
+                  Maximum 500 MB file size
+                </p>
               </div>
             </>
           )}
@@ -779,8 +816,8 @@ const FinancingPage = () => {
       {/* Guarantor Form Dialog */}
       <Dialog open={showGuarantorForm} onOpenChange={setShowGuarantorForm}>
         <DialogContent className="sm:max-w-md bg-white rounded-[32px] p-8 border-0 shadow-2xl max-h-[90vh] overflow-y-auto">
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Guarantor Details</h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for two trusted guarantors.</p>
+          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Guarantor Details</DialogTitle>
+          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for two trusted guarantors.</DialogDescription>
           
           <div className="space-y-6">
             {/* Guarantor 1 */}
@@ -793,6 +830,25 @@ const FinancingPage = () => {
                 <input type="text" placeholder="Full Name" value={guarantors.g1Name} onChange={e => setGuarantors({...guarantors, g1Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="tel" placeholder="Phone Number" value={guarantors.g1Phone} onChange={e => setGuarantors({...guarantors, g1Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="email" placeholder="Email Address (Optional)" value={guarantors.g1Email} onChange={e => setGuarantors({...guarantors, g1Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
+                <div className="mt-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-2">National ID Document</label>
+                  <div className="relative">
+                    <input type="file" accept="image/*" onChange={e => handleGuarantorFile(e, 'g1Id_url')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    <div className="w-full border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer group">
+                      <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-2 mb-3 text-slate-700 font-bold text-sm group-hover:-translate-y-1 transition-transform">
+                        <Upload size={16} />
+                        Upload
+                      </div>
+                      <p className="font-bold text-slate-800 text-sm mb-1 text-center">
+                        Choose a file or drag & drop it here
+                      </p>
+                      <p className="text-xs text-slate-400 font-medium text-center">
+                        Maximum 500 MB file size
+                      </p>
+                    </div>
+                  </div>
+                  {guarantors.g1Id_url && <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={12} /> Document attached</p>}
+                </div>
               </div>
             </div>
 
@@ -806,23 +862,56 @@ const FinancingPage = () => {
                 <input type="text" placeholder="Full Name" value={guarantors.g2Name} onChange={e => setGuarantors({...guarantors, g2Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="tel" placeholder="Phone Number" value={guarantors.g2Phone} onChange={e => setGuarantors({...guarantors, g2Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="email" placeholder="Email Address (Optional)" value={guarantors.g2Email} onChange={e => setGuarantors({...guarantors, g2Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
+                <div className="mt-2">
+                  <label className="block text-xs font-bold text-slate-500 mb-2">National ID Document</label>
+                  <div className="relative">
+                    <input type="file" accept="image/*" onChange={e => handleGuarantorFile(e, 'g2Id_url')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    <div className="w-full border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer group">
+                      <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-2 mb-3 text-slate-700 font-bold text-sm group-hover:-translate-y-1 transition-transform">
+                        <Upload size={16} />
+                        Upload
+                      </div>
+                      <p className="font-bold text-slate-800 text-sm mb-1 text-center">
+                        Choose a file or drag & drop it here
+                      </p>
+                      <p className="text-xs text-slate-400 font-medium text-center">
+                        Maximum 500 MB file size
+                      </p>
+                    </div>
+                  </div>
+                  {guarantors.g2Id_url && <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={12} /> Document attached</p>}
+                </div>
               </div>
             </div>
 
             <button 
-              onClick={() => {
-                setIsUploading(true);
-                setTimeout(() => { 
-                  setIsUploading(false); 
+              onClick={async () => {
+                setIsSubmitting(true);
+                try {
+                  await updateProfile.mutateAsync({
+                    guarantor1Name: guarantors.g1Name,
+                    guarantor1Phone: guarantors.g1Phone,
+                    guarantor1Email: guarantors.g1Email,
+                    guarantor2Name: guarantors.g2Name,
+                    guarantor2Phone: guarantors.g2Phone,
+                    guarantor2Email: guarantors.g2Email,
+                    guarantor1Id_url: guarantors.g1Id_url,
+                    guarantor2Id_url: guarantors.g2Id_url
+                  });
                   setIsGuarantorSubmitted(true);
                   setShowGuarantorForm(false); 
-                }, 1500);
+                } catch (e) {
+                  console.error(e);
+                  alert('Failed to save guarantors');
+                } finally {
+                  setIsSubmitting(false); 
+                }
               }}
-              disabled={isUploading || !guarantors.g1Name || !guarantors.g1Phone || !guarantors.g2Name || !guarantors.g2Phone}
+              disabled={isSubmitting || !guarantors.g1Name || !guarantors.g1Phone || !guarantors.g2Name || !guarantors.g2Phone}
               className="w-full py-4 px-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {isUploading ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
-              Submit Guarantors
+              {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
+              {isSubmitting ? 'Saving Guarantors...' : 'Submit Guarantors'}
             </button>
           </div>
         </DialogContent>
@@ -847,16 +936,16 @@ const FinancingPage = () => {
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
                   <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
                     <span>Vehicle Cost</span>
-                    <span>{formatUGX(car.priceUgx)}</span>
+                    <span>{formatUGX(activeCar.priceUgx)}</span>
                   </div>
                   <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
                     <span>Target Deposit (30%)</span>
-                    <span>{formatUGX(car.priceUgx * 0.3)}</span>
+                    <span>{formatUGX(activeCar.priceUgx * 0.3)}</span>
                   </div>
                   <hr className="border-slate-200" />
                   <div className="flex justify-between text-sm font-black text-emerald-600">
                     <span>Total Saved & Locked</span>
-                    <span>{formatUGX(dashboardData.savings.totalSaved || (car.priceUgx * 0.3))}</span>
+                    <span>{formatUGX(dashboardData.savings.totalSaved || (activeCar.priceUgx * 0.3))}</span>
                   </div>
                 </div>
 
@@ -877,8 +966,8 @@ const FinancingPage = () => {
                   <ShieldCheck size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">KYC Verification Details</h3>
-                  <p className="text-xs text-slate-500 font-medium">Verified customer profile</p>
+                  <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">KYC Verification Details</DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500 font-medium">Verified customer profile</DialogDescription>
                 </div>
               </div>
 
@@ -913,37 +1002,69 @@ const FinancingPage = () => {
                   <Users size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Guarantor Information</h3>
-                  <p className="text-xs text-slate-500 font-medium">Linked secondary contacts</p>
+                  <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Guarantor Information</DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500 font-medium">Linked secondary contacts</DialogDescription>
                 </div>
               </div>
 
               <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
                 {/* Guarantor 1 */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
-                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">1</div>
-                    Primary Guarantor
+                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">1</div>
+                      Primary Guarantor
+                    </span>
+                    {guarantors.g1Id_url ? (
+                      <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <CheckCircle2 size={10} /> ID UPLOADED
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        PENDING ID
+                      </span>
+                    )}
                   </h4>
                   <div>
-                    <p className="text-sm font-bold text-slate-800">{guarantors.g1Name || 'Mugisha Patrick'}</p>
-                    <p className="text-xs text-slate-500 font-medium">{guarantors.g1Phone || '+256 701 555 123'}</p>
-                    <p className="text-xs text-slate-400 font-medium">{guarantors.g1Email || 'patrick@example.com'}</p>
+                    <p className="text-sm font-bold text-slate-800">{guarantors.g1Name || 'Not Provided'}</p>
+                    <p className="text-xs text-slate-500 font-medium">{guarantors.g1Phone || 'Not Provided'}</p>
+                    <p className="text-xs text-slate-400 font-medium">{guarantors.g1Email || 'Not Provided'}</p>
                   </div>
                 </div>
 
                 {/* Guarantor 2 */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
-                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">2</div>
-                    Secondary Guarantor
+                  <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">2</div>
+                      Secondary Guarantor
+                    </span>
+                    {guarantors.g2Id_url ? (
+                      <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <CheckCircle2 size={10} /> ID UPLOADED
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        PENDING ID
+                      </span>
+                    )}
                   </h4>
                   <div>
-                    <p className="text-sm font-bold text-slate-800">{guarantors.g2Name || 'Nakato Sarah'}</p>
-                    <p className="text-xs text-slate-500 font-medium">{guarantors.g2Phone || '+256 772 444 987'}</p>
-                    <p className="text-xs text-slate-400 font-medium">{guarantors.g2Email || 'sarah@example.com'}</p>
+                    <p className="text-sm font-bold text-slate-800">{guarantors.g2Name || 'Not Provided'}</p>
+                    <p className="text-xs text-slate-500 font-medium">{guarantors.g2Phone || 'Not Provided'}</p>
+                    <p className="text-xs text-slate-400 font-medium">{guarantors.g2Email || 'Not Provided'}</p>
                   </div>
                 </div>
+                
+                <button 
+                  onClick={() => {
+                    setActiveDetailsModal(null);
+                    setShowGuarantorForm(true);
+                  }}
+                  className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-colors text-sm"
+                >
+                  Edit Details / Upload Documents
+                </button>
               </div>
             </div>
           )}

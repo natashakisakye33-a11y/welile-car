@@ -219,3 +219,18 @@
 .glass-panel { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
 .amethyst-gradient { background: linear-gradient(135deg, #4f1291 0%, #340068 100%); }
 .premium-shadow { box-shadow: 0px 20px 40px rgba(52, 0, 104, 0.15); }
+
+/* Premium Global Dark Mode Color Inversion */
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #0b1c30; /* Keep deep contrast matching background colors */
+}
+
+html.dark img,
+html.dark video,
+html.dark iframe,
+html.dark canvas,
+html.dark [style*="background-image"],
+html.dark .no-invert {
+  filter: invert(1) hue-rotate(180deg);
+}

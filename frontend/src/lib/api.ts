@@ -9,13 +9,7 @@ export async function fetchWithTimeout(resource: string | URL | Request, options
   
   // Only add if not explicitly omitted or already set
   if (!headers.has('Authorization')) {
-    let token = null;
-    if (typeof window !== 'undefined' && (window as any).Clerk?.session) {
-      token = await (window as any).Clerk.session.getToken();
-    }
-    if (!token) {
-      token = localStorage.getItem('authToken');
-    }
+    let token = localStorage.getItem('authToken');
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -27,6 +21,14 @@ export async function fetchWithTimeout(resource: string | URL | Request, options
       headers,
       signal: controller.signal
     });
+
+    if (response.status === 401 || response.status === 403) {
+      if (localStorage.getItem('authToken')) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/';
+      }
+    }
+
     return response;
   } catch (error: any) {
     if (error.name === 'AbortError') {
