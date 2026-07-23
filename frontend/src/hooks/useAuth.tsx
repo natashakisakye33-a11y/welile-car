@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      if (!session) setSession({ access_token: token });
+      setSession({ access_token: token });
       fetchUser(token).finally(() => setLoading(false));
     } else {
       setLoading(false);

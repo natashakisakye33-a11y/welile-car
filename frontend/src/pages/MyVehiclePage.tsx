@@ -49,7 +49,7 @@ const MyVehiclePage = () => {
           setCarLoading(false);
         });
     }
-  }, [profile?.selected_car_id]);
+  }, [activeProfile?.selected_car_id]);
 
   if (isLoading || carLoading) {
     return <PageLoader message="Loading Vehicle Data..." />;
