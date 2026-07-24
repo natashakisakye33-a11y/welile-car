@@ -262,8 +262,6 @@ const AuthPage: React.FC = () => {
             <a className="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors" href="#">Support</a>
           </nav>
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsLogin(true)} className="font-label-md text-label-md text-primary px-4 py-2 hover:bg-surface-container-low transition-colors rounded-lg cursor-pointer">Sign In</button>
-            <button onClick={() => setIsLogin(false)} className="font-label-md text-label-md bg-primary text-on-primary px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">Register</button>
           </div>
         </div>
       </header>
