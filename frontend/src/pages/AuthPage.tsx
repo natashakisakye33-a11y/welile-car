@@ -11,7 +11,7 @@ const GoogleAuthButton = ({ isLogin }: { isLogin: boolean }) => {
 
   const handleSuccess = async (credentialResponse: any) => {
     if (credentialResponse.credential) {
-      const { error } = await signInWithGoogle(credentialResponse.credential);
+      const { error } = await signInWithGoogle(credentialResponse.credential, !isLogin);
       if (error) {
         toast.error(error);
       } else {

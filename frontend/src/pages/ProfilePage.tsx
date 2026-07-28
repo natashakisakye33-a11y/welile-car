@@ -36,6 +36,7 @@ import {
   DialogDescription 
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { carsData } from '@/data/cars';
 
 export default function ProfilePage() {
   const { isAdmin, isCfo, signOut, user: customUser, session } = useAuth();
@@ -69,14 +70,17 @@ export default function ProfilePage() {
     joinDate: customUser?.createdAt 
       ? new Date(customUser.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
       : "May 15, 2026",
-    activeLoan: profile?.selected_car_id 
-      ? {
-          id: profile.selected_car_id,
-          name: profile.selected_car_name || "Selected Vehicle",
-          image: profile.selected_car_image || null,
-          price: profile.selected_car_price ? `${profile.selected_car_price.toLocaleString()} UGX` : "N/A",
-          condition: profile.selected_car_condition || 'used'
-        }
+    activeLoan: profile?.selectedVehicleId 
+      ? (() => {
+          const matchedCar = carsData.find(c => c.id.toString() === profile.selectedVehicleId?.toString());
+          return {
+            id: profile.selectedVehicleId,
+            name: matchedCar?.name || "Selected Vehicle",
+            image: matchedCar?.images?.[0] || matchedCar?.image || null,
+            price: profile.selectedVehiclePrice ? `UGX ${profile.selectedVehiclePrice.toLocaleString()}` : (matchedCar ? `UGX ${matchedCar.priceUgx.toLocaleString()}` : "N/A"),
+            condition: profile.selectedVehicleCondition || 'used'
+          };
+        })()
       : null
   };
 
@@ -306,38 +310,6 @@ export default function ProfilePage() {
     navigate('/');
   };
 
-  const handleSwitchRole = async (role: 'ADMIN' | 'CFO') => {
-    setIsLoading(true);
-    try {
-      // 1. Try to hit the API just in case it's working
-      const { fetchWithTimeout } = await import('@/lib/api');
-      const { API_URL } = await import('@/config');
-      const token = await session?.getToken();
-      fetchWithTimeout(`${API_URL}/users/me/role`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ role })
-      }).catch(() => {}); // Ignore errors, rely on local override
-
-      // 2. Set the custom local override so the UI works seamlessly
-      localStorage.setItem('customRoleOverride', role);
-      toast.success(`Role changed to ${role}. Refreshing...`);
-      setTimeout(() => window.location.reload(), 1500);
-
-    } catch (e) {
-      console.error(e);
-      // Fallback works even if imports fail
-      localStorage.setItem('customRoleOverride', role);
-      toast.success(`Role changed locally to ${role}. Refreshing...`);
-      setTimeout(() => window.location.reload(), 1500);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#4C158D]/20 flex flex-col pb-24">
 
@@ -440,15 +412,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
-                  <FileText size={20} />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">National ID / Passport No.</p>
-                  <p className="font-bold text-slate-800">{customer.nationalId}</p>
-                </div>
-              </div>
 
               <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
@@ -460,65 +423,12 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
-                  <User size={20} />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Member Since</p>
-                  <p className="font-bold text-slate-800">{customer.joinDate}</p>
-                </div>
-              </div>
             </div>
 
             {/* Split Grid for Passport and Purchasing Item */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               
-              {/* Passport Photo Sized Standard */}
-              <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl flex flex-col justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
-                    <Globe size={20} className="text-[#4C158D]" />
-                    Official Passport Photo
-                  </h3>
-                  <p className="text-xs font-medium text-slate-500 mb-4">
-                    Required for processing vehicle logbooks and final financing release. Sized at standard 2" x 2" (1:1 aspect ratio).
-                  </p>
-                </div>
-                
-                <div className="flex flex-col items-center gap-4 my-2">
-                  <div className="w-[160px] h-[160px] bg-white border-8 border-white rounded-lg shadow-md overflow-hidden relative group">
-                    {currentPassportUrl ? (
-                      <img 
-                        src={currentPassportUrl.startsWith('/') ? `${API_URL}${currentPassportUrl}` : currentPassportUrl} 
-                        alt="Passport Photo" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300 p-4 border border-dashed border-slate-200">
-                        <User size={40} className="stroke-[1.5]" />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-2">No Photo</span>
-                      </div>
-                    )}
-                    
-                    {currentPassportUrl && (
-                      <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full shadow-sm">
-                        Standard 2x2
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 w-full max-w-[200px]">
-                    <button 
-                      onClick={() => { setPhotoType('passport'); setIsModalOpen(true); }}
-                      className="flex-1 text-center bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                    >
-                      <Upload size={14} className="text-[#4C158D]" />
-                      Upload Photo
-                    </button>
-                  </div>
-                </div>
-              </div>
+              
 
               {/* Item am purchasing */}
               <div className="bg-slate-50 border border-slate-100 p-6 rounded-3xl flex flex-col justify-between">
@@ -581,25 +491,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              {isAdmin && (
-                <button 
-                  onClick={() => navigate('/admin')}
-                  className="w-full sm:w-auto bg-[#4C158D]/10 hover:bg-[#4C158D]/20 text-[#4C158D] font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
-                >
-                  <ShieldCheck size={18} />
-                  Admin Dashboard
-                </button>
-              )}
-              
-              {isCfo && (
-                <button 
-                  onClick={() => navigate('/cfo')}
-                  className="w-full sm:w-auto bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
-                >
-                  <ShieldCheck size={18} />
-                  CFO Portal
-                </button>
-              )}
+
 
 
 

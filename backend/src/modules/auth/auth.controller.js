@@ -89,7 +89,7 @@ const login = async (req, res) => {
 
 const googleLogin = async (req, res) => {
   try {
-    const { idToken } = req.body;
+    const { idToken, isSignUp } = req.body;
     if (!idToken) {
       return res.status(400).json({ error: 'No ID token provided' });
     }
@@ -110,6 +110,9 @@ const googleLogin = async (req, res) => {
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
+      if (!isSignUp) {
+        return res.status(404).json({ error: 'Account not found. Please sign up first.' });
+      }
       // Create user if they don't exist
       user = await prisma.user.create({
         data: {
@@ -125,6 +128,10 @@ const googleLogin = async (req, res) => {
           }
         }
       });
+    } else {
+      if (isSignUp) {
+        return res.status(400).json({ error: 'Account already exists. Please sign in.' });
+      }
     }
 
     const token = generateToken(user);

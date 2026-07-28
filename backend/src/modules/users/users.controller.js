@@ -50,7 +50,8 @@ const getMyProfile = async (req, res) => {
       select: { 
         id: true, email: true, name: true, phone: true, role: true, 
         status: true, kycStatus: true, nationalId: true, 
-        address: true, employmentStatus: true, avatarUrl: true, passportUrl: true 
+        address: true, employmentStatus: true, avatarUrl: true, passportUrl: true,
+        selectedVehicleId: true, selectedVehicleCondition: true, selectedVehiclePrice: true
       }
     });
 

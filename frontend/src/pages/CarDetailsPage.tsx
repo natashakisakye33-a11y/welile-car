@@ -215,7 +215,12 @@ const CarDetailsPage = () => {
 
               <div className="mt-auto">
                 <button
-                  onClick={() => {
+                  onClick={async () => {
+                    await selectCar.mutateAsync({
+                      carId: (car?.id || id).toString(),
+                      condition: car?.condition?.condition === 'Brand New' ? 'new' : 'used',
+                      price: car?.priceUgx || 0
+                    }).catch(e => console.error(e));
                     setPaymentStep('amount');
                     setShowPaymentModal(true);
                   }}

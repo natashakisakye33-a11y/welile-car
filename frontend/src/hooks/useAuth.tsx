@@ -21,7 +21,7 @@ interface AuthContextType {
   isCfo: boolean;
   signUp: (phone: string, password: string, name: string, email: string, residence: string) => Promise<{ error: string | null }>;
   signIn: (phone: string, password: string) => Promise<{ error: string | null, user?: User }>;
-  signInWithGoogle: (idToken: string) => Promise<{ error: string | null, user?: User }>;
+  signInWithGoogle: (idToken: string, isSignUp?: boolean) => Promise<{ error: string | null, user?: User }>;
   signOut: () => Promise<void>;
 }
 
@@ -154,12 +154,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async (idToken: string) => {
+  const signInWithGoogle = async (idToken: string, isSignUp: boolean = false) => {
     try {
       const res = await fetchWithTimeout(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ idToken, isSignUp })
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || 'Google login failed' };
