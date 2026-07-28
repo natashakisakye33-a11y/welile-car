@@ -59,10 +59,13 @@ const FinancingPage = () => {
   const [uploadTarget, setUploadTarget] = useState<'income' | 'kyc' | null>(null);
   const [isIncomeUploaded, setIsIncomeUploaded] = useState(false);
   const [isKycUploaded, setIsKycUploaded] = useState(false);
+  const [isNextOfKinSubmitted, setIsNextOfKinSubmitted] = useState(false);
   const [isGuarantorSubmitted, setIsGuarantorSubmitted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [hasAskedPermission, setHasAskedPermission] = useState(false);
   
   // Guarantor State
+  const [showNextOfKinForm, setShowNextOfKinForm] = useState(false);
   const [showGuarantorForm, setShowGuarantorForm] = useState(false);
   const [guarantors, setGuarantors] = useState({
     g1Name: '', g1Phone: '', g1Email: '', g1Id_url: '',
@@ -97,7 +100,12 @@ const FinancingPage = () => {
         g2Email: profile.guarantor2Email || '',
         g2Id_url: profile.guarantor2IdUrl || ''
       });
-      setIsGuarantorSubmitted(true);
+      if (profile.guarantor1Name) {
+        setIsNextOfKinSubmitted(true);
+      }
+      if (profile.guarantor2Name) {
+        setIsGuarantorSubmitted(true);
+      }
     }
   }, [profile]);
 
@@ -568,6 +576,44 @@ const FinancingPage = () => {
                       </div>
                     )}
 
+                    {!isNextOfKinSubmitted ? (
+                      <div className="flex flex-col gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50/50 group hover:border-amber-300 transition-colors cursor-pointer" onClick={() => setShowNextOfKinForm(true)}>
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-amber-100 text-amber-600">
+                            <Users size={18} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <p className="font-black text-sm text-amber-900">Next of Kin Details</p>
+                              <span className="flex h-2 w-2 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                              </span>
+                            </div>
+                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please provide details for your next of kin.</p>
+                          </div>
+                        </div>
+                        <div className="ml-14">
+                          <button 
+                            className="bg-white border border-amber-200 text-amber-700 text-xs font-bold py-2 px-4 rounded-xl shadow-sm hover:bg-amber-100 transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setShowNextOfKinForm(true); }}
+                          >
+                            Enter Details
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-4 p-4 rounded-2xl border bg-emerald-50 border-emerald-100 transition-all">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+                          <CheckCircle2 size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-black text-sm text-emerald-900">Next of Kin Details</p>
+                          <p className="text-xs text-emerald-700/80 mt-1 font-medium">Next of kin verified.</p>
+                        </div>
+                      </div>
+                    )}
+
                     {!isGuarantorSubmitted ? (
                       <div className="flex flex-col gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50/50 group hover:border-amber-300 transition-colors cursor-pointer" onClick={() => setShowGuarantorForm(true)}>
                         <div className="flex items-start gap-4">
@@ -576,13 +622,13 @@ const FinancingPage = () => {
                           </div>
                           <div className="flex-1">
                             <div className="flex justify-between items-center">
-                              <p className="font-black text-sm text-amber-900">Next of Kin & Guarantor Details</p>
+                              <p className="font-black text-sm text-amber-900">Guarantor Details</p>
                               <span className="flex h-2 w-2 relative">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                               </span>
                             </div>
-                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please provide details for your next of kin and a guarantor.</p>
+                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please provide details for a trusted guarantor.</p>
                           </div>
                         </div>
                         <div className="ml-14">
@@ -600,8 +646,8 @@ const FinancingPage = () => {
                           <CheckCircle2 size={20} />
                         </div>
                         <div className="flex-1">
-                          <p className="font-black text-sm text-emerald-900">Next of Kin & Guarantor Details</p>
-                          <p className="text-xs text-emerald-700/80 mt-1 font-medium">Next of kin and guarantor verified.</p>
+                          <p className="font-black text-sm text-emerald-900">Guarantor Details</p>
+                          <p className="text-xs text-emerald-700/80 mt-1 font-medium">Guarantor verified.</p>
                         </div>
                       </div>
                     )}
@@ -778,6 +824,8 @@ const FinancingPage = () => {
                 </button>
                 <button 
                   onClick={() => {
+                    setHasAskedPermission(true);
+                    setPermissionRequest(null);
                     fileInputRef.current?.click();
                   }}
                   className="flex-1 py-3 px-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5"
@@ -793,7 +841,13 @@ const FinancingPage = () => {
               
               <div 
                 onClick={() => {
-                  if (!isUploading) fileInputRef.current?.click();
+                  if (!isUploading) {
+                    if (!hasAskedPermission) {
+                      setPermissionRequest('gallery');
+                    } else {
+                      fileInputRef.current?.click();
+                    }
+                  }
                 }}
                 className={`w-full mt-4 border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer group ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
               >
@@ -814,13 +868,12 @@ const FinancingPage = () => {
       </Dialog>
 
       {/* Guarantor Form Dialog */}
-      <Dialog open={showGuarantorForm} onOpenChange={setShowGuarantorForm}>
+      <Dialog open={showNextOfKinForm} onOpenChange={setShowNextOfKinForm}>
         <DialogContent className="sm:max-w-md bg-white rounded-[32px] p-8 border-0 shadow-2xl max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Next of Kin & Guarantor Details</DialogTitle>
-          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for your next of kin and a trusted guarantor.</DialogDescription>
+          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Next of Kin Details</DialogTitle>
+          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for your next of kin.</DialogDescription>
           
           <div className="space-y-6">
-            {/* Guarantor 1 */}
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
               <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">1</div>
@@ -830,57 +883,6 @@ const FinancingPage = () => {
                 <input type="text" placeholder="Full Name" value={guarantors.g1Name} onChange={e => setGuarantors({...guarantors, g1Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="tel" placeholder="Phone Number" value={guarantors.g1Phone} onChange={e => setGuarantors({...guarantors, g1Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
                 <input type="email" placeholder="Email Address (Optional)" value={guarantors.g1Email} onChange={e => setGuarantors({...guarantors, g1Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
-                <div className="mt-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-2">National ID Document</label>
-                  <div className="relative">
-                    <input type="file" accept="image/*" onChange={e => handleGuarantorFile(e, 'g1Id_url')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                    <div className="w-full border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer group">
-                      <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-2 mb-3 text-slate-700 font-bold text-sm group-hover:-translate-y-1 transition-transform">
-                        <Upload size={16} />
-                        Upload
-                      </div>
-                      <p className="font-bold text-slate-800 text-sm mb-1 text-center">
-                        Choose a file or drag & drop it here
-                      </p>
-                      <p className="text-xs text-slate-400 font-medium text-center">
-                        Maximum 500 MB file size
-                      </p>
-                    </div>
-                  </div>
-                  {guarantors.g1Id_url && <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={12} /> Document attached</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Guarantor 2 */}
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-              <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">2</div>
-                Guarantor
-              </h4>
-              <div className="space-y-3">
-                <input type="text" placeholder="Full Name" value={guarantors.g2Name} onChange={e => setGuarantors({...guarantors, g2Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
-                <input type="tel" placeholder="Phone Number" value={guarantors.g2Phone} onChange={e => setGuarantors({...guarantors, g2Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
-                <input type="email" placeholder="Email Address (Optional)" value={guarantors.g2Email} onChange={e => setGuarantors({...guarantors, g2Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
-                <div className="mt-2">
-                  <label className="block text-xs font-bold text-slate-500 mb-2">National ID Document</label>
-                  <div className="relative">
-                    <input type="file" accept="image/*" onChange={e => handleGuarantorFile(e, 'g2Id_url')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                    <div className="w-full border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-50 transition-colors rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer group">
-                      <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-2 mb-3 text-slate-700 font-bold text-sm group-hover:-translate-y-1 transition-transform">
-                        <Upload size={16} />
-                        Upload
-                      </div>
-                      <p className="font-bold text-slate-800 text-sm mb-1 text-center">
-                        Choose a file or drag & drop it here
-                      </p>
-                      <p className="text-xs text-slate-400 font-medium text-center">
-                        Maximum 500 MB file size
-                      </p>
-                    </div>
-                  </div>
-                  {guarantors.g2Id_url && <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={12} /> Document attached</p>}
-                </div>
               </div>
             </div>
 
@@ -891,27 +893,68 @@ const FinancingPage = () => {
                   await updateProfile.mutateAsync({
                     guarantor1Name: guarantors.g1Name,
                     guarantor1Phone: guarantors.g1Phone,
-                    guarantor1Email: guarantors.g1Email,
+                    guarantor1Email: guarantors.g1Email
+                  });
+                  setIsNextOfKinSubmitted(true);
+                  setShowNextOfKinForm(false); 
+                } catch (e) {
+                  console.error(e);
+                  alert('Failed to save next of kin');
+                } finally {
+                  setIsSubmitting(false); 
+                }
+              }}
+              disabled={isSubmitting || !guarantors.g1Name || !guarantors.g1Phone}
+              className="w-full py-4 px-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
+              {isSubmitting ? 'Saving Details...' : 'Submit Next of Kin'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showGuarantorForm} onOpenChange={setShowGuarantorForm}>
+        <DialogContent className="sm:max-w-md bg-white rounded-[32px] p-8 border-0 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Guarantor Details</DialogTitle>
+          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for a trusted guarantor.</DialogDescription>
+          
+          <div className="space-y-6">
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+              <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">1</div>
+                Guarantor
+              </h4>
+              <div className="space-y-3">
+                <input type="text" placeholder="Full Name" value={guarantors.g2Name} onChange={e => setGuarantors({...guarantors, g2Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
+                <input type="tel" placeholder="Phone Number" value={guarantors.g2Phone} onChange={e => setGuarantors({...guarantors, g2Phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
+                <input type="email" placeholder="Email Address (Optional)" value={guarantors.g2Email} onChange={e => setGuarantors({...guarantors, g2Email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
+              </div>
+            </div>
+
+            <button 
+              onClick={async () => {
+                setIsSubmitting(true);
+                try {
+                  await updateProfile.mutateAsync({
                     guarantor2Name: guarantors.g2Name,
                     guarantor2Phone: guarantors.g2Phone,
-                    guarantor2Email: guarantors.g2Email,
-                    guarantor1Id_url: guarantors.g1Id_url,
-                    guarantor2Id_url: guarantors.g2Id_url
+                    guarantor2Email: guarantors.g2Email
                   });
                   setIsGuarantorSubmitted(true);
                   setShowGuarantorForm(false); 
                 } catch (e) {
                   console.error(e);
-                  alert('Failed to save guarantors');
+                  alert('Failed to save guarantor');
                 } finally {
                   setIsSubmitting(false); 
                 }
               }}
-              disabled={isSubmitting || !guarantors.g1Name || !guarantors.g1Phone || !guarantors.g2Name || !guarantors.g2Phone}
+              disabled={isSubmitting || !guarantors.g2Name || !guarantors.g2Phone}
               className="w-full py-4 px-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
-              {isSubmitting ? 'Saving Details...' : 'Submit Details'}
+              {isSubmitting ? 'Saving Details...' : 'Submit Guarantor'}
             </button>
           </div>
         </DialogContent>
@@ -1015,15 +1058,6 @@ const FinancingPage = () => {
                       <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">1</div>
                       Next of Kin
                     </span>
-                    {guarantors.g1Id_url ? (
-                      <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        <CheckCircle2 size={10} /> ID UPLOADED
-                      </span>
-                    ) : (
-                      <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        PENDING ID
-                      </span>
-                    )}
                   </h4>
                   <div>
                     <p className="text-sm font-bold text-slate-800">{guarantors.g1Name || 'Not Provided'}</p>
@@ -1039,15 +1073,6 @@ const FinancingPage = () => {
                       <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">2</div>
                       Guarantor
                     </span>
-                    {guarantors.g2Id_url ? (
-                      <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        <CheckCircle2 size={10} /> ID UPLOADED
-                      </span>
-                    ) : (
-                      <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        PENDING ID
-                      </span>
-                    )}
                   </h4>
                   <div>
                     <p className="text-sm font-bold text-slate-800">{guarantors.g2Name || 'Not Provided'}</p>
