@@ -6,6 +6,9 @@ export interface User {
   email?: string;
   name?: string;
   role?: string;
+  status?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
   savingsAccount?: any;
   createdAt?: string | number | Date;
 }

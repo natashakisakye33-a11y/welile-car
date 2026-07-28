@@ -1,5 +1,6 @@
  
 import { useState } from 'react';
+import { CARS } from '@/store/appStore';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
