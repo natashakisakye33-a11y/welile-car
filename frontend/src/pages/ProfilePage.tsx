@@ -23,7 +23,8 @@ import {
   AlertCircle,
   Bell,
   CreditCard,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
@@ -84,8 +85,16 @@ export default function ProfilePage() {
       : null
   };
 
-  const currentAvatarUrl = profile?.avatar_url || undefined;
-  const currentPassportUrl = profile?.passport_url || undefined;
+  const getImageUrl = (url?: string) => {
+    if (!url) return undefined;
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('data:')) return url;
+    if (url.startsWith('/uploads')) return `${API_URL.replace('/api', '')}${url}`;
+    return url;
+  };
+
+  const currentAvatarUrl = getImageUrl(profile?.avatar_url);
+  const currentPassportUrl = getImageUrl(profile?.passport_url);
 
   // Compress/resize image helper to fit in localStorage limits
   const compressImage = (base64Str: string, maxWidth = 256, maxHeight = 256): Promise<string> => {
@@ -413,13 +422,38 @@ export default function ProfilePage() {
               </div>
 
 
-              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm">
+              <div className="relative flex items-center gap-4 bg-slate-50 hover:bg-slate-100 p-4 rounded-2xl border border-slate-100 cursor-pointer transition-colors group">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#4C158D] shadow-sm group-hover:scale-105 transition-transform">
                   <ShieldCheck size={20} />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Employment Status</p>
                   <p className="font-bold text-slate-800">{customer.employmentStatus}</p>
+                </div>
+                <select
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  value={customer.employmentStatus === 'Working' || customer.employmentStatus === 'Not Working' ? customer.employmentStatus : ""}
+                  onChange={async (e) => {
+                    const newStatus = e.target.value;
+                    if (newStatus) {
+                      toast.loading("Updating employment status...");
+                      try {
+                        await updateProfileMutation.mutateAsync({ employment_status: newStatus });
+                        toast.dismiss();
+                        toast.success("Employment status updated!");
+                      } catch (err) {
+                        toast.dismiss();
+                        toast.error("Failed to update status");
+                      }
+                    }
+                  }}
+                >
+                  <option value="" disabled>Select Status</option>
+                  <option value="Working">Working</option>
+                  <option value="Not Working">Not Working</option>
+                </select>
+                <div className="ml-auto text-slate-400 group-hover:text-[#4C158D]">
+                  <ChevronDown size={20} />
                 </div>
               </div>
 
