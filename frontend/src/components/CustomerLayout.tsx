@@ -51,7 +51,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Wallet', key: 'nav.wallet', path: '/wallet', icon: 'account_balance_wallet' },
     { name: 'My Vehicle', key: 'nav.my_vehicle', path: '/my-vehicle', icon: 'directions_car' },
     { name: 'Support', key: 'nav.support', path: '/support', icon: 'help' },
-    { name: 'Settings', key: 'settings.menu', path: '/settings', icon: 'settings' },
+    { name: 'Settings', key: 'nav.settings', path: '/settings', icon: 'settings' },
   ];
 
   const SidebarContent = () => (
