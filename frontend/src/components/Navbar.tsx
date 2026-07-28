@@ -82,8 +82,12 @@ export default function Navbar() {
               </div>
               <Link to="/profile" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/profile")}>{t('settings.account')}</Link>
               <Link to="/logbook" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/logbook")}>{t('nav.wallet')}</Link>
-              <Link to="/admin" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/admin")}>Admin Panel</Link>
-              <Link to="/cfo" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/cfo")}>CFO Portal</Link>
+              {isAdmin && (
+                <Link to="/admin" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/admin")}>Admin Panel</Link>
+              )}
+              {isCfo && (
+                <Link to="/cfo" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/cfo")}>CFO Portal</Link>
+              )}
               <Link to="/settings" onClick={() => setIsMenuOpen(false)} className={getLinkClass("/settings")}>{t('settings.menu')}</Link>
               <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-slate-600 hover:text-[#4C158D] font-semibold transition-colors">{t('nav.about')}</Link>
             </motion.div>

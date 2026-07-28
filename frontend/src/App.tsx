@@ -75,6 +75,8 @@ const AppLayout = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/cars" element={<Navigate to="/vehicles" replace />} />
         <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/customer" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/Customer" element={<Navigate to="/dashboard" replace />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminPage />} />

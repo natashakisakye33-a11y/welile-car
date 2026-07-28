@@ -503,7 +503,7 @@ const FinancingPage = () => {
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                               </span>
                             </div>
-                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please upload your National ID.</p>
+                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please upload a photocopy of your National ID.</p>
                           </div>
                         </div>
                         <div className="ml-14">
@@ -544,7 +544,7 @@ const FinancingPage = () => {
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                               </span>
                             </div>
-                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please upload 3 months bank statements.</p>
+                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please upload a bank statement for at least 6 months.</p>
                           </div>
                         </div>
                         <div className="ml-14">
@@ -576,13 +576,13 @@ const FinancingPage = () => {
                           </div>
                           <div className="flex-1">
                             <div className="flex justify-between items-center">
-                              <p className="font-black text-sm text-amber-900">Guarantor Details</p>
+                              <p className="font-black text-sm text-amber-900">Next of Kin & Guarantor Details</p>
                               <span className="flex h-2 w-2 relative">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                               </span>
                             </div>
-                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please provide details for 2 guarantors.</p>
+                            <p className="text-xs text-amber-700/80 mt-1 font-medium">Please provide details for your next of kin and a guarantor.</p>
                           </div>
                         </div>
                         <div className="ml-14">
@@ -600,8 +600,8 @@ const FinancingPage = () => {
                           <CheckCircle2 size={20} />
                         </div>
                         <div className="flex-1">
-                          <p className="font-black text-sm text-emerald-900">Guarantor Details</p>
-                          <p className="text-xs text-emerald-700/80 mt-1 font-medium">2 guarantors verified.</p>
+                          <p className="font-black text-sm text-emerald-900">Next of Kin & Guarantor Details</p>
+                          <p className="text-xs text-emerald-700/80 mt-1 font-medium">Next of kin and guarantor verified.</p>
                         </div>
                       </div>
                     )}
@@ -816,15 +816,15 @@ const FinancingPage = () => {
       {/* Guarantor Form Dialog */}
       <Dialog open={showGuarantorForm} onOpenChange={setShowGuarantorForm}>
         <DialogContent className="sm:max-w-md bg-white rounded-[32px] p-8 border-0 shadow-2xl max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Guarantor Details</DialogTitle>
-          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for two trusted guarantors.</DialogDescription>
+          <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight mb-2">Next of Kin & Guarantor Details</DialogTitle>
+          <DialogDescription className="text-slate-500 text-sm font-medium mb-6">Please provide contact information for your next of kin and a trusted guarantor.</DialogDescription>
           
           <div className="space-y-6">
             {/* Guarantor 1 */}
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
               <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">1</div>
-                First Guarantor
+                Next of Kin
               </h4>
               <div className="space-y-3">
                 <input type="text" placeholder="Full Name" value={guarantors.g1Name} onChange={e => setGuarantors({...guarantors, g1Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
@@ -856,7 +856,7 @@ const FinancingPage = () => {
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
               <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">2</div>
-                Second Guarantor
+                Guarantor
               </h4>
               <div className="space-y-3">
                 <input type="text" placeholder="Full Name" value={guarantors.g2Name} onChange={e => setGuarantors({...guarantors, g2Name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium" />
@@ -911,7 +911,7 @@ const FinancingPage = () => {
               className="w-full py-4 px-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
-              {isSubmitting ? 'Saving Guarantors...' : 'Submit Guarantors'}
+              {isSubmitting ? 'Saving Details...' : 'Submit Details'}
             </button>
           </div>
         </DialogContent>
@@ -1002,7 +1002,7 @@ const FinancingPage = () => {
                   <Users size={24} />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Guarantor Information</DialogTitle>
+                  <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Next of Kin & Guarantor Information</DialogTitle>
                   <DialogDescription className="text-xs text-slate-500 font-medium">Linked secondary contacts</DialogDescription>
                 </div>
               </div>
@@ -1013,7 +1013,7 @@ const FinancingPage = () => {
                   <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">1</div>
-                      Primary Guarantor
+                      Next of Kin
                     </span>
                     {guarantors.g1Id_url ? (
                       <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">
@@ -1037,7 +1037,7 @@ const FinancingPage = () => {
                   <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <div className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">2</div>
-                      Secondary Guarantor
+                      Guarantor
                     </span>
                     {guarantors.g2Id_url ? (
                       <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md flex items-center gap-1">

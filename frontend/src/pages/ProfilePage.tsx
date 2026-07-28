@@ -601,25 +601,7 @@ export default function ProfilePage() {
                 </button>
               )}
 
-              {!isAdmin && (
-                <button 
-                  onClick={() => handleSwitchRole('ADMIN')}
-                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
-                >
-                  <ShieldCheck size={18} />
-                  Switch to Admin Role
-                </button>
-              )}
 
-              {!isCfo && (
-                <button 
-                  onClick={() => handleSwitchRole('CFO')}
-                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-8 rounded-xl transition-colors flex items-center justify-center sm:justify-start gap-2"
-                >
-                  <ShieldCheck size={18} />
-                  Switch to CFO Role
-                </button>
-              )}
 
               <button 
                 onClick={handleLogout}

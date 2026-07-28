@@ -162,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) return { error: data.error || 'Google login failed' };
       
       persistLogin(data.token, data.user);
-      return { error: null };
+      return { error: null, user: data.user };
     } catch (err) {
       return { error: 'Network error' };
     }

@@ -18,7 +18,7 @@ export const translations: Record<Language, Dictionary> = {
     'nav.portal.cfo': 'CFO Portal',
     'member.standard': 'Standard Member',
     'member.premium': 'Premium Member',
-    'settings.menu': 'Menu',
+    'settings.menu': 'Settings',
     'settings.account': 'Account',
     'settings.notification': 'Notification',
     'settings.display': 'Display',

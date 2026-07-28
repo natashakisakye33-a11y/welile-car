@@ -15,9 +15,10 @@ import {
 } from '@/hooks/useAdmin';
 import { formatUGX } from '@/lib/format';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 
 const AdminPage = () => {
-  const { isAdmin, isCfo, loading: authLoading, signOut, signIn } = useAuth();
+  const { isAdmin, isCfo, loading: authLoading, signOut, signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { data: users = [], isLoading, error: usersError } = useAllProfiles();
   const { data: allTransactions = [], error: txsError } = useAllTransactions();
@@ -70,6 +71,38 @@ const AdminPage = () => {
             <p className="text-label-md text-on-surface-variant uppercase tracking-widest">Operations Panel Gate</p>
           </div>
           <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div className="w-full flex justify-center mb-2">
+              <GoogleLogin
+                onSuccess={async (credentialResponse: any) => {
+                  if (credentialResponse.credential) {
+                    setLoginLoading(true);
+                    setLoginError('');
+                    const { error, user } = await signInWithGoogle(credentialResponse.credential);
+                    setLoginLoading(false);
+                    if (error) {
+                      setLoginError(error);
+                    } else if (user && user.role !== 'ADMIN' && user.role !== 'CFO') {
+                      setLoginError('You do not have administrative privileges to access this panel.');
+                      await signOut();
+                    }
+                  }
+                }}
+                onError={() => setLoginError('Google Sign In failed')}
+                useOneTap
+                shape="pill"
+                text="signin_with"
+              />
+            </div>
+            
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-surface-container-lowest text-on-surface-variant">Or continue with email</span>
+              </div>
+            </div>
+
             <div>
               <label className="block text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Email Address</label>
               <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@admin.com" className="w-full h-12 px-4 rounded-lg bg-surface-container-low border border-outline-variant outline-none focus:border-primary text-body-md text-on-surface" />

@@ -53,9 +53,12 @@ const CfoPage = () => {
     setLoginError('');
     setLoginLoading(true);
     try {
-      const { error } = await signIn(email, password);
+      const { error, user } = await signIn(email, password);
       if (error) {
         setLoginError('Invalid credentials');
+      } else if (user && user.role !== 'CFO') {
+        setLoginError('You do not have CFO privileges to access this portal.');
+        await signOut();
       } else {
         toast.success("Welcome back, Chief Financial Officer!");
       }
